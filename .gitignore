@@ -43,6 +43,8 @@ lerna-debug.log*
 
 secrets/*
 reports/*
+docs/*
+.github/copilot-instructions.md
 
 # temp directory
 .temp
