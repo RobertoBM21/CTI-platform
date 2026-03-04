@@ -49,14 +49,13 @@ Implementado:
 - Endpoint `GET /health` en contexto `shared`.
 - Modelo de dominio `Threat` (entidades, value objects y puertos).
 - Schemas Mongoose espejo del dominio `Threat`.
-- Suite de tests unitarios de dominio + e2e base en verde.
+- Casos de uso de lectura de `Threat` (catálogo, detalle, listado de IoCs).
+- Repositorios concretos Mongoose de `Threat` y wiring completo de `ThreatModule`.
+- Suite de tests unitarios de dominio + application + integración de repositorios + e2e base en verde.
 
 Pendiente (siguiente fase):
 
-- Casos de uso de `Threat`.
-- Repositorios concretos Mongoose.
 - Controladores REST de `Threat` (catálogo, detalle, IoCs).
-- Wiring completo de `ThreatModule`.
 - Monitor de salud extendido (última ingesta + conteos).
 - Ingesta automatizada.
 

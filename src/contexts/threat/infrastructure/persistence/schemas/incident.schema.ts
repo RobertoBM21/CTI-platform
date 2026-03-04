@@ -1,9 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 import { TLP } from '../../../domain/value-objects/tlp.vo';
 
 @Schema({ timestamps: true, collection: 'incidents' })
 export class IncidentDocument {
+    @Prop({ required: true, unique: true, index: true })
+    domainId!: string;
+
     @Prop({ required: true, index: true })
     name!: string;
 
@@ -22,20 +25,17 @@ export class IncidentDocument {
     @Prop({ type: String, enum: Object.values(TLP), default: TLP.WHITE })
     tlp!: string;
 
-    @Prop({
-        type: [MongooseSchema.Types.ObjectId],
-        ref: 'ThreatActorDocument',
-    })
-    threatActorIds!: MongooseSchema.Types.ObjectId[];
+    @Prop({ type: [String] })
+    threatActorIds!: string[];
 
-    @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'CampaignDocument' })
-    campaignId?: MongooseSchema.Types.ObjectId;
+    @Prop()
+    campaignId?: string;
 
-    @Prop({
-        type: [MongooseSchema.Types.ObjectId],
-        ref: 'AttackPatternDocument',
-    })
-    attackPatternIds!: MongooseSchema.Types.ObjectId[];
+    @Prop({ type: [String] })
+    attackPatternIds!: string[];
+
+    createdAt!: Date;
+    updatedAt!: Date;
 }
 
 export type IncidentDoc = HydratedDocument<IncidentDocument>;

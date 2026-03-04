@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 import { AttackMotivation } from '../../../domain/value-objects/attack-motivation.vo';
 import { ResourceLevel } from '../../../domain/value-objects/resource-level.vo';
 import { ThreatActorRole } from '../../../domain/value-objects/threat-actor-role.vo';
@@ -9,6 +9,9 @@ import { TLP } from '../../../domain/value-objects/tlp.vo';
 
 @Schema({ timestamps: true, collection: 'threat_actors' })
 export class ThreatActorDocument {
+    @Prop({ required: true, unique: true, index: true })
+    domainId!: string;
+
     @Prop({ required: true, index: true })
     name!: string;
 
@@ -51,11 +54,11 @@ export class ThreatActorDocument {
     @Prop({ type: String, enum: Object.values(TLP), default: TLP.WHITE })
     tlp!: string;
 
-    @Prop({
-        type: [MongooseSchema.Types.ObjectId],
-        ref: 'AttackPatternDocument',
-    })
-    attackPatternIds!: MongooseSchema.Types.ObjectId[];
+    @Prop({ type: [String] })
+    attackPatternIds!: string[];
+
+    createdAt!: Date;
+    updatedAt!: Date;
 }
 
 export type ThreatActorDoc = HydratedDocument<ThreatActorDocument>;
