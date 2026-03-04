@@ -1,6 +1,6 @@
 # CTI Platform MVP
 
-Backend del TFM orientado a ciberinteligencia (CTI), inspirado en los Pulses de OTX.
+Backend del TFM orientado a ciberinteligencia (CTI), inspirado en el buscador de Pulsos de OTX.
 
 ## Objetivo
 
@@ -14,8 +14,7 @@ En esta fase:
 
 ## Stack tecnológico
 
-- Node.js 24
-- pnpm
+- Node.js 24 + pnpm
 - NestJS + TypeScript
 - SWC (build y tests)
 - MongoDB + Mongoose
@@ -40,7 +39,7 @@ flowchart LR
     Repo --> DB[(MongoDB)]
 ```
 
-La separación entre dominio y persistencia es intencional: el dominio no depende de Nest ni de Mongoose, y la persistencia se modela en documentos específicos. Esto evita acoplamiento tecnológico y facilita evolución del sistema.
+La separación entre dominio y persistencia es **intencional**: el dominio no depende de Nest ni de Mongoose, y la persistencia se modela en documentos específicos. Esto evita acoplamiento tecnológico y facilita evolución del sistema.
 
 ## Estado actual
 
@@ -56,7 +55,7 @@ Pendiente (siguiente fase):
 
 - Casos de uso de `Threat`.
 - Repositorios concretos Mongoose.
-- Controladores REST de `Threat` (catálogo, detalle, IoCs, exportación).
+- Controladores REST de `Threat` (catálogo, detalle, IoCs).
 - Wiring completo de `ThreatModule`.
 - Monitor de salud extendido (última ingesta + conteos).
 - Ingesta automatizada.
