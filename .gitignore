@@ -41,10 +41,11 @@ lerna-debug.log*
 !.env.example
 !.env.test
 
+# workspace files
+.github/copilot-instructions.md
 secrets/*
 reports/*
-docs/*
-.github/copilot-instructions.md
+/docs
 
 # temp directory
 .temp
