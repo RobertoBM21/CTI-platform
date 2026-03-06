@@ -16,6 +16,11 @@ import {
     IocRepository,
     ThreatActorRepository,
 } from '../domain';
+import { AttackPatternsController } from './controllers/attack-patterns.controller';
+import { CampaignsController } from './controllers/campaigns.controller';
+import { IncidentsController } from './controllers/incidents.controller';
+import { IocsController } from './controllers/iocs.controller';
+import { ThreatActorsController } from './controllers/threat-actors.controller';
 import {
     AttackPatternMongooseRepository,
     CampaignMongooseRepository,
@@ -46,7 +51,13 @@ import {
             { name: IocDocument.name, schema: IocSchema },
         ]),
     ],
-    controllers: [],
+    controllers: [
+        ThreatActorsController,
+        CampaignsController,
+        IncidentsController,
+        AttackPatternsController,
+        IocsController,
+    ],
     providers: [
         ThreatActorMongooseRepository,
         CampaignMongooseRepository,

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { SortCriteria } from '../../../../shared/application/dtos/sort.dto';
 import { Incident, IncidentRepository, TLP } from '../../../domain';
 import { IncidentDoc, IncidentDocument } from '../schemas/incident.schema';
 
@@ -22,10 +23,12 @@ export class IncidentMongooseRepository extends IncidentRepository {
         filter: Partial<{ name: string; tlp: string }>,
         page: number,
         limit: number,
+        sort: SortCriteria,
     ) {
         const safePage = Math.max(1, page);
         const safeLimit = Math.max(1, limit);
         const query: Record<string, unknown> = {};
+        const sortQuery = { [sort.field]: sort.direction };
 
         if (filter.name) {
             query.name = { $regex: filter.name, $options: 'i' };
@@ -38,7 +41,7 @@ export class IncidentMongooseRepository extends IncidentRepository {
         const [docs, total] = await Promise.all([
             this.incidentModel
                 .find(query)
-                .sort({ createdAt: -1 })
+                .sort(sortQuery)
                 .skip((safePage - 1) * safeLimit)
                 .limit(safeLimit)
                 .exec(),

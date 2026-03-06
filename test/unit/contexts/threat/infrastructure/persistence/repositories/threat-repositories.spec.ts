@@ -167,6 +167,7 @@ describe('Threat repositories integration', () => {
             'inc-int-1',
             1,
             10,
+            { field: 'createdAt', direction: -1 },
         );
 
         expect(page.meta.total).toBe(1);
@@ -183,5 +184,55 @@ describe('Threat repositories integration', () => {
         expect(updated?.name).toBe('Actor Updated');
         expect(deleted).toBe(true);
         expect(notFound).toBeNull();
+    });
+
+    it('should apply requested sort order to paginated threat actor queries', async () => {
+        await threatActorRepository.create(
+            new ThreatActor({ id: 'actor-int-2', name: 'Zulu Actor' }),
+        );
+        await threatActorRepository.create(
+            new ThreatActor({ id: 'actor-int-3', name: 'Alpha Actor' }),
+        );
+
+        const page = await threatActorRepository.findAll({}, 1, 10, {
+            field: 'name',
+            direction: 1,
+        });
+
+        expect(page.data[0]?.name).toBe('Actor Updated');
+        expect(page.data[1]?.name).toBe('Alpha Actor');
+        expect(page.data[2]?.name).toBe('Zulu Actor');
+    });
+
+    it('should apply requested sort order to IoC source queries', async () => {
+        await iocRepository.create(
+            new Ioc({
+                id: 'ioc-int-2',
+                type: IocType.DOMAIN,
+                value: 'zzz.example',
+                sourceType: 'incident',
+                sourceId: 'inc-int-1',
+            }),
+        );
+        await iocRepository.create(
+            new Ioc({
+                id: 'ioc-int-3',
+                type: IocType.DOMAIN,
+                value: 'aaa.example',
+                sourceType: 'incident',
+                sourceId: 'inc-int-1',
+            }),
+        );
+
+        const page = await iocRepository.findBySource(
+            'incident',
+            'inc-int-1',
+            1,
+            10,
+            { field: 'value', direction: 1 },
+        );
+
+        expect(page.data[0]?.value).toBe('aaa.example');
+        expect(page.data[1]?.value).toBe('zzz.example');
     });
 });

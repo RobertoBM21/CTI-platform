@@ -46,18 +46,65 @@ La separación entre dominio y persistencia es **intencional**: el dominio no de
 Implementado:
 
 - Bootstrap Nest + Swagger (`/api`).
-- Endpoint `GET /health` en contexto `shared`.
+- Endpoint `GET /health` extendido en contexto `shared` con estado de DB, conteos por entidad y `lastIngestion: null`.
 - Modelo de dominio `Threat` (entidades, value objects y puertos).
 - Schemas Mongoose espejo del dominio `Threat`.
 - Casos de uso de lectura de `Threat` (catálogo, detalle, listado de IoCs).
 - Repositorios concretos Mongoose de `Threat` y wiring completo de `ThreatModule`.
-- Suite de tests unitarios de dominio + application + integración de repositorios + e2e base en verde.
+- Controladores REST de `Threat` para catálogo, detalle simple e IoCs.
+- Contrato HTTP validado para filtrado, ordenación y paginación en catálogo Threat e IoCs.
+- Suite de tests unitarios de dominio + application + integración de repositorios + e2e en verde.
 
 Pendiente (siguiente fase):
 
-- Controladores REST de `Threat` (catálogo, detalle, IoCs).
-- Monitor de salud extendido (última ingesta + conteos).
+- Posibles use-cases overview de detalle enriquecido si la UI requiere respuestas compuestas en una sola llamada.
+- Filtros avanzados adicionales más allá del contrato base del MVP.
 - Ingesta automatizada.
+
+## API expuesta actualmente
+
+### Threat
+
+- `GET /threat-actors`
+- `GET /threat-actors/:id`
+- `GET /campaigns`
+- `GET /campaigns/:id`
+- `GET /incidents`
+- `GET /incidents/:id`
+- `GET /attack-patterns`
+- `GET /attack-patterns/:id`
+- `GET /iocs`
+
+### Health
+
+- `GET /health`
+
+## Contrato de consulta del MVP
+
+### Catálogo Threat
+
+- Paginación: `page`, `limit`
+- Filtros: `name`, `tlp`
+- Sort: `sortBy`, `sortOrder`
+- Campos de ordenación permitidos: `createdAt`, `updatedAt`, `name`
+
+### IoCs
+
+- Paginación: `page`, `limit`
+- Filtros: `type`, `value`, `tlp`
+- Contexto opcional por origen: `sourceType`, `sourceId`
+- Sort: `sortBy`, `sortOrder`
+- Campos de ordenación permitidos: `createdAt`, `updatedAt`, `value`, `type`
+
+## Health operativo del MVP
+
+`GET /health` devuelve:
+
+- estado general del servicio
+- timestamp de la comprobación
+- estado de la conexión a MongoDB
+- conteos por entidad Threat (`threatActors`, `campaigns`, `incidents`, `attackPatterns`, `iocs`)
+- `lastIngestion: null` como placeholder hasta que exista ingesta automatizada
 
 ## Modelo de dominio Threat (implementado)
 

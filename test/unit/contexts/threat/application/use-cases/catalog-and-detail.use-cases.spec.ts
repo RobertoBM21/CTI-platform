@@ -1,3 +1,5 @@
+import { SortOrder } from '../../../../../../src/contexts/shared/application/dtos/sort.dto';
+import { ThreatCatalogSortBy } from '../../../../../../src/contexts/threat/application/dtos';
 import { GetAttackPatternDetailUseCase } from '../../../../../../src/contexts/threat/application/use-cases/get-attack-pattern-detail.use-case';
 import { GetCampaignDetailUseCase } from '../../../../../../src/contexts/threat/application/use-cases/get-campaign-detail.use-case';
 import { GetIncidentDetailUseCase } from '../../../../../../src/contexts/threat/application/use-cases/get-incident-detail.use-case';
@@ -37,12 +39,15 @@ describe('Threat catalog/detail use cases', () => {
             page: 1,
             limit: 20,
             name: 'Camp',
+            sortBy: ThreatCatalogSortBy.UPDATED_AT,
+            sortOrder: SortOrder.ASC,
         });
 
         expect(repository.findAll).toHaveBeenCalledWith(
             { name: 'Camp', tlp: undefined },
             1,
             20,
+            { field: ThreatCatalogSortBy.UPDATED_AT, direction: 1 },
         );
         expect(result.data[0]?.id).toBe('camp-1');
     });
@@ -67,12 +72,15 @@ describe('Threat catalog/detail use cases', () => {
             page: 2,
             limit: 10,
             tlp: TLP.AMBER,
+            sortBy: ThreatCatalogSortBy.CREATED_AT,
+            sortOrder: SortOrder.DESC,
         });
 
         expect(repository.findAll).toHaveBeenCalledWith(
             { name: undefined, tlp: TLP.AMBER },
             2,
             10,
+            { field: ThreatCatalogSortBy.CREATED_AT, direction: -1 },
         );
         expect(result.data[0]?.id).toBe('inc-1');
     });
@@ -95,12 +103,18 @@ describe('Threat catalog/detail use cases', () => {
         };
 
         const useCase = new ListAttackPatternsUseCase(repository);
-        const result = await useCase.execute({ page: 1, limit: 5 });
+        const result = await useCase.execute({
+            page: 1,
+            limit: 5,
+            sortBy: ThreatCatalogSortBy.NAME,
+            sortOrder: SortOrder.ASC,
+        });
 
         expect(repository.findAll).toHaveBeenCalledWith(
             { name: undefined, tlp: undefined },
             1,
             5,
+            { field: ThreatCatalogSortBy.NAME, direction: 1 },
         );
         expect(result.data[0]?.id).toBe('ap-1');
     });

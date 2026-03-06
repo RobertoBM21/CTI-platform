@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { SortCriteria } from '../../../../shared/application/dtos/sort.dto';
 import {
     Ioc,
     IocRepository,
@@ -28,10 +29,12 @@ export class IocMongooseRepository extends IocRepository {
         filter: Partial<{ type: string; value: string; tlp: string }>,
         page: number,
         limit: number,
+        sort: SortCriteria,
     ) {
         const safePage = Math.max(1, page);
         const safeLimit = Math.max(1, limit);
         const query: Record<string, unknown> = {};
+        const sortQuery = { [sort.field]: sort.direction };
 
         if (filter.type) {
             query.type = filter.type;
@@ -48,7 +51,7 @@ export class IocMongooseRepository extends IocRepository {
         const [docs, total] = await Promise.all([
             this.iocModel
                 .find(query)
-                .sort({ createdAt: -1 })
+                .sort(sortQuery)
                 .skip((safePage - 1) * safeLimit)
                 .limit(safeLimit)
                 .exec(),
@@ -71,15 +74,17 @@ export class IocMongooseRepository extends IocRepository {
         sourceId: string,
         page: number,
         limit: number,
+        sort: SortCriteria,
     ) {
         const safePage = Math.max(1, page);
         const safeLimit = Math.max(1, limit);
         const query = { sourceType, sourceId };
+        const sortQuery = { [sort.field]: sort.direction };
 
         const [docs, total] = await Promise.all([
             this.iocModel
                 .find(query)
-                .sort({ createdAt: -1 })
+                .sort(sortQuery)
                 .skip((safePage - 1) * safeLimit)
                 .limit(safeLimit)
                 .exec(),

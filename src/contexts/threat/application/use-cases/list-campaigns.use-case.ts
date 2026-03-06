@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PaginatedResponse } from '../../../shared/application/dtos/pagination.dto';
+import {
+    type SortCriteria,
+    SortOrder,
+} from '../../../shared/application/dtos/sort.dto';
 import { Campaign, CampaignRepository } from '../../domain';
-import { ThreatCatalogQueryDto } from '../dtos';
+import { ThreatCatalogQueryDto } from '../dtos/threat-catalog-query.dto';
 
 @Injectable()
 export class ListCampaignsUseCase {
@@ -10,6 +14,11 @@ export class ListCampaignsUseCase {
     execute(
         query: ThreatCatalogQueryDto,
     ): Promise<PaginatedResponse<Campaign>> {
+        const sort: SortCriteria = {
+            field: query.sortBy,
+            direction: query.sortOrder === SortOrder.ASC ? 1 : -1,
+        };
+
         return this.campaignRepository.findAll(
             {
                 name: query.name,
@@ -17,6 +26,7 @@ export class ListCampaignsUseCase {
             },
             query.page,
             query.limit,
+            sort,
         );
     }
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { SortCriteria } from '../../../../shared/application/dtos/sort.dto';
 import { AttackPattern, AttackPatternRepository, TLP } from '../../../domain';
 import {
     AttackPatternDoc,
@@ -27,10 +28,12 @@ export class AttackPatternMongooseRepository extends AttackPatternRepository {
         filter: Partial<{ name: string; tlp: string }>,
         page: number,
         limit: number,
+        sort: SortCriteria,
     ) {
         const safePage = Math.max(1, page);
         const safeLimit = Math.max(1, limit);
         const query: Record<string, unknown> = {};
+        const sortQuery = { [sort.field]: sort.direction };
 
         if (filter.name) {
             query.name = { $regex: filter.name, $options: 'i' };
@@ -43,7 +46,7 @@ export class AttackPatternMongooseRepository extends AttackPatternRepository {
         const [docs, total] = await Promise.all([
             this.attackPatternModel
                 .find(query)
-                .sort({ createdAt: -1 })
+                .sort(sortQuery)
                 .skip((safePage - 1) * safeLimit)
                 .limit(safeLimit)
                 .exec(),

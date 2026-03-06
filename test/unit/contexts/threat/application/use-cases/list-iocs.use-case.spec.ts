@@ -1,3 +1,5 @@
+import { SortOrder } from '../../../../../../src/contexts/shared/application/dtos/sort.dto';
+import { IocListSortBy } from '../../../../../../src/contexts/threat/application/dtos';
 import { ListIocsUseCase } from '../../../../../../src/contexts/threat/application/use-cases/list-iocs.use-case';
 import {
     Ioc,
@@ -47,6 +49,7 @@ describe('ListIocsUseCase', () => {
             { type: undefined, value: '10.0.0.1', tlp: undefined },
             1,
             10,
+            { field: IocListSortBy.CREATED_AT, direction: -1 },
         );
         expect(repository.findBySource).not.toHaveBeenCalled();
     });
@@ -59,6 +62,8 @@ describe('ListIocsUseCase', () => {
             limit: 5,
             sourceType: 'campaign',
             sourceId: 'camp-1',
+            sortBy: IocListSortBy.VALUE,
+            sortOrder: SortOrder.ASC,
         });
 
         expect(repository.findBySource).toHaveBeenCalledWith(
@@ -66,6 +71,7 @@ describe('ListIocsUseCase', () => {
             'camp-1',
             2,
             5,
+            { field: IocListSortBy.VALUE, direction: 1 },
         );
         expect(repository.findAll).not.toHaveBeenCalled();
     });

@@ -1,4 +1,5 @@
 import { PaginatedResponse } from '../../../shared/application/dtos/pagination.dto';
+import { SortCriteria } from '../../../shared/application/dtos/sort.dto';
 import { Incident } from '../entities/incident.entity';
 
 export abstract class IncidentRepository {
@@ -8,6 +9,7 @@ export abstract class IncidentRepository {
         filter: Partial<{ name: string; tlp: string }>,
         page: number,
         limit: number,
+        sort: SortCriteria,
     ): Promise<PaginatedResponse<Incident>>;
 
     abstract findByCampaignId(campaignId: string): Promise<Incident[]>;

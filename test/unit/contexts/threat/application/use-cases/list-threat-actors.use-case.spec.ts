@@ -1,3 +1,5 @@
+import { SortOrder } from '../../../../../../src/contexts/shared/application/dtos/sort.dto';
+import { ThreatCatalogSortBy } from '../../../../../../src/contexts/threat/application/dtos';
 import { ListThreatActorsUseCase } from '../../../../../../src/contexts/threat/application/use-cases/list-threat-actors.use-case';
 import {
     ThreatActor,
@@ -31,12 +33,15 @@ describe('ListThreatActorsUseCase', () => {
             limit: 10,
             name: 'APT',
             tlp: TLP.GREEN,
+            sortBy: ThreatCatalogSortBy.NAME,
+            sortOrder: SortOrder.ASC,
         });
 
         expect(repository.findAll).toHaveBeenCalledWith(
             { name: 'APT', tlp: TLP.GREEN },
             1,
             10,
+            { field: ThreatCatalogSortBy.NAME, direction: 1 },
         );
         expect(result.data).toHaveLength(1);
         expect(result.data[0]?.id).toBe('actor-1');

@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PaginatedResponse } from '../../../shared/application/dtos/pagination.dto';
+import {
+    type SortCriteria,
+    SortOrder,
+} from '../../../shared/application/dtos/sort.dto';
 import { AttackPattern, AttackPatternRepository } from '../../domain';
-import { ThreatCatalogQueryDto } from '../dtos';
+import { ThreatCatalogQueryDto } from '../dtos/threat-catalog-query.dto';
 
 @Injectable()
 export class ListAttackPatternsUseCase {
@@ -12,6 +16,11 @@ export class ListAttackPatternsUseCase {
     execute(
         query: ThreatCatalogQueryDto,
     ): Promise<PaginatedResponse<AttackPattern>> {
+        const sort: SortCriteria = {
+            field: query.sortBy,
+            direction: query.sortOrder === SortOrder.ASC ? 1 : -1,
+        };
+
         return this.attackPatternRepository.findAll(
             {
                 name: query.name,
@@ -19,6 +28,7 @@ export class ListAttackPatternsUseCase {
             },
             query.page,
             query.limit,
+            sort,
         );
     }
 }

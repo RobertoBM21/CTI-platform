@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 import { AppModule } from '../src/app.module';
 
 describe('Health (e2e)', () => {
@@ -43,6 +43,14 @@ describe('Health (e2e)', () => {
             .expect((res) => {
                 expect(res.body).toHaveProperty('status', 'ok');
                 expect(res.body).toHaveProperty('timestamp');
+                expect(res.body).toHaveProperty('database.status', 'up');
+                expect(res.body).toHaveProperty('counts');
+                expect(res.body).toHaveProperty('counts.threatActors');
+                expect(res.body).toHaveProperty('counts.campaigns');
+                expect(res.body).toHaveProperty('counts.incidents');
+                expect(res.body).toHaveProperty('counts.attackPatterns');
+                expect(res.body).toHaveProperty('counts.iocs');
+                expect(res.body).toHaveProperty('lastIngestion', null);
             });
     });
 });

@@ -1,4 +1,5 @@
 import { PaginatedResponse } from '../../../shared/application/dtos/pagination.dto';
+import { SortCriteria } from '../../../shared/application/dtos/sort.dto';
 import { Ioc, IocSourceType } from '../entities/ioc.entity';
 
 export abstract class IocRepository {
@@ -8,6 +9,7 @@ export abstract class IocRepository {
         filter: Partial<{ type: string; value: string; tlp: string }>,
         page: number,
         limit: number,
+        sort: SortCriteria,
     ): Promise<PaginatedResponse<Ioc>>;
 
     abstract findBySource(
@@ -15,6 +17,7 @@ export abstract class IocRepository {
         sourceId: string,
         page: number,
         limit: number,
+        sort: SortCriteria,
     ): Promise<PaginatedResponse<Ioc>>;
 
     abstract findByValue(value: string): Promise<Ioc[]>;
