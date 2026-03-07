@@ -1,33 +1,34 @@
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: development
-    ports:
-      - '3000:3000'
-      - '9229:9229'
-    volumes:
-      - .:/app
-      - /app/node_modules
-    environment:
-      - MONGODB_URI=mongodb://mongo:27017/cti-platform
-      - NODE_ENV=development
-    depends_on:
-      mongo:
-        condition: service_healthy
+    app:
+        build:
+            context: .
+            dockerfile: backend/Dockerfile
+            target: development
+        ports:
+            - '3000:3000'
+            - '9229:9229'
+        volumes:
+            - .:/app
+            - /app/node_modules
+            - /app/backend/node_modules
+        environment:
+            - MONGODB_URI=mongodb://mongo:27017/cti-platform
+            - NODE_ENV=development
+        depends_on:
+            mongo:
+                condition: service_healthy
 
-  mongo:
-    image: mongo:7
-    ports:
-      - '27017:27017'
-    volumes:
-      - mongo-data:/data/db
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    mongo:
+        image: mongo:7
+        ports:
+            - '27017:27017'
+        volumes:
+            - mongo-data:/data/db
+        healthcheck:
+            test: echo 'db.runCommand("ping").ok' | mongosh --quiet
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
 volumes:
-  mongo-data:
+    mongo-data:

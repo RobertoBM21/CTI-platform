@@ -1,41 +1,54 @@
 name: CI CTI Platform
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    push:
+        branches: [main]
+        paths:
+            - 'backend/**'
+            - 'package.json'
+            - 'pnpm-*.yaml'
+            - '.github/workflows/**'
+            - 'docker-compose*.yml'
+    pull_request:
+        branches: [main]
+        paths:
+            - 'backend/**'
+            - 'package.json'
+            - 'pnpm-*.yaml'
+            - '.github/workflows/**'
+            - 'docker-compose*.yml'
 
 jobs:
-  test-suite:
-    runs-on: ubuntu-latest
+    backend:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 9
 
-      - name: Use Node.js 24.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: 'pnpm'
+            - name: Use Node.js 24.x
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+                  cache: 'pnpm'
+                  cache-dependency-path: pnpm-lock.yaml
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
 
-      - name: Linting (ESLint)
-        run: pnpm lint
+            - name: Linting (ESLint)
+              run: pnpm backend:lint
 
-      - name: Run unit tests (Jest + SWC)
-        run: pnpm test
+            - name: Run unit tests (Jest + SWC)
+              run: pnpm backend:test
 
-      - name: Run E2E tests (Supertest + Mongo In-Memory)
-        run: pnpm run test:e2e
+            - name: Run E2E tests (Supertest + Mongo In-Memory)
+              run: pnpm backend:test:e2e
 
-      - name: Build application (SWC)
-        run: pnpm build
+            - name: Build application (SWC)
+              run: pnpm backend:build

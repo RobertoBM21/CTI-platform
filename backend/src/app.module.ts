@@ -10,7 +10,7 @@ import { ThreatModule } from './contexts/threat/infrastructure/threat.module';
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
-            envFilePath: ['.env'],
+            envFilePath: '../.env',
             load: [appConfig, databaseConfig],
         }),
 

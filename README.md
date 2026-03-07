@@ -1,16 +1,17 @@
 # CTI Platform MVP
 
-Backend del TFM orientado a ciberinteligencia (CTI), inspirado en el buscador de Pulsos de OTX.
+Repositorio del TFM orientado a ciberinteligencia (CTI), preparado como workspace con `pnpm` para convivir con varias aplicaciones. Actualmente solo existe el backend, inspirado en el buscador de Pulsos de OTX.
 
 ## Objetivo
 
-Desarrollar un backend mantenible y testeable para gestionar inteligencia de amenazas en el MVP, con una base técnica sólida para evolucionar en siguientes iteraciones.
+Desarrollar una plataforma mantenible y testeable para gestionar inteligencia de amenazas en el MVP, con una base técnica sólida para evolucionar hacia backend + frontend en siguientes iteraciones.
 
 En esta fase:
 
 - No se implementa autenticación.
 - El foco funcional está en el contexto `Threat`.
 - Se prioriza una arquitectura clara y desacoplada entre dominio y adaptadores.
+- El repositorio está preparado para añadir un futuro `frontend/`, aunque todavía no existe.
 
 ## Stack tecnológico
 
@@ -22,7 +23,7 @@ En esta fase:
 - Jest + `@swc/jest` + Supertest + `mongodb-memory-server`
 - Docker + Docker Compose
 
-## Arquitectura
+## Arquitectura backend
 
 Se aplica arquitectura hexagonal pragmática por contextos:
 
@@ -54,6 +55,12 @@ Implementado:
 - Controladores REST de `Threat` para catálogo, detalle simple e IoCs.
 - Contrato HTTP validado para filtrado, ordenación y paginación en catálogo Threat e IoCs.
 - Suite de tests unitarios de dominio + application + integración de repositorios + e2e en verde.
+
+Estructura de workspace:
+
+- Backend activo en `backend/`.
+- Raíz con aliases para operar el backend y frontend sin cambiar de directorio.
+- CI única en raíz con filtros por rutas relevantes del workspace.
 
 Pendiente (siguiente fase):
 
@@ -113,10 +120,10 @@ Pendiente (siguiente fase):
 - **Puertos de repositorio**: `ThreatActorRepository`, `CampaignRepository`, `IncidentRepository`, `AttackPatternRepository`, `IocRepository`.
 - **Persistencia (Mongoose)**: `ThreatActorDocument`, `CampaignDocument`, `IncidentDocument`, `AttackPatternDocument`, `IocDocument`.
 
-## Estructura de carpetas
+## Estructura de carpetas backend
 
 ```text
-src/
+backend/src/
 	main.ts                                      # Bootstrap (pipes globales, swagger, puerto)
 	app.module.ts                                # Módulo raíz (configuración, DB, módulos de contexto)
 	config/                                      # Configuración tipada de aplicación y base de datos
@@ -142,7 +149,7 @@ src/
 
 ## Configuración de entorno
 
-Usa `.env` para ejecución local y toma como base `.env.example`.
+Usa `.env` en la raíz del repositorio para ejecución local y toma como base `.env.example`.
 
 ### Decisión técnica sobre configuración
 
@@ -156,37 +163,28 @@ Variables actuales:
 
 ## Ejecución local
 
-### Instalar dependencias
-
 ```bash
 pnpm install
 ```
 
-### Desarrollo
+La instalación se realiza desde la raíz del workspace.
+
+### Desde la raíz
+
+- Scripts genéricos del workspace: `pnpm build`, `pnpm lint`, `pnpm test`, `pnpm start:dev`
+- Scripts específicos del backend: `pnpm backend:build`, `pnpm backend:lint`, `pnpm backend:test`, `pnpm backend:test:e2e`, `pnpm backend:start:dev`
+
+Hoy ambos grupos ejecutan el backend porque es la única aplicación existente. La diferencia es de intención: los scripts genéricos orquestan todas las apps del workspace y los `backend:*` solo el backend.
+
+### Desde `backend/`
 
 ```bash
-node --run start:dev
-# o
+cd backend
 pnpm start:dev
-```
-
-### Build y producción
-
-```bash
-node --run build
-node --run start:prod
-# o
-pnpm build && pnpm start:prod
-```
-
-### Lint y tests
-
-```bash
-node --run lint
-node --run test
-node --run test:e2e
-# o
-pnpm lint && pnpm test && pnpm test:e2e
+pnpm build
+pnpm lint
+pnpm test
+pnpm test:e2e
 ```
 
 ## Docker
