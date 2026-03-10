@@ -18,6 +18,24 @@ services:
             mongo:
                 condition: service_healthy
 
+    frontend:
+        build:
+            context: .
+            dockerfile: frontend/Dockerfile
+            target: development
+        ports:
+            - '3001:3001'
+        volumes:
+            - .:/app
+            - /app/node_modules
+            - /app/frontend/node_modules
+            - /app/frontend/.next
+        environment:
+            - NEXT_PUBLIC_API_URL=http://app:3000
+            - NODE_ENV=development
+        depends_on:
+            - app
+
     mongo:
         image: mongo:7
         ports:

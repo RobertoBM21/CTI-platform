@@ -5,6 +5,7 @@ on:
         branches: [main]
         paths:
             - 'backend/**'
+            - 'frontend/**'
             - 'package.json'
             - 'pnpm-*.yaml'
             - '.github/workflows/**'
@@ -13,6 +14,7 @@ on:
         branches: [main]
         paths:
             - 'backend/**'
+            - 'frontend/**'
             - 'package.json'
             - 'pnpm-*.yaml'
             - '.github/workflows/**'
@@ -50,3 +52,32 @@ jobs:
 
             - name: Build application (SWC)
               run: pnpm backend:build
+
+    frontend:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+
+            - name: Use Node.js 24.x
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+                  cache: 'pnpm'
+                  cache-dependency-path: pnpm-lock.yaml
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Linting (ESLint)
+              run: pnpm frontend:lint
+
+            - name: Run unit tests (Vitest)
+              run: pnpm frontend:test
+
+            - name: Build application (Next.js)
+              run: pnpm frontend:build

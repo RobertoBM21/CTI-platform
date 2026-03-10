@@ -32,6 +32,16 @@
         "backend:test:watch": "pnpm --filter @cti-platform/backend run test:watch",
         "backend:test:cov": "pnpm --filter @cti-platform/backend run test:cov",
         "backend:test:debug": "pnpm --filter @cti-platform/backend run test:debug",
-        "backend:test:e2e": "pnpm --filter @cti-platform/backend run test:e2e"
+        "backend:test:e2e": "pnpm --filter @cti-platform/backend run test:e2e",
+        "frontend:dev": "pnpm --filter @cti-platform/frontend run dev",
+        "frontend:build": "pnpm --filter @cti-platform/frontend run build",
+        "frontend:start": "pnpm --filter @cti-platform/frontend run start",
+        "frontend:lint": "pnpm --filter @cti-platform/frontend run lint",
+        "frontend:lint:fix": "pnpm --filter @cti-platform/frontend run lint:fix",
+        "frontend:format": "pnpm --filter @cti-platform/frontend run format",
+        "frontend:test": "pnpm --filter @cti-platform/frontend run test",
+        "frontend:test:watch": "pnpm --filter @cti-platform/frontend run test:watch",
+        "frontend:test:cov": "pnpm --filter @cti-platform/frontend run test:cov",
+        "frontend:test:e2e": "pnpm --filter @cti-platform/frontend run test:e2e"
     }
 }

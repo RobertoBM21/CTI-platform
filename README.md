@@ -1,19 +1,21 @@
 # CTI Platform MVP
 
-Repositorio del TFM orientado a ciberinteligencia (CTI), preparado como workspace con `pnpm` para convivir con varias aplicaciones. Actualmente solo existe el backend, inspirado en el buscador de Pulsos de OTX.
+Repositorio del TFM orientado a ciberinteligencia (CTI), preparado como workspace con `pnpm` para convivir con varias aplicaciones. Contiene el backend (API REST NestJS) y el frontend (Next.js).
 
 ## Objetivo
 
-Desarrollar una plataforma mantenible y testeable para gestionar inteligencia de amenazas en el MVP, con una base técnica sólida para evolucionar hacia backend + frontend en siguientes iteraciones.
+Desarrollar una plataforma mantenible y testeable para gestionar inteligencia de amenazas en el MVP, con una base técnica sólida para evolucionar.
 
 En esta fase:
 
 - No se implementa autenticación.
 - El foco funcional está en el contexto `Threat`.
 - Se prioriza una arquitectura clara y desacoplada entre dominio y adaptadores.
-- El repositorio está preparado para añadir un futuro `frontend/`, aunque todavía no existe.
+- Backend y frontend operan como aplicaciones separadas en un monorepo pnpm.
 
 ## Stack tecnológico
+
+### Backend
 
 - Node.js 24 + pnpm
 - NestJS + TypeScript
@@ -22,6 +24,17 @@ En esta fase:
 - ESLint + Prettier (basado en _strict type checking_ y _stylistic_ de TypeScript ESLint)
 - Jest + `@swc/jest` + Supertest + `mongodb-memory-server`
 - Docker + Docker Compose
+
+### Frontend
+
+- Node.js 24 + pnpm
+- Next.js 16 + React 19 + TypeScript
+- App Router + Turbopack (dev) + React Compiler
+- Tailwind CSS v4 + shadcn/ui (base-nova)
+- TanStack Query (data fetching con cache)
+- ESLint (next/core-web-vitals + next/typescript) + Prettier
+- Vitest + React Testing Library + jsdom
+- Playwright (E2E local, no en CI)
 
 ## Arquitectura backend
 
@@ -56,11 +69,22 @@ Implementado:
 - Contrato HTTP validado para filtrado, ordenación y paginación en catálogo Threat e IoCs.
 - Suite de tests unitarios de dominio + application + integración de repositorios + e2e en verde.
 
+Frontend:
+
+- Bootstrap Next.js 16 con App Router, Tailwind CSS v4, shadcn/ui, React Compiler, Turbopack.
+- Identidad visual UMU aplicada: IBM Plex Sans/Mono + paleta corporativa mapeada a tokens shadcn/ui.
+- TanStack Query provider + API client base con tipado de respuestas paginadas.
+- ESLint + Prettier configurados en consistencia con el backend.
+- Vitest + React Testing Library con test de humo.
+- Playwright configurado para E2E local con smoke test.
+- Dockerfile multi-stage (development + production con standalone output).
+
 Estructura de workspace:
 
 - Backend activo en `backend/`.
+- Frontend activo en `frontend/`.
 - Raíz con aliases para operar el backend y frontend sin cambiar de directorio.
-- CI única en raíz con filtros por rutas relevantes del workspace.
+- CI única en raíz con jobs paralelos para backend y frontend.
 
 Pendiente (siguiente fase):
 
@@ -147,6 +171,23 @@ backend/src/
 			infrastructure/persistence/repositories/ # Implementaciones concretas de puertos
 ```
 
+## Estructura de carpetas frontend
+
+```text
+frontend/src/
+	app/
+		layout.tsx                               # Layout raíz con providers, fuentes UMU, metadata
+		page.tsx                                 # Página principal (placeholder)
+		globals.css                              # Tema UMU + tokens shadcn/ui (OKLCH)
+	components/
+		ui/                                      # Componentes shadcn/ui (autogenerados)
+	lib/
+		utils.ts                                 # Utilidad cn() de shadcn
+		api-client.ts                            # Cliente API base (fetch + tipado)
+	providers/
+		query-provider.tsx                       # TanStack Query provider
+```
+
 ## Configuración de entorno
 
 Usa `.env` en la raíz del repositorio para ejecución local y toma como base `.env.example`.
@@ -157,9 +198,10 @@ Se usa configuración tipada con espacios de nombres (`app.*` y `database.*`) en
 
 Variables actuales:
 
-- `PORT`
-- `NODE_ENV`
-- `MONGODB_URI`
+- `PORT` — Puerto del backend (default: 3000)
+- `NODE_ENV` — Entorno de ejecución
+- `MONGODB_URI` — URI de conexión a MongoDB
+- `NEXT_PUBLIC_API_URL` — URL del backend para el frontend
 
 ## Ejecución local
 
@@ -173,14 +215,26 @@ La instalación se realiza desde la raíz del workspace.
 
 - Scripts genéricos del workspace: `pnpm build`, `pnpm lint`, `pnpm test`, `pnpm start:dev`
 - Scripts específicos del backend: `pnpm backend:build`, `pnpm backend:lint`, `pnpm backend:test`, `pnpm backend:test:e2e`, `pnpm backend:start:dev`
+- Scripts específicos del frontend: `pnpm frontend:build`, `pnpm frontend:lint`, `pnpm frontend:test`, `pnpm frontend:dev`
 
-Hoy ambos grupos ejecutan el backend porque es la única aplicación existente. La diferencia es de intención: los scripts genéricos orquestan todas las apps del workspace y los `backend:*` solo el backend.
+Los scripts genéricos orquestan todas las apps del workspace; los `backend:*` y `frontend:*` operan solo su aplicación respectiva.
 
 ### Desde `backend/`
 
 ```bash
 cd backend
 pnpm start:dev
+pnpm build
+pnpm lint
+pnpm test
+pnpm test:e2e
+```
+
+### Desde `frontend/`
+
+```bash
+cd frontend
+pnpm dev
 pnpm build
 pnpm lint
 pnpm test
@@ -208,6 +262,7 @@ docker compose -f docker-compose.yml up --build
 
 Servicios:
 
-- API: `http://localhost:3000`
+- Backend API: `http://localhost:3000`
 - Swagger: `http://localhost:3000/api`
+- Frontend: `http://localhost:3001`
 - MongoDB: `localhost:27017`
