@@ -8,12 +8,12 @@ import { AttackPattern, AttackPatternRepository } from '../../domain';
 import { ThreatCatalogQueryDto } from '../dtos/threat-catalog-query.dto';
 
 @Injectable()
-export class ListAttackPatternsUseCase {
+export class AttackPatternService {
     constructor(
         private readonly attackPatternRepository: AttackPatternRepository,
     ) {}
 
-    execute(
+    list(
         query: ThreatCatalogQueryDto,
     ): Promise<PaginatedResponse<AttackPattern>> {
         const sort: SortCriteria = {
@@ -30,5 +30,9 @@ export class ListAttackPatternsUseCase {
             query.limit,
             sort,
         );
+    }
+
+    findById(id: string): Promise<AttackPattern | null> {
+        return this.attackPatternRepository.findById(id);
     }
 }

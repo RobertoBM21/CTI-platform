@@ -1,14 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { GetAttackPatternDetailUseCase } from '../application/use-cases/get-attack-pattern-detail.use-case';
-import { GetCampaignDetailUseCase } from '../application/use-cases/get-campaign-detail.use-case';
-import { GetIncidentDetailUseCase } from '../application/use-cases/get-incident-detail.use-case';
-import { GetThreatActorDetailUseCase } from '../application/use-cases/get-threat-actor-detail.use-case';
-import { ListAttackPatternsUseCase } from '../application/use-cases/list-attack-patterns.use-case';
-import { ListCampaignsUseCase } from '../application/use-cases/list-campaigns.use-case';
-import { ListIncidentsUseCase } from '../application/use-cases/list-incidents.use-case';
-import { ListIocsUseCase } from '../application/use-cases/list-iocs.use-case';
-import { ListThreatActorsUseCase } from '../application/use-cases/list-threat-actors.use-case';
+import {
+    AttackPatternService,
+    CampaignService,
+    IncidentService,
+    IocService,
+    ThreatActorService,
+} from '../application/services';
 import {
     AttackPatternRepository,
     CampaignRepository,
@@ -84,15 +82,11 @@ import {
             provide: IocRepository,
             useExisting: IocMongooseRepository,
         },
-        ListThreatActorsUseCase,
-        GetThreatActorDetailUseCase,
-        ListCampaignsUseCase,
-        GetCampaignDetailUseCase,
-        ListIncidentsUseCase,
-        GetIncidentDetailUseCase,
-        ListAttackPatternsUseCase,
-        GetAttackPatternDetailUseCase,
-        ListIocsUseCase,
+        ThreatActorService,
+        CampaignService,
+        IncidentService,
+        AttackPatternService,
+        IocService,
     ],
     exports: [
         ThreatActorRepository,
@@ -100,15 +94,11 @@ import {
         IncidentRepository,
         AttackPatternRepository,
         IocRepository,
-        ListThreatActorsUseCase,
-        GetThreatActorDetailUseCase,
-        ListCampaignsUseCase,
-        GetCampaignDetailUseCase,
-        ListIncidentsUseCase,
-        GetIncidentDetailUseCase,
-        ListAttackPatternsUseCase,
-        GetAttackPatternDetailUseCase,
-        ListIocsUseCase,
+        ThreatActorService,
+        CampaignService,
+        IncidentService,
+        AttackPatternService,
+        IocService,
     ],
 })
 export class ThreatModule {}

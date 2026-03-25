@@ -4,24 +4,20 @@ import {
     type SortCriteria,
     SortOrder,
 } from '../../../shared/application/dtos/sort.dto';
-import { ThreatActor, ThreatActorRepository } from '../../domain';
+import { Incident, IncidentRepository } from '../../domain';
 import { ThreatCatalogQueryDto } from '../dtos/threat-catalog-query.dto';
 
 @Injectable()
-export class ListThreatActorsUseCase {
-    constructor(
-        private readonly threatActorRepository: ThreatActorRepository,
-    ) {}
+export class IncidentService {
+    constructor(private readonly incidentRepository: IncidentRepository) {}
 
-    execute(
-        query: ThreatCatalogQueryDto,
-    ): Promise<PaginatedResponse<ThreatActor>> {
+    list(query: ThreatCatalogQueryDto): Promise<PaginatedResponse<Incident>> {
         const sort: SortCriteria = {
             field: query.sortBy,
             direction: query.sortOrder === SortOrder.ASC ? 1 : -1,
         };
 
-        return this.threatActorRepository.findAll(
+        return this.incidentRepository.findAll(
             {
                 name: query.name,
                 tlp: query.tlp,
@@ -30,5 +26,9 @@ export class ListThreatActorsUseCase {
             query.limit,
             sort,
         );
+    }
+
+    findById(id: string): Promise<Incident | null> {
+        return this.incidentRepository.findById(id);
     }
 }

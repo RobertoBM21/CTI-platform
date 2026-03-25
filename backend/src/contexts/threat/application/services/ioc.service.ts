@@ -8,10 +8,10 @@ import { Ioc, IocRepository } from '../../domain';
 import { type IocListQuery, IocListSortBy } from '../dtos/ioc-list-query.dto';
 
 @Injectable()
-export class ListIocsUseCase {
+export class IocService {
     constructor(private readonly iocRepository: IocRepository) {}
 
-    execute(query: IocListQuery): Promise<PaginatedResponse<Ioc>> {
+    list(query: IocListQuery): Promise<PaginatedResponse<Ioc>> {
         const sort: SortCriteria = {
             field: query.sortBy ?? IocListSortBy.CREATED_AT,
             direction:

@@ -12,24 +12,18 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 import { ThreatCatalogQueryDto } from '../../application/dtos';
-import {
-    GetThreatActorDetailUseCase,
-    ListThreatActorsUseCase,
-} from '../../application/use-cases';
+import { ThreatActorService } from '../../application/services';
 
 @ApiTags('Threat Actors')
 @Controller('threat-actors')
 export class ThreatActorsController {
-    constructor(
-        private readonly listThreatActorsUseCase: ListThreatActorsUseCase,
-        private readonly getThreatActorDetailUseCase: GetThreatActorDetailUseCase,
-    ) {}
+    constructor(private readonly threatActorService: ThreatActorService) {}
 
     @Get()
     @ApiOperation({ summary: 'List threat actors' })
     @ApiOkResponse({ description: 'Threat actors retrieved successfully' })
     list(@Query() query: ThreatCatalogQueryDto) {
-        return this.listThreatActorsUseCase.execute(query);
+        return this.threatActorService.list(query);
     }
 
     @Get(':id')
@@ -37,9 +31,7 @@ export class ThreatActorsController {
     @ApiOkResponse({ description: 'Threat actor retrieved successfully' })
     @ApiNotFoundResponse({ description: 'Threat actor not found' })
     async detail(@Param('id') id: string) {
-        const threatActor = await this.getThreatActorDetailUseCase.execute({
-            id,
-        });
+        const threatActor = await this.threatActorService.findById(id);
 
         if (!threatActor) {
             throw new NotFoundException('Threat actor not found');

@@ -2,7 +2,7 @@ import { Abstract } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { ListIocsUseCase } from '../../../../../src/contexts/threat/application/use-cases/list-iocs.use-case';
+import { IocService } from '../../../../../src/contexts/threat/application/services/ioc.service';
 import {
     AttackPatternRepository,
     CampaignRepository,
@@ -32,7 +32,7 @@ describe('ThreatModule wiring', () => {
         await mongoServer.stop();
     });
 
-    it('should resolve repository ports and key use-cases from DI', () => {
+    it('should resolve repository ports and key services from DI', () => {
         expect(
             moduleRef.get(ThreatActorRepository as Abstract<unknown>),
         ).toBeDefined();
@@ -46,6 +46,6 @@ describe('ThreatModule wiring', () => {
             moduleRef.get(AttackPatternRepository as Abstract<unknown>),
         ).toBeDefined();
         expect(moduleRef.get(IocRepository as Abstract<unknown>)).toBeDefined();
-        expect(moduleRef.get(ListIocsUseCase)).toBeDefined();
+        expect(moduleRef.get(IocService)).toBeDefined();
     });
 });

@@ -12,24 +12,18 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 import { ThreatCatalogQueryDto } from '../../application/dtos';
-import {
-    GetCampaignDetailUseCase,
-    ListCampaignsUseCase,
-} from '../../application/use-cases';
+import { CampaignService } from '../../application/services';
 
 @ApiTags('Campaigns')
 @Controller('campaigns')
 export class CampaignsController {
-    constructor(
-        private readonly listCampaignsUseCase: ListCampaignsUseCase,
-        private readonly getCampaignDetailUseCase: GetCampaignDetailUseCase,
-    ) {}
+    constructor(private readonly campaignService: CampaignService) {}
 
     @Get()
     @ApiOperation({ summary: 'List campaigns' })
     @ApiOkResponse({ description: 'Campaigns retrieved successfully' })
     list(@Query() query: ThreatCatalogQueryDto) {
-        return this.listCampaignsUseCase.execute(query);
+        return this.campaignService.list(query);
     }
 
     @Get(':id')
@@ -37,7 +31,7 @@ export class CampaignsController {
     @ApiOkResponse({ description: 'Campaign retrieved successfully' })
     @ApiNotFoundResponse({ description: 'Campaign not found' })
     async detail(@Param('id') id: string) {
-        const campaign = await this.getCampaignDetailUseCase.execute({ id });
+        const campaign = await this.campaignService.findById(id);
 
         if (!campaign) {
             throw new NotFoundException('Campaign not found');

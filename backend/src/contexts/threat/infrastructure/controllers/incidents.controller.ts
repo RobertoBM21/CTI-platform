@@ -12,24 +12,18 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 import { ThreatCatalogQueryDto } from '../../application/dtos';
-import {
-    GetIncidentDetailUseCase,
-    ListIncidentsUseCase,
-} from '../../application/use-cases';
+import { IncidentService } from '../../application/services';
 
 @ApiTags('Incidents')
 @Controller('incidents')
 export class IncidentsController {
-    constructor(
-        private readonly listIncidentsUseCase: ListIncidentsUseCase,
-        private readonly getIncidentDetailUseCase: GetIncidentDetailUseCase,
-    ) {}
+    constructor(private readonly incidentService: IncidentService) {}
 
     @Get()
     @ApiOperation({ summary: 'List incidents' })
     @ApiOkResponse({ description: 'Incidents retrieved successfully' })
     list(@Query() query: ThreatCatalogQueryDto) {
-        return this.listIncidentsUseCase.execute(query);
+        return this.incidentService.list(query);
     }
 
     @Get(':id')
@@ -37,7 +31,7 @@ export class IncidentsController {
     @ApiOkResponse({ description: 'Incident retrieved successfully' })
     @ApiNotFoundResponse({ description: 'Incident not found' })
     async detail(@Param('id') id: string) {
-        const incident = await this.getIncidentDetailUseCase.execute({ id });
+        const incident = await this.incidentService.findById(id);
 
         if (!incident) {
             throw new NotFoundException('Incident not found');
