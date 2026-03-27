@@ -1,3 +1,4 @@
+import { ExternalReference } from '../../../shared/domain/value-objects/external-reference.vo';
 import { AttackMotivation, TLP } from '../value-objects';
 
 export interface CampaignProps {
@@ -10,9 +11,10 @@ export interface CampaignProps {
     objective?: string;
     primaryMotivations?: AttackMotivation[];
     secondaryMotivations?: AttackMotivation[];
+    confidence?: number;
+    revoked?: boolean;
+    externalReferences?: ExternalReference[];
     tlp?: TLP;
-    threatActorIds?: string[];
-    attackPatternIds?: string[];
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -27,9 +29,10 @@ export class Campaign {
     readonly objective?: string;
     readonly primaryMotivations: AttackMotivation[];
     readonly secondaryMotivations: AttackMotivation[];
+    readonly confidence?: number;
+    readonly revoked: boolean;
+    readonly externalReferences: ExternalReference[];
     readonly tlp: TLP;
-    readonly threatActorIds: string[];
-    readonly attackPatternIds: string[];
     readonly createdAt: Date;
     readonly updatedAt: Date;
 
@@ -43,9 +46,10 @@ export class Campaign {
         this.objective = props.objective;
         this.primaryMotivations = props.primaryMotivations ?? [];
         this.secondaryMotivations = props.secondaryMotivations ?? [];
+        this.confidence = props.confidence;
+        this.revoked = props.revoked ?? false;
+        this.externalReferences = props.externalReferences ?? [];
         this.tlp = props.tlp ?? TLP.WHITE;
-        this.threatActorIds = props.threatActorIds ?? [];
-        this.attackPatternIds = props.attackPatternIds ?? [];
         this.createdAt = props.createdAt ?? new Date();
         this.updatedAt = props.updatedAt ?? new Date();
     }

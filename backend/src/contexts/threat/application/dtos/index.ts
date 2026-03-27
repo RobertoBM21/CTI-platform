@@ -1,8 +1,8 @@
 export {
-    IocListQueryDto,
-    IocListSortBy,
-    type IocListQuery,
-} from './ioc-list-query.dto';
+    IndicatorListQueryDto,
+    IndicatorListSortBy,
+    type IndicatorListQuery,
+} from './indicator-list-query.dto';
 export {
     ThreatCatalogQueryDto,
     ThreatCatalogSortBy,

@@ -32,7 +32,7 @@ describe('ThreatActor', () => {
             expect(actor.roles).toEqual([]);
             expect(actor.primaryMotivations).toEqual([]);
             expect(actor.secondaryMotivations).toEqual([]);
-            expect(actor.attackPatternIds).toEqual([]);
+            expect(actor.externalReferences).toEqual([]);
         });
 
         it('should auto-generate createdAt and updatedAt as Date instances', () => {
@@ -78,7 +78,11 @@ describe('ThreatActor', () => {
                 secondaryMotivations: [AttackMotivation.DOMINANCE],
                 personalMotivations: 'Geopolitical leverage',
                 tlp: TLP.AMBER,
-                attackPatternIds: ['pattern-1', 'pattern-2'],
+                confidence: 80,
+                revoked: true,
+                externalReferences: [
+                    { sourceName: 'MITRE', externalId: 'G0016' },
+                ],
                 createdAt: now,
                 updatedAt: now,
             });
@@ -112,24 +116,46 @@ describe('ThreatActor', () => {
             ]);
             expect(actor.personalMotivations).toBe('Geopolitical leverage');
             expect(actor.tlp).toBe(TLP.AMBER);
-            expect(actor.attackPatternIds).toEqual(['pattern-1', 'pattern-2']);
+            expect(actor.confidence).toBe(80);
+            expect(actor.revoked).toBe(true);
+            expect(actor.externalReferences).toEqual([
+                { sourceName: 'MITRE', externalId: 'G0016' },
+            ]);
             expect(actor.createdAt).toBe(now);
             expect(actor.updatedAt).toBe(now);
         });
     });
 
-    describe('relationships', () => {
-        it('should accept an array of attackPatternIds', () => {
-            const actor = new ThreatActor({
-                name: 'Test Actor',
-                attackPatternIds: ['ap-1', 'ap-2', 'ap-3'],
-            });
-            expect(actor.attackPatternIds).toEqual(['ap-1', 'ap-2', 'ap-3']);
+    describe('STIX common properties', () => {
+        it('should default confidence to undefined', () => {
+            const actor = new ThreatActor({ name: 'Test Actor' });
+            expect(actor.confidence).toBeUndefined();
         });
 
-        it('should default attackPatternIds to an empty array', () => {
+        it('should default revoked to false', () => {
             const actor = new ThreatActor({ name: 'Test Actor' });
-            expect(actor.attackPatternIds).toEqual([]);
+            expect(actor.revoked).toBe(false);
+        });
+
+        it('should default externalReferences to empty array', () => {
+            const actor = new ThreatActor({ name: 'Test Actor' });
+            expect(actor.externalReferences).toEqual([]);
+        });
+
+        it('should accept STIX common props when provided', () => {
+            const actor = new ThreatActor({
+                name: 'Test Actor',
+                confidence: 95,
+                revoked: true,
+                externalReferences: [
+                    { sourceName: 'MITRE', externalId: 'G0016' },
+                ],
+            });
+            expect(actor.confidence).toBe(95);
+            expect(actor.revoked).toBe(true);
+            expect(actor.externalReferences).toEqual([
+                { sourceName: 'MITRE', externalId: 'G0016' },
+            ]);
         });
     });
 });

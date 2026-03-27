@@ -59,22 +59,6 @@ export class IncidentMongooseRepository extends IncidentRepository {
         };
     }
 
-    async findByCampaignId(campaignId: string): Promise<Incident[]> {
-        const docs = await this.incidentModel
-            .find({ campaignId })
-            .sort({ createdAt: -1 })
-            .exec();
-        return docs.map((doc) => this.toDomain(doc));
-    }
-
-    async findByThreatActorId(threatActorId: string): Promise<Incident[]> {
-        const docs = await this.incidentModel
-            .find({ threatActorIds: threatActorId })
-            .sort({ createdAt: -1 })
-            .exec();
-        return docs.map((doc) => this.toDomain(doc));
-    }
-
     async create(entity: Incident): Promise<Incident> {
         const doc = await this.incidentModel.create(this.toPersistence(entity));
         return this.toDomain(doc);
@@ -112,10 +96,19 @@ export class IncidentMongooseRepository extends IncidentRepository {
             firstSeen: doc.firstSeen,
             lastSeen: doc.lastSeen,
             objective: doc.objective,
+            confidence: doc.confidence,
+            revoked: doc.revoked,
+            externalReferences: doc.externalReferences.map((r) => ({
+                sourceName: r.sourceName,
+                ...(r.description != null && {
+                    description: r.description,
+                }),
+                ...(r.externalId != null && {
+                    externalId: r.externalId,
+                }),
+                ...(r.url != null && { url: r.url }),
+            })),
             tlp: doc.tlp as TLP,
-            threatActorIds: doc.threatActorIds as unknown as string[],
-            campaignId: doc.campaignId,
-            attackPatternIds: doc.attackPatternIds as unknown as string[],
             createdAt: doc.createdAt,
             updatedAt: doc.updatedAt,
         });
@@ -129,10 +122,10 @@ export class IncidentMongooseRepository extends IncidentRepository {
             firstSeen: entity.firstSeen,
             lastSeen: entity.lastSeen,
             objective: entity.objective,
+            confidence: entity.confidence,
+            revoked: entity.revoked,
+            externalReferences: entity.externalReferences,
             tlp: entity.tlp,
-            threatActorIds: entity.threatActorIds,
-            campaignId: entity.campaignId,
-            attackPatternIds: entity.attackPatternIds,
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
         };
@@ -149,13 +142,12 @@ export class IncidentMongooseRepository extends IncidentRepository {
         if (entity.firstSeen !== undefined) update.firstSeen = entity.firstSeen;
         if (entity.lastSeen !== undefined) update.lastSeen = entity.lastSeen;
         if (entity.objective !== undefined) update.objective = entity.objective;
+        if (entity.confidence !== undefined)
+            update.confidence = entity.confidence;
+        if (entity.revoked !== undefined) update.revoked = entity.revoked;
+        if (entity.externalReferences !== undefined)
+            update.externalReferences = entity.externalReferences;
         if (entity.tlp !== undefined) update.tlp = entity.tlp;
-        if (entity.threatActorIds !== undefined)
-            update.threatActorIds = entity.threatActorIds;
-        if (entity.campaignId !== undefined)
-            update.campaignId = entity.campaignId;
-        if (entity.attackPatternIds !== undefined)
-            update.attackPatternIds = entity.attackPatternIds;
 
         return update;
     }

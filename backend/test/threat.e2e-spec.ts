@@ -7,13 +7,13 @@ import { AppModule } from '../src/app.module';
 import { AttackPattern } from '../src/contexts/threat/domain/entities/attack-pattern.entity';
 import { Campaign } from '../src/contexts/threat/domain/entities/campaign.entity';
 import { Incident } from '../src/contexts/threat/domain/entities/incident.entity';
-import { Ioc } from '../src/contexts/threat/domain/entities/ioc.entity';
+import { Indicator } from '../src/contexts/threat/domain/entities/indicator.entity';
 import { ThreatActor } from '../src/contexts/threat/domain/entities/threat-actor.entity';
 import { IocType, TLP } from '../src/contexts/threat/domain/value-objects';
 import { AttackPatternMongooseRepository } from '../src/contexts/threat/infrastructure/persistence/repositories/attack-pattern-mongoose.repository';
 import { CampaignMongooseRepository } from '../src/contexts/threat/infrastructure/persistence/repositories/campaign-mongoose.repository';
 import { IncidentMongooseRepository } from '../src/contexts/threat/infrastructure/persistence/repositories/incident-mongoose.repository';
-import { IocMongooseRepository } from '../src/contexts/threat/infrastructure/persistence/repositories/ioc-mongoose.repository';
+import { IndicatorMongooseRepository } from '../src/contexts/threat/infrastructure/persistence/repositories/indicator-mongoose.repository';
 import { ThreatActorMongooseRepository } from '../src/contexts/threat/infrastructure/persistence/repositories/threat-actor-mongoose.repository';
 
 describe('Threat API (e2e)', () => {
@@ -47,7 +47,7 @@ describe('Threat API (e2e)', () => {
         const attackPatternRepository = app.get(
             AttackPatternMongooseRepository,
         );
-        const iocRepository = app.get(IocMongooseRepository);
+        const indicatorRepository = app.get(IndicatorMongooseRepository);
 
         await threatActorRepository.create(
             new ThreatActor({
@@ -80,23 +80,19 @@ describe('Threat API (e2e)', () => {
                 tlp: TLP.WHITE,
             }),
         );
-        await iocRepository.create(
-            new Ioc({
-                id: 'ioc-1',
+        await indicatorRepository.create(
+            new Indicator({
+                id: 'ind-1',
                 type: IocType.DOMAIN,
                 value: 'zzz.example',
-                sourceType: 'incident',
-                sourceId: 'inc-1',
                 tlp: TLP.GREEN,
             }),
         );
-        await iocRepository.create(
-            new Ioc({
-                id: 'ioc-2',
+        await indicatorRepository.create(
+            new Indicator({
+                id: 'ind-2',
                 type: IocType.IPV4,
                 value: '1.1.1.1',
-                sourceType: 'incident',
-                sourceId: 'inc-1',
                 tlp: TLP.GREEN,
             }),
         );
@@ -164,11 +160,9 @@ describe('Threat API (e2e)', () => {
             });
     });
 
-    it('GET /iocs should support contextual listing with sorting', () => {
+    it('GET /indicators should return paginated catalog with sorting', () => {
         return request(app.getHttpServer())
-            .get(
-                '/iocs?sourceType=incident&sourceId=inc-1&sortBy=value&sortOrder=asc',
-            )
+            .get('/indicators?sortBy=value&sortOrder=asc')
             .expect(200)
             .expect((res) => {
                 expect(res.body.meta.total).toBe(2);
@@ -177,9 +171,19 @@ describe('Threat API (e2e)', () => {
             });
     });
 
-    it('GET /iocs should reject invalid sourceType', () => {
+    it('GET /indicators/:id should return detail', () => {
         return request(app.getHttpServer())
-            .get('/iocs?sourceType=actor&sourceId=inc-1')
-            .expect(400);
+            .get('/indicators/ind-1')
+            .expect(200)
+            .expect((res) => {
+                expect(res.body).toHaveProperty('id', 'ind-1');
+                expect(res.body).toHaveProperty('value', 'zzz.example');
+            });
+    });
+
+    it('GET /indicators/:id should return 404 when entity does not exist', () => {
+        return request(app.getHttpServer())
+            .get('/indicators/missing')
+            .expect(404);
     });
 });

@@ -12,8 +12,6 @@ export abstract class CampaignRepository {
         sort: SortCriteria,
     ): Promise<PaginatedResponse<Campaign>>;
 
-    abstract findByThreatActorId(threatActorId: string): Promise<Campaign[]>;
-
     abstract create(entity: Campaign): Promise<Campaign>;
 
     abstract update(

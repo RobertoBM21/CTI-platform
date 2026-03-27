@@ -1,34 +1,31 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsEnum, IsIn, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { PaginationQueryDto } from '../../../shared/application/dtos/pagination.dto';
 import { SortOrder } from '../../../shared/application/dtos/sort.dto';
-import { IocType, TLP, type IocSourceType } from '../../domain';
+import { IocType, TLP } from '../../domain';
 
-const IOC_SOURCE_TYPES = ['threat-actor', 'campaign', 'incident'] as const;
-
-export enum IocListSortBy {
+export enum IndicatorListSortBy {
     CREATED_AT = 'createdAt',
     UPDATED_AT = 'updatedAt',
     VALUE = 'value',
     TYPE = 'type',
+    NAME = 'name',
 }
 
-export interface IocListQuery {
+export interface IndicatorListQuery {
     page: number;
     limit: number;
     type?: IocType;
     value?: string;
+    name?: string;
     tlp?: TLP;
-    sourceType?: IocSourceType;
-    sourceId?: string;
-    sortBy?: IocListSortBy;
+    sortBy?: IndicatorListSortBy;
     sortOrder?: SortOrder;
 }
 
-export class IocListQueryDto
+export class IndicatorListQueryDto
     extends PaginationQueryDto
-    implements IocListQuery
+    implements IndicatorListQuery
 {
     @ApiPropertyOptional({ enum: IocType, enumName: 'IocType' })
     @IsOptional()
@@ -40,30 +37,24 @@ export class IocListQueryDto
     @IsString()
     value?: string;
 
+    @ApiPropertyOptional()
+    @IsOptional()
+    @IsString()
+    name?: string;
+
     @ApiPropertyOptional({ enum: TLP, enumName: 'TLP' })
     @IsOptional()
     @IsEnum(TLP)
     tlp?: TLP;
 
-    @ApiPropertyOptional({ enum: IOC_SOURCE_TYPES, enumName: 'IocSourceType' })
-    @IsOptional()
-    @Type(() => String)
-    @IsIn(IOC_SOURCE_TYPES)
-    sourceType?: IocSourceType;
-
-    @ApiPropertyOptional()
-    @IsOptional()
-    @IsString()
-    sourceId?: string;
-
     @ApiPropertyOptional({
-        enum: IocListSortBy,
-        enumName: 'IocListSortBy',
-        default: IocListSortBy.CREATED_AT,
+        enum: IndicatorListSortBy,
+        enumName: 'IndicatorListSortBy',
+        default: IndicatorListSortBy.CREATED_AT,
     })
     @IsOptional()
-    @IsEnum(IocListSortBy)
-    sortBy: IocListSortBy = IocListSortBy.CREATED_AT;
+    @IsEnum(IndicatorListSortBy)
+    sortBy: IndicatorListSortBy = IndicatorListSortBy.CREATED_AT;
 
     @ApiPropertyOptional({
         enum: SortOrder,

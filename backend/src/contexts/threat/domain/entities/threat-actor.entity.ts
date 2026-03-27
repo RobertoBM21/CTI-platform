@@ -1,3 +1,4 @@
+import { ExternalReference } from '../../../shared/domain/value-objects/external-reference.vo';
 import {
     AttackMotivation,
     ResourceLevel,
@@ -22,8 +23,10 @@ export interface ThreatActorProps {
     primaryMotivations?: AttackMotivation[];
     secondaryMotivations?: AttackMotivation[];
     personalMotivations?: string;
+    confidence?: number;
+    revoked?: boolean;
+    externalReferences?: ExternalReference[];
     tlp?: TLP;
-    attackPatternIds?: string[];
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -43,8 +46,10 @@ export class ThreatActor {
     readonly primaryMotivations: AttackMotivation[];
     readonly secondaryMotivations: AttackMotivation[];
     readonly personalMotivations?: string;
+    readonly confidence?: number;
+    readonly revoked: boolean;
+    readonly externalReferences: ExternalReference[];
     readonly tlp: TLP;
-    readonly attackPatternIds: string[];
     readonly createdAt: Date;
     readonly updatedAt: Date;
 
@@ -63,8 +68,10 @@ export class ThreatActor {
         this.primaryMotivations = props.primaryMotivations ?? [];
         this.secondaryMotivations = props.secondaryMotivations ?? [];
         this.personalMotivations = props.personalMotivations;
+        this.confidence = props.confidence;
+        this.revoked = props.revoked ?? false;
+        this.externalReferences = props.externalReferences ?? [];
         this.tlp = props.tlp ?? TLP.WHITE;
-        this.attackPatternIds = props.attackPatternIds ?? [];
         this.createdAt = props.createdAt ?? new Date();
         this.updatedAt = props.updatedAt ?? new Date();
     }

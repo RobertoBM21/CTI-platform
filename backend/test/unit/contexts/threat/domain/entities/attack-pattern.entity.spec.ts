@@ -25,7 +25,7 @@ describe('AttackPattern', () => {
         it('should default arrays to empty', () => {
             const pattern = new AttackPattern({ name: 'Test Pattern' });
             expect(pattern.aliases).toEqual([]);
-            expect(pattern.subPatternIds).toEqual([]);
+            expect(pattern.externalReferences).toEqual([]);
         });
 
         it('should auto-generate createdAt and updatedAt as Date instances', () => {
@@ -54,7 +54,11 @@ describe('AttackPattern', () => {
                 externalReference: 'T0097.206',
                 killChainPhase: 'TA16',
                 tlp: TLP.GREEN,
-                subPatternIds: ['sub-1', 'sub-2'],
+                confidence: 75,
+                revoked: true,
+                externalReferences: [
+                    { sourceName: 'DISARM', externalId: 'T0097.206' },
+                ],
                 createdAt: now,
                 updatedAt: now,
             });
@@ -71,7 +75,11 @@ describe('AttackPattern', () => {
             expect(pattern.externalReference).toBe('T0097.206');
             expect(pattern.killChainPhase).toBe('TA16');
             expect(pattern.tlp).toBe(TLP.GREEN);
-            expect(pattern.subPatternIds).toEqual(['sub-1', 'sub-2']);
+            expect(pattern.confidence).toBe(75);
+            expect(pattern.revoked).toBe(true);
+            expect(pattern.externalReferences).toEqual([
+                { sourceName: 'DISARM', externalId: 'T0097.206' },
+            ]);
             expect(pattern.createdAt).toBe(now);
             expect(pattern.updatedAt).toBe(now);
         });
@@ -92,6 +100,39 @@ describe('AttackPattern', () => {
                 killChainPhase: 'TA16',
             });
             expect(pattern.killChainPhase).toBe('TA16');
+        });
+    });
+
+    describe('STIX common properties', () => {
+        it('should default confidence to undefined', () => {
+            const pattern = new AttackPattern({ name: 'Test Pattern' });
+            expect(pattern.confidence).toBeUndefined();
+        });
+
+        it('should default revoked to false', () => {
+            const pattern = new AttackPattern({ name: 'Test Pattern' });
+            expect(pattern.revoked).toBe(false);
+        });
+
+        it('should default externalReferences to empty array', () => {
+            const pattern = new AttackPattern({ name: 'Test Pattern' });
+            expect(pattern.externalReferences).toEqual([]);
+        });
+
+        it('should accept STIX common props when provided', () => {
+            const pattern = new AttackPattern({
+                name: 'Test Pattern',
+                confidence: 85,
+                revoked: true,
+                externalReferences: [
+                    { sourceName: 'DISARM', externalId: 'T0097' },
+                ],
+            });
+            expect(pattern.confidence).toBe(85);
+            expect(pattern.revoked).toBe(true);
+            expect(pattern.externalReferences).toEqual([
+                { sourceName: 'DISARM', externalId: 'T0097' },
+            ]);
         });
     });
 });

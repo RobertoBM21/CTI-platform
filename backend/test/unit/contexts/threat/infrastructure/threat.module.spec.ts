@@ -2,12 +2,12 @@ import { Abstract } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { IocService } from '../../../../../src/contexts/threat/application/services/ioc.service';
+import { IndicatorService } from '../../../../../src/contexts/threat/application/services/indicator.service';
 import {
     AttackPatternRepository,
     CampaignRepository,
     IncidentRepository,
-    IocRepository,
+    IndicatorRepository,
     ThreatActorRepository,
 } from '../../../../../src/contexts/threat/domain';
 import { ThreatModule } from '../../../../../src/contexts/threat/infrastructure/threat.module';
@@ -45,7 +45,9 @@ describe('ThreatModule wiring', () => {
         expect(
             moduleRef.get(AttackPatternRepository as Abstract<unknown>),
         ).toBeDefined();
-        expect(moduleRef.get(IocRepository as Abstract<unknown>)).toBeDefined();
-        expect(moduleRef.get(IocService)).toBeDefined();
+        expect(
+            moduleRef.get(IndicatorRepository as Abstract<unknown>),
+        ).toBeDefined();
+        expect(moduleRef.get(IndicatorService)).toBeDefined();
     });
 });

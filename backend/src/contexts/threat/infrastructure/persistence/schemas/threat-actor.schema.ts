@@ -51,11 +51,33 @@ export class ThreatActorDocument {
     @Prop()
     personalMotivations?: string;
 
+    @Prop({ type: Number, min: 0, max: 100 })
+    confidence?: number;
+
+    @Prop({ type: Boolean, default: false })
+    revoked!: boolean;
+
+    @Prop({
+        type: [
+            {
+                sourceName: { type: String, required: true },
+                description: String,
+                externalId: String,
+                url: String,
+            },
+        ],
+        default: [],
+        _id: false,
+    })
+    externalReferences!: {
+        sourceName: string;
+        description?: string;
+        externalId?: string;
+        url?: string;
+    }[];
+
     @Prop({ type: String, enum: Object.values(TLP), default: TLP.WHITE })
     tlp!: string;
-
-    @Prop({ type: [String] })
-    attackPatternIds!: string[];
 
     createdAt!: Date;
     updatedAt!: Date;

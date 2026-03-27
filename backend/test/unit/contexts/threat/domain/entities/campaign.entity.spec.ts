@@ -26,8 +26,7 @@ describe('Campaign', () => {
             expect(campaign.aliases).toEqual([]);
             expect(campaign.primaryMotivations).toEqual([]);
             expect(campaign.secondaryMotivations).toEqual([]);
-            expect(campaign.threatActorIds).toEqual([]);
-            expect(campaign.attackPatternIds).toEqual([]);
+            expect(campaign.externalReferences).toEqual([]);
         });
 
         it('should auto-generate createdAt and updatedAt as Date instances', () => {
@@ -63,8 +62,11 @@ describe('Campaign', () => {
                 primaryMotivations: [AttackMotivation.IDEOLOGY],
                 secondaryMotivations: [AttackMotivation.DOMINANCE],
                 tlp: TLP.RED,
-                threatActorIds: ['actor-1', 'actor-2'],
-                attackPatternIds: ['pattern-1'],
+                confidence: 90,
+                revoked: true,
+                externalReferences: [
+                    { sourceName: 'OSINT', externalId: 'OP-BLACKOUT-2024' },
+                ],
                 createdAt: now,
                 updatedAt: now,
             });
@@ -87,28 +89,46 @@ describe('Campaign', () => {
                 AttackMotivation.DOMINANCE,
             ]);
             expect(campaign.tlp).toBe(TLP.RED);
-            expect(campaign.threatActorIds).toEqual(['actor-1', 'actor-2']);
-            expect(campaign.attackPatternIds).toEqual(['pattern-1']);
+            expect(campaign.confidence).toBe(90);
+            expect(campaign.revoked).toBe(true);
+            expect(campaign.externalReferences).toEqual([
+                { sourceName: 'OSINT', externalId: 'OP-BLACKOUT-2024' },
+            ]);
             expect(campaign.createdAt).toBe(now);
             expect(campaign.updatedAt).toBe(now);
         });
     });
 
-    describe('relationships', () => {
-        it('should default threatActorIds and attackPatternIds to empty arrays', () => {
+    describe('STIX common properties', () => {
+        it('should default confidence to undefined', () => {
             const campaign = new Campaign({ name: 'Test Campaign' });
-            expect(campaign.threatActorIds).toEqual([]);
-            expect(campaign.attackPatternIds).toEqual([]);
+            expect(campaign.confidence).toBeUndefined();
         });
 
-        it('should accept provided relationship arrays', () => {
+        it('should default revoked to false', () => {
+            const campaign = new Campaign({ name: 'Test Campaign' });
+            expect(campaign.revoked).toBe(false);
+        });
+
+        it('should default externalReferences to empty array', () => {
+            const campaign = new Campaign({ name: 'Test Campaign' });
+            expect(campaign.externalReferences).toEqual([]);
+        });
+
+        it('should accept STIX common props when provided', () => {
             const campaign = new Campaign({
                 name: 'Test Campaign',
-                threatActorIds: ['ta-1', 'ta-2'],
-                attackPatternIds: ['ap-1'],
+                confidence: 60,
+                revoked: true,
+                externalReferences: [
+                    { sourceName: 'OSINT', externalId: 'CAMP-001' },
+                ],
             });
-            expect(campaign.threatActorIds).toEqual(['ta-1', 'ta-2']);
-            expect(campaign.attackPatternIds).toEqual(['ap-1']);
+            expect(campaign.confidence).toBe(60);
+            expect(campaign.revoked).toBe(true);
+            expect(campaign.externalReferences).toEqual([
+                { sourceName: 'OSINT', externalId: 'CAMP-001' },
+            ]);
         });
     });
 });

@@ -22,8 +22,7 @@ describe('Incident', () => {
 
         it('should default all arrays to empty', () => {
             const incident = new Incident({ name: 'Test Incident' });
-            expect(incident.threatActorIds).toEqual([]);
-            expect(incident.attackPatternIds).toEqual([]);
+            expect(incident.externalReferences).toEqual([]);
         });
 
         it('should auto-generate createdAt and updatedAt as Date instances', () => {
@@ -38,7 +37,6 @@ describe('Incident', () => {
             expect(incident.firstSeen).toBeUndefined();
             expect(incident.lastSeen).toBeUndefined();
             expect(incident.objective).toBeUndefined();
-            expect(incident.campaignId).toBeUndefined();
         });
     });
 
@@ -57,9 +55,11 @@ describe('Incident', () => {
                 lastSeen,
                 objective: 'Create public panic about energy supply',
                 tlp: TLP.AMBER_STRICT,
-                threatActorIds: ['actor-1'],
-                campaignId: 'campaign-1',
-                attackPatternIds: ['pattern-1', 'pattern-2'],
+                confidence: 70,
+                revoked: true,
+                externalReferences: [
+                    { sourceName: 'CERT', externalId: 'INC-789' },
+                ],
                 createdAt: now,
                 updatedAt: now,
             });
@@ -75,35 +75,46 @@ describe('Incident', () => {
                 'Create public panic about energy supply',
             );
             expect(incident.tlp).toBe(TLP.AMBER_STRICT);
-            expect(incident.threatActorIds).toEqual(['actor-1']);
-            expect(incident.campaignId).toBe('campaign-1');
-            expect(incident.attackPatternIds).toEqual([
-                'pattern-1',
-                'pattern-2',
+            expect(incident.confidence).toBe(70);
+            expect(incident.revoked).toBe(true);
+            expect(incident.externalReferences).toEqual([
+                { sourceName: 'CERT', externalId: 'INC-789' },
             ]);
             expect(incident.createdAt).toBe(now);
             expect(incident.updatedAt).toBe(now);
         });
     });
 
-    describe('relationships', () => {
-        it('should default campaignId to undefined', () => {
+    describe('STIX common properties', () => {
+        it('should default confidence to undefined', () => {
             const incident = new Incident({ name: 'Test Incident' });
-            expect(incident.campaignId).toBeUndefined();
+            expect(incident.confidence).toBeUndefined();
         });
 
-        it('should accept a campaignId when provided', () => {
+        it('should default revoked to false', () => {
+            const incident = new Incident({ name: 'Test Incident' });
+            expect(incident.revoked).toBe(false);
+        });
+
+        it('should default externalReferences to empty array', () => {
+            const incident = new Incident({ name: 'Test Incident' });
+            expect(incident.externalReferences).toEqual([]);
+        });
+
+        it('should accept STIX common props when provided', () => {
             const incident = new Incident({
                 name: 'Test Incident',
-                campaignId: 'campaign-abc',
+                confidence: 50,
+                revoked: true,
+                externalReferences: [
+                    { sourceName: 'CERT', externalId: 'INC-001' },
+                ],
             });
-            expect(incident.campaignId).toBe('campaign-abc');
-        });
-
-        it('should default threatActorIds and attackPatternIds to empty arrays', () => {
-            const incident = new Incident({ name: 'Test Incident' });
-            expect(incident.threatActorIds).toEqual([]);
-            expect(incident.attackPatternIds).toEqual([]);
+            expect(incident.confidence).toBe(50);
+            expect(incident.revoked).toBe(true);
+            expect(incident.externalReferences).toEqual([
+                { sourceName: 'CERT', externalId: 'INC-001' },
+            ]);
         });
     });
 });

@@ -1,3 +1,4 @@
+import { ExternalReference } from '../../../shared/domain/value-objects/external-reference.vo';
 import { TLP } from '../value-objects';
 
 export interface AttackPatternProps {
@@ -7,8 +8,10 @@ export interface AttackPatternProps {
     aliases?: string[];
     externalReference?: string;
     killChainPhase?: string;
+    confidence?: number;
+    revoked?: boolean;
+    externalReferences?: ExternalReference[];
     tlp?: TLP;
-    subPatternIds?: string[];
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -20,8 +23,10 @@ export class AttackPattern {
     readonly aliases: string[];
     readonly externalReference?: string;
     readonly killChainPhase?: string;
+    readonly confidence?: number;
+    readonly revoked: boolean;
+    readonly externalReferences: ExternalReference[];
     readonly tlp: TLP;
-    readonly subPatternIds: string[];
     readonly createdAt: Date;
     readonly updatedAt: Date;
 
@@ -32,8 +37,10 @@ export class AttackPattern {
         this.aliases = props.aliases ?? [];
         this.externalReference = props.externalReference;
         this.killChainPhase = props.killChainPhase;
+        this.confidence = props.confidence;
+        this.revoked = props.revoked ?? false;
+        this.externalReferences = props.externalReferences ?? [];
         this.tlp = props.tlp ?? TLP.WHITE;
-        this.subPatternIds = props.subPatternIds ?? [];
         this.createdAt = props.createdAt ?? new Date();
         this.updatedAt = props.updatedAt ?? new Date();
     }

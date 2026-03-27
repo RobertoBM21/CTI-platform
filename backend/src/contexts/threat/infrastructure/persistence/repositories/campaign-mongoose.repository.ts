@@ -64,15 +64,6 @@ export class CampaignMongooseRepository extends CampaignRepository {
         };
     }
 
-    async findByThreatActorId(threatActorId: string): Promise<Campaign[]> {
-        const docs = await this.campaignModel
-            .find({ threatActorIds: threatActorId })
-            .sort({ createdAt: -1 })
-            .exec();
-
-        return docs.map((doc) => this.toDomain(doc));
-    }
-
     async create(entity: Campaign): Promise<Campaign> {
         const doc = await this.campaignModel.create(this.toPersistence(entity));
         return this.toDomain(doc);
@@ -115,9 +106,19 @@ export class CampaignMongooseRepository extends CampaignRepository {
                 doc.primaryMotivations as unknown as AttackMotivation[],
             secondaryMotivations:
                 doc.secondaryMotivations as unknown as AttackMotivation[],
+            confidence: doc.confidence,
+            revoked: doc.revoked,
+            externalReferences: doc.externalReferences.map((r) => ({
+                sourceName: r.sourceName,
+                ...(r.description != null && {
+                    description: r.description,
+                }),
+                ...(r.externalId != null && {
+                    externalId: r.externalId,
+                }),
+                ...(r.url != null && { url: r.url }),
+            })),
             tlp: doc.tlp as TLP,
-            threatActorIds: doc.threatActorIds as unknown as string[],
-            attackPatternIds: doc.attackPatternIds as unknown as string[],
             createdAt: doc.createdAt,
             updatedAt: doc.updatedAt,
         });
@@ -134,9 +135,10 @@ export class CampaignMongooseRepository extends CampaignRepository {
             objective: entity.objective,
             primaryMotivations: entity.primaryMotivations,
             secondaryMotivations: entity.secondaryMotivations,
+            confidence: entity.confidence,
+            revoked: entity.revoked,
+            externalReferences: entity.externalReferences,
             tlp: entity.tlp,
-            threatActorIds: entity.threatActorIds,
-            attackPatternIds: entity.attackPatternIds,
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
         };
@@ -158,11 +160,12 @@ export class CampaignMongooseRepository extends CampaignRepository {
             update.primaryMotivations = entity.primaryMotivations;
         if (entity.secondaryMotivations !== undefined)
             update.secondaryMotivations = entity.secondaryMotivations;
+        if (entity.confidence !== undefined)
+            update.confidence = entity.confidence;
+        if (entity.revoked !== undefined) update.revoked = entity.revoked;
+        if (entity.externalReferences !== undefined)
+            update.externalReferences = entity.externalReferences;
         if (entity.tlp !== undefined) update.tlp = entity.tlp;
-        if (entity.threatActorIds !== undefined)
-            update.threatActorIds = entity.threatActorIds;
-        if (entity.attackPatternIds !== undefined)
-            update.attackPatternIds = entity.attackPatternIds;
 
         return update;
     }

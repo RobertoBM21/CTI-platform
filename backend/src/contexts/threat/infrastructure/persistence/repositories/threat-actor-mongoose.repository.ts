@@ -130,8 +130,19 @@ export class ThreatActorMongooseRepository extends ThreatActorRepository {
             secondaryMotivations:
                 doc.secondaryMotivations as unknown as AttackMotivation[],
             personalMotivations: doc.personalMotivations,
+            confidence: doc.confidence,
+            revoked: doc.revoked,
+            externalReferences: doc.externalReferences.map((r) => ({
+                sourceName: r.sourceName,
+                ...(r.description != null && {
+                    description: r.description,
+                }),
+                ...(r.externalId != null && {
+                    externalId: r.externalId,
+                }),
+                ...(r.url != null && { url: r.url }),
+            })),
             tlp: doc.tlp as TLP,
-            attackPatternIds: doc.attackPatternIds as unknown as string[],
             createdAt: doc.createdAt,
             updatedAt: doc.updatedAt,
         });
@@ -153,8 +164,10 @@ export class ThreatActorMongooseRepository extends ThreatActorRepository {
             primaryMotivations: entity.primaryMotivations,
             secondaryMotivations: entity.secondaryMotivations,
             personalMotivations: entity.personalMotivations,
+            confidence: entity.confidence,
+            revoked: entity.revoked,
+            externalReferences: entity.externalReferences,
             tlp: entity.tlp,
-            attackPatternIds: entity.attackPatternIds,
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
         };
@@ -185,9 +198,12 @@ export class ThreatActorMongooseRepository extends ThreatActorRepository {
             update.secondaryMotivations = entity.secondaryMotivations;
         if (entity.personalMotivations !== undefined)
             update.personalMotivations = entity.personalMotivations;
+        if (entity.confidence !== undefined)
+            update.confidence = entity.confidence;
+        if (entity.revoked !== undefined) update.revoked = entity.revoked;
+        if (entity.externalReferences !== undefined)
+            update.externalReferences = entity.externalReferences;
         if (entity.tlp !== undefined) update.tlp = entity.tlp;
-        if (entity.attackPatternIds !== undefined)
-            update.attackPatternIds = entity.attackPatternIds;
 
         return update;
     }

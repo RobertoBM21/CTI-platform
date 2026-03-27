@@ -110,8 +110,19 @@ export class AttackPatternMongooseRepository extends AttackPatternRepository {
             aliases: doc.aliases as unknown as string[],
             externalReference: doc.externalReference,
             killChainPhase: doc.killChainPhase,
+            confidence: doc.confidence,
+            revoked: doc.revoked,
+            externalReferences: doc.externalReferences.map((r) => ({
+                sourceName: r.sourceName,
+                ...(r.description != null && {
+                    description: r.description,
+                }),
+                ...(r.externalId != null && {
+                    externalId: r.externalId,
+                }),
+                ...(r.url != null && { url: r.url }),
+            })),
             tlp: doc.tlp as TLP,
-            subPatternIds: doc.subPatternIds as unknown as string[],
             createdAt: doc.createdAt,
             updatedAt: doc.updatedAt,
         });
@@ -125,8 +136,10 @@ export class AttackPatternMongooseRepository extends AttackPatternRepository {
             aliases: entity.aliases,
             externalReference: entity.externalReference,
             killChainPhase: entity.killChainPhase,
+            confidence: entity.confidence,
+            revoked: entity.revoked,
+            externalReferences: entity.externalReferences,
             tlp: entity.tlp,
-            subPatternIds: entity.subPatternIds,
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
         };
@@ -145,9 +158,12 @@ export class AttackPatternMongooseRepository extends AttackPatternRepository {
             update.externalReference = entity.externalReference;
         if (entity.killChainPhase !== undefined)
             update.killChainPhase = entity.killChainPhase;
+        if (entity.confidence !== undefined)
+            update.confidence = entity.confidence;
+        if (entity.revoked !== undefined) update.revoked = entity.revoked;
+        if (entity.externalReferences !== undefined)
+            update.externalReferences = entity.externalReferences;
         if (entity.tlp !== undefined) update.tlp = entity.tlp;
-        if (entity.subPatternIds !== undefined)
-            update.subPatternIds = entity.subPatternIds;
 
         return update;
     }

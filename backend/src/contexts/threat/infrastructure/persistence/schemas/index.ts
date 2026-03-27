@@ -13,7 +13,11 @@ export {
     IncidentSchema,
     type IncidentDoc,
 } from './incident.schema';
-export { IocDocument, IocSchema, type IocDoc } from './ioc.schema';
+export {
+    IndicatorDocument,
+    IndicatorSchema,
+    type IndicatorDoc,
+} from './indicator.schema';
 export {
     ThreatActorDocument,
     ThreatActorSchema,

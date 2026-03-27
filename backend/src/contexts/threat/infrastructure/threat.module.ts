@@ -4,26 +4,26 @@ import {
     AttackPatternService,
     CampaignService,
     IncidentService,
-    IocService,
+    IndicatorService,
     ThreatActorService,
 } from '../application/services';
 import {
     AttackPatternRepository,
     CampaignRepository,
     IncidentRepository,
-    IocRepository,
+    IndicatorRepository,
     ThreatActorRepository,
 } from '../domain';
 import { AttackPatternsController } from './controllers/attack-patterns.controller';
 import { CampaignsController } from './controllers/campaigns.controller';
 import { IncidentsController } from './controllers/incidents.controller';
-import { IocsController } from './controllers/iocs.controller';
+import { IndicatorsController } from './controllers/indicators.controller';
 import { ThreatActorsController } from './controllers/threat-actors.controller';
 import {
     AttackPatternMongooseRepository,
     CampaignMongooseRepository,
     IncidentMongooseRepository,
-    IocMongooseRepository,
+    IndicatorMongooseRepository,
     ThreatActorMongooseRepository,
 } from './persistence/repositories';
 import {
@@ -33,8 +33,8 @@ import {
     CampaignSchema,
     IncidentDocument,
     IncidentSchema,
-    IocDocument,
-    IocSchema,
+    IndicatorDocument,
+    IndicatorSchema,
     ThreatActorDocument,
     ThreatActorSchema,
 } from './persistence/schemas';
@@ -46,7 +46,7 @@ import {
             { name: CampaignDocument.name, schema: CampaignSchema },
             { name: IncidentDocument.name, schema: IncidentSchema },
             { name: AttackPatternDocument.name, schema: AttackPatternSchema },
-            { name: IocDocument.name, schema: IocSchema },
+            { name: IndicatorDocument.name, schema: IndicatorSchema },
         ]),
     ],
     controllers: [
@@ -54,14 +54,14 @@ import {
         CampaignsController,
         IncidentsController,
         AttackPatternsController,
-        IocsController,
+        IndicatorsController,
     ],
     providers: [
         ThreatActorMongooseRepository,
         CampaignMongooseRepository,
         IncidentMongooseRepository,
         AttackPatternMongooseRepository,
-        IocMongooseRepository,
+        IndicatorMongooseRepository,
         {
             provide: ThreatActorRepository,
             useExisting: ThreatActorMongooseRepository,
@@ -79,26 +79,26 @@ import {
             useExisting: AttackPatternMongooseRepository,
         },
         {
-            provide: IocRepository,
-            useExisting: IocMongooseRepository,
+            provide: IndicatorRepository,
+            useExisting: IndicatorMongooseRepository,
         },
         ThreatActorService,
         CampaignService,
         IncidentService,
         AttackPatternService,
-        IocService,
+        IndicatorService,
     ],
     exports: [
         ThreatActorRepository,
         CampaignRepository,
         IncidentRepository,
         AttackPatternRepository,
-        IocRepository,
+        IndicatorRepository,
         ThreatActorService,
         CampaignService,
         IncidentService,
         AttackPatternService,
-        IocService,
+        IndicatorService,
     ],
 })
 export class ThreatModule {}
