@@ -9,8 +9,8 @@ export class HealthController {
 
     @Get()
     @ApiOperation({ summary: 'Health check endpoint' })
-    @ApiOkResponse({ description: 'Service health and threat counters' })
-    check(): Promise<HealthStatusResponse> {
+    @ApiOkResponse({ description: 'Service health status' })
+    check(): HealthStatusResponse {
         return this.healthService.check();
     }
 }

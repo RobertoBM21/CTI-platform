@@ -1,5 +1,5 @@
+import { TLP } from '../../../../../../src/contexts/shared/domain/value-objects/tlp.vo';
 import { Incident } from '../../../../../../src/contexts/threat/domain/entities/incident.entity';
-import { TLP } from '../../../../../../src/contexts/threat/domain/value-objects/tlp.vo';
 
 describe('Incident', () => {
     describe('constructor with minimal props', () => {

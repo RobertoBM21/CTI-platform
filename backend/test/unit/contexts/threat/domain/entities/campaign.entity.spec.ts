@@ -1,6 +1,6 @@
+import { AttackMotivation } from '../../../../../../src/contexts/shared/domain/value-objects/attack-motivation.vo';
+import { TLP } from '../../../../../../src/contexts/shared/domain/value-objects/tlp.vo';
 import { Campaign } from '../../../../../../src/contexts/threat/domain/entities/campaign.entity';
-import { AttackMotivation } from '../../../../../../src/contexts/threat/domain/value-objects/attack-motivation.vo';
-import { TLP } from '../../../../../../src/contexts/threat/domain/value-objects/tlp.vo';
 
 describe('Campaign', () => {
     describe('constructor with minimal props', () => {

@@ -1,9 +1,11 @@
-import { TLP } from '../value-objects';
-import { AttackMotivation } from '../value-objects/attack-motivation.vo';
-import { ResourceLevel } from '../value-objects/resource-level.vo';
-import { ThreatActorRole } from '../value-objects/threat-actor-role.vo';
-import { ThreatActorSophistication } from '../value-objects/threat-actor-sophistication.vo';
-import { ThreatActorType } from '../value-objects/threat-actor-type.vo';
+import {
+    AttackMotivation,
+    ResourceLevel,
+    ThreatActorRole,
+    ThreatActorSophistication,
+    ThreatActorType,
+    TLP,
+} from '../value-objects';
 
 export interface ThreatActorProps {
     id?: string;

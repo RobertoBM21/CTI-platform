@@ -1,31 +1,40 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import {
-    AttackPatternDocument,
-    AttackPatternSchema,
-    CampaignDocument,
-    CampaignSchema,
-    IncidentDocument,
-    IncidentSchema,
-    IocDocument,
-    IocSchema,
-    ThreatActorDocument,
-    ThreatActorSchema,
-} from '../../threat/infrastructure/persistence/schemas';
+import { RelationshipRepository, SightingRepository } from '../domain';
 import { HealthController } from './controllers/health.controller';
 import { HealthService } from './health.service';
+import {
+    RelationshipMongooseRepository,
+    SightingMongooseRepository,
+} from './persistence/repositories';
+import {
+    RelationshipDocument,
+    RelationshipSchema,
+    SightingDocument,
+    SightingSchema,
+} from './persistence/schemas';
 
 @Module({
     imports: [
         MongooseModule.forFeature([
-            { name: ThreatActorDocument.name, schema: ThreatActorSchema },
-            { name: CampaignDocument.name, schema: CampaignSchema },
-            { name: IncidentDocument.name, schema: IncidentSchema },
-            { name: AttackPatternDocument.name, schema: AttackPatternSchema },
-            { name: IocDocument.name, schema: IocSchema },
+            { name: RelationshipDocument.name, schema: RelationshipSchema },
+            { name: SightingDocument.name, schema: SightingSchema },
         ]),
     ],
     controllers: [HealthController],
-    providers: [HealthService],
+    providers: [
+        HealthService,
+        RelationshipMongooseRepository,
+        SightingMongooseRepository,
+        {
+            provide: RelationshipRepository,
+            useExisting: RelationshipMongooseRepository,
+        },
+        {
+            provide: SightingRepository,
+            useExisting: SightingMongooseRepository,
+        },
+    ],
+    exports: [RelationshipRepository, SightingRepository],
 })
 export class SharedModule {}

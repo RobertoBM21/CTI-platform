@@ -1,4 +1,4 @@
-import { ResourceLevel } from '../../../../../../src/contexts/threat/domain/value-objects/resource-level.vo';
+import { ResourceLevel } from '../../../../../../src/contexts/shared/domain/value-objects/resource-level.vo';
 
 describe('ResourceLevel', () => {
     const values = Object.values(ResourceLevel);

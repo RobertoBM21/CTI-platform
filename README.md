@@ -60,7 +60,8 @@ La separación entre dominio y persistencia es **intencional**: el dominio no de
 Implementado:
 
 - Bootstrap Nest + Swagger (`/api`).
-- Endpoint `GET /health` extendido en contexto `shared` con estado de DB, conteos por entidad y `lastIngestion: null`.
+- Endpoint `GET /health` en contexto `shared` con estado de DB.
+- Capa de dominio compartida (`shared`) con SROs (Relationship, Sighting) y VOs transversales STIX.
 - Modelo de dominio `Threat` (entidades, value objects y puertos).
 - Schemas Mongoose espejo del dominio `Threat`.
 - Casos de uso de lectura de `Threat` (catálogo, detalle, listado de IoCs).
@@ -131,16 +132,24 @@ Pendiente (siguiente fase):
 
 `GET /health` devuelve:
 
-- estado general del servicio
+- estado general del servicio (`ok` o `degraded`)
 - timestamp de la comprobación
-- estado de la conexión a MongoDB
-- conteos por entidad Threat (`threatActors`, `campaigns`, `incidents`, `attackPatterns`, `iocs`)
-- `lastIngestion: null` como placeholder hasta que exista ingesta automatizada
+- estado de la conexión a MongoDB (`up` o `down`)
 
-## Modelo de dominio Threat (implementado)
+## Modelo de dominio (implementado)
+
+### Shared (transversal)
+
+- **Entidades SRO**: `Relationship`, `Sighting`.
+- **Value Objects / enums compartidos**: `TLP`, `AttackMotivation`, `ResourceLevel`, `RelationshipType`.
+- **Value Objects / interfaces compartidos**: `KillChainPhase`, `ExternalReference`.
+- **Puertos de repositorio**: `RelationshipRepository`, `SightingRepository`.
+- **Persistencia (Mongoose)**: `RelationshipDocument`, `SightingDocument`.
+
+### Threat
 
 - **Entidades**: `ThreatActor`, `Campaign`, `Incident`, `AttackPattern`, `Ioc`.
-- **Value Objects / enums**: `TLP`, `IocType`, `AttackMotivation`, `ThreatActorType`, `ThreatActorRole`, `ThreatActorSophistication`, `ResourceLevel`.
+- **Value Objects / enums propios**: `IocType`, `ThreatActorType`, `ThreatActorRole`, `ThreatActorSophistication`.
 - **Puertos de repositorio**: `ThreatActorRepository`, `CampaignRepository`, `IncidentRepository`, `AttackPatternRepository`, `IocRepository`.
 - **Persistencia (Mongoose)**: `ThreatActorDocument`, `CampaignDocument`, `IncidentDocument`, `AttackPatternDocument`, `IocDocument`.
 
@@ -155,16 +164,20 @@ backend/src/
 	contexts/
 		shared/
 			application/dtos/                        # DTOs reutilizables (p. ej. paginación)
-			domain/                                  # Elementos de dominio transversales
+			domain/entities/                         # Entidades SRO (Relationship, Sighting)
+			domain/value-objects/                    # VOs transversales STIX (TLP, RelationshipType...)
+			domain/ports/                            # Puertos de repositorio SRO
 			infrastructure/controllers/              # Endpoints transversales (p. ej. health)
+			infrastructure/persistence/schemas/      # Schemas Mongoose SRO
+			infrastructure/persistence/repositories/ # Repositorios Mongoose SRO
 
 		threat/
 			domain/entities/                         # Entidades del dominio Threat
 			domain/value-objects/                    # Enums y tipos de valor del dominio
 			domain/ports/                            # Contratos (puertos) de repositorio
 
-			application/dtos/                        # DTOs de entrada/salida de casos de uso
-			application/use-cases/                   # Casos de uso de Threat
+			application/dtos/                        # DTOs de entrada/salida de servicios
+			application/services/                    # Servicios por entidad de Threat
 
 			infrastructure/controllers/              # Controladores REST de Threat
 			infrastructure/persistence/schemas/      # Schemas Mongoose (documentos)

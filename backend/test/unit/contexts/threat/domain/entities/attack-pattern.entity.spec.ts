@@ -1,5 +1,5 @@
+import { TLP } from '../../../../../../src/contexts/shared/domain/value-objects/tlp.vo';
 import { AttackPattern } from '../../../../../../src/contexts/threat/domain/entities/attack-pattern.entity';
-import { TLP } from '../../../../../../src/contexts/threat/domain/value-objects/tlp.vo';
 
 describe('AttackPattern', () => {
     describe('constructor with minimal props', () => {

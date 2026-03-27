@@ -1,7 +1,7 @@
-export { AttackMotivation } from './attack-motivation.vo';
+export { AttackMotivation } from '../../../shared/domain/value-objects/attack-motivation.vo';
+export { ResourceLevel } from '../../../shared/domain/value-objects/resource-level.vo';
+export { TLP } from '../../../shared/domain/value-objects/tlp.vo';
 export { IocType } from './ioc-type.vo';
-export { ResourceLevel } from './resource-level.vo';
 export { ThreatActorRole } from './threat-actor-role.vo';
 export { ThreatActorSophistication } from './threat-actor-sophistication.vo';
 export { ThreatActorType } from './threat-actor-type.vo';
-export { TLP } from './tlp.vo';

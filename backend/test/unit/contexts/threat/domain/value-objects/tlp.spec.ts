@@ -1,4 +1,4 @@
-import { TLP } from '../../../../../../src/contexts/threat/domain/value-objects/tlp.vo';
+import { TLP } from '../../../../../../src/contexts/shared/domain/value-objects/tlp.vo';
 
 describe('TLP', () => {
     const values = Object.values(TLP);

@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import { TLP } from '../../../../shared/domain/value-objects/tlp.vo';
 import { IocType } from '../../../domain/value-objects/ioc-type.vo';
-import { TLP } from '../../../domain/value-objects/tlp.vo';
 
 @Schema({ timestamps: true, collection: 'iocs' })
 export class IocDocument {

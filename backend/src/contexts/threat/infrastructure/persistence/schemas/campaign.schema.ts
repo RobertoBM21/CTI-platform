@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { AttackMotivation } from '../../../domain/value-objects/attack-motivation.vo';
-import { TLP } from '../../../domain/value-objects/tlp.vo';
+import { AttackMotivation } from '../../../../shared/domain/value-objects/attack-motivation.vo';
+import { TLP } from '../../../../shared/domain/value-objects/tlp.vo';
 
 @Schema({ timestamps: true, collection: 'campaigns' })
 export class CampaignDocument {

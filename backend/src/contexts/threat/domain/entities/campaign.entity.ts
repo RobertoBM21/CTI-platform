@@ -1,5 +1,4 @@
-import { TLP } from '../value-objects';
-import { AttackMotivation } from '../value-objects/attack-motivation.vo';
+import { AttackMotivation, TLP } from '../value-objects';
 
 export interface CampaignProps {
     id?: string;

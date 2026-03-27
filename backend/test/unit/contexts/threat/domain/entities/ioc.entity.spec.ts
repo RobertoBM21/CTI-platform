@@ -1,6 +1,6 @@
+import { TLP } from '../../../../../../src/contexts/shared/domain/value-objects/tlp.vo';
 import { Ioc } from '../../../../../../src/contexts/threat/domain/entities/ioc.entity';
 import { IocType } from '../../../../../../src/contexts/threat/domain/value-objects/ioc-type.vo';
-import { TLP } from '../../../../../../src/contexts/threat/domain/value-objects/tlp.vo';
 
 describe('Ioc', () => {
     const minimalProps = {

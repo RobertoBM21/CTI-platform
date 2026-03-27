@@ -1,4 +1,4 @@
-import { AttackMotivation } from '../../../../../../src/contexts/threat/domain/value-objects/attack-motivation.vo';
+import { AttackMotivation } from '../../../../../../src/contexts/shared/domain/value-objects/attack-motivation.vo';
 
 describe('AttackMotivation', () => {
     const values = Object.values(AttackMotivation);

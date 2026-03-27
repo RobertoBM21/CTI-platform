@@ -1,11 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { AttackMotivation } from '../../../domain/value-objects/attack-motivation.vo';
-import { ResourceLevel } from '../../../domain/value-objects/resource-level.vo';
+import { AttackMotivation } from '../../../../shared/domain/value-objects/attack-motivation.vo';
+import { ResourceLevel } from '../../../../shared/domain/value-objects/resource-level.vo';
+import { TLP } from '../../../../shared/domain/value-objects/tlp.vo';
 import { ThreatActorRole } from '../../../domain/value-objects/threat-actor-role.vo';
 import { ThreatActorSophistication } from '../../../domain/value-objects/threat-actor-sophistication.vo';
 import { ThreatActorType } from '../../../domain/value-objects/threat-actor-type.vo';
-import { TLP } from '../../../domain/value-objects/tlp.vo';
 
 @Schema({ timestamps: true, collection: 'threat_actors' })
 export class ThreatActorDocument {

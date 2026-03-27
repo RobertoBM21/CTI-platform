@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { TLP } from '../../../domain/value-objects/tlp.vo';
+import { TLP } from '../../../../shared/domain/value-objects/tlp.vo';
 
 @Schema({ timestamps: true, collection: 'attack_patterns' })
 export class AttackPatternDocument {

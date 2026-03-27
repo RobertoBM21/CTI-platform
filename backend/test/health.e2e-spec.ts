@@ -44,13 +44,6 @@ describe('Health (e2e)', () => {
                 expect(res.body).toHaveProperty('status', 'ok');
                 expect(res.body).toHaveProperty('timestamp');
                 expect(res.body).toHaveProperty('database.status', 'up');
-                expect(res.body).toHaveProperty('counts');
-                expect(res.body).toHaveProperty('counts.threatActors');
-                expect(res.body).toHaveProperty('counts.campaigns');
-                expect(res.body).toHaveProperty('counts.incidents');
-                expect(res.body).toHaveProperty('counts.attackPatterns');
-                expect(res.body).toHaveProperty('counts.iocs');
-                expect(res.body).toHaveProperty('lastIngestion', null);
             });
     });
 });

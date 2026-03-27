@@ -1,10 +1,10 @@
+import { AttackMotivation } from '../../../../../../src/contexts/shared/domain/value-objects/attack-motivation.vo';
+import { ResourceLevel } from '../../../../../../src/contexts/shared/domain/value-objects/resource-level.vo';
+import { TLP } from '../../../../../../src/contexts/shared/domain/value-objects/tlp.vo';
 import { ThreatActor } from '../../../../../../src/contexts/threat/domain/entities/threat-actor.entity';
-import { AttackMotivation } from '../../../../../../src/contexts/threat/domain/value-objects/attack-motivation.vo';
-import { ResourceLevel } from '../../../../../../src/contexts/threat/domain/value-objects/resource-level.vo';
 import { ThreatActorRole } from '../../../../../../src/contexts/threat/domain/value-objects/threat-actor-role.vo';
 import { ThreatActorSophistication } from '../../../../../../src/contexts/threat/domain/value-objects/threat-actor-sophistication.vo';
 import { ThreatActorType } from '../../../../../../src/contexts/threat/domain/value-objects/threat-actor-type.vo';
-import { TLP } from '../../../../../../src/contexts/threat/domain/value-objects/tlp.vo';
 
 describe('ThreatActor', () => {
     describe('constructor with minimal props', () => {
