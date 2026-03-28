@@ -10,7 +10,7 @@ import { TLP } from '../../../../../../src/contexts/threat/domain/value-objects'
 describe('ThreatActorService', () => {
     it('should delegate list to threat actor repository', async () => {
         const actor = new ThreatActor({
-            id: 'actor-1',
+            id: 'threat-actor--actor-1',
             name: 'APT-Unit',
             tlp: TLP.GREEN,
         });
@@ -44,16 +44,17 @@ describe('ThreatActorService', () => {
             { field: ThreatCatalogSortBy.NAME, direction: 1 },
         );
         expect(result.data).toHaveLength(1);
-        expect(result.data[0]?.id).toBe('actor-1');
+        expect(result.data[0]?.id).toBe('threat-actor--actor-1');
     });
 
     it('should delegate findById to threat actor repository', async () => {
         const repository: ThreatActorRepository = {
-            findById: jest
-                .fn()
-                .mockResolvedValue(
-                    new ThreatActor({ id: 'actor-1', name: 'Actor 1' }),
-                ),
+            findById: jest.fn().mockResolvedValue(
+                new ThreatActor({
+                    id: 'threat-actor--actor-1',
+                    name: 'Actor 1',
+                }),
+            ),
             findAll: jest.fn(),
             findByName: jest.fn(),
             create: jest.fn(),
@@ -62,10 +63,12 @@ describe('ThreatActorService', () => {
         };
 
         const service = new ThreatActorService(repository);
-        const result = await service.findById('actor-1');
+        const result = await service.findById('threat-actor--actor-1');
 
-        expect(repository.findById).toHaveBeenCalledWith('actor-1');
-        expect(result?.id).toBe('actor-1');
+        expect(repository.findById).toHaveBeenCalledWith(
+            'threat-actor--actor-1',
+        );
+        expect(result?.id).toBe('threat-actor--actor-1');
     });
 
     it('should return null when threat actor is not found', async () => {

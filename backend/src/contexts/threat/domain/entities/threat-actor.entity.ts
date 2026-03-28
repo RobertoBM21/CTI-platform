@@ -54,7 +54,7 @@ export class ThreatActor {
     readonly updatedAt: Date;
 
     constructor(props: ThreatActorProps) {
-        this.id = props.id ?? crypto.randomUUID();
+        this.id = props.id ?? `threat-actor--${crypto.randomUUID()}`;
         this.name = props.name;
         this.description = props.description;
         this.threatActorTypes = props.threatActorTypes ?? [];

@@ -30,7 +30,7 @@ export class Opinion {
     readonly updatedAt: Date;
 
     constructor(props: OpinionProps) {
-        this.id = props.id ?? crypto.randomUUID();
+        this.id = props.id ?? `opinion--${crypto.randomUUID()}`;
         this.opinion = props.opinion;
         this.objectRefs = props.objectRefs ?? [];
         this.explanation = props.explanation;

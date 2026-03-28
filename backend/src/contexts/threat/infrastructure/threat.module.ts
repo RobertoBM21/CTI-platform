@@ -1,10 +1,14 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CyberModule } from '../../cyber/infrastructure/cyber.module';
+import { SharedModule } from '../../shared/infrastructure/shared.module';
 import {
     AttackPatternService,
     CampaignService,
+    DetailEnricher,
     IncidentService,
     IndicatorService,
+    StixRefResolver,
     ThreatActorService,
 } from '../application/services';
 import {
@@ -41,6 +45,8 @@ import {
 
 @Module({
     imports: [
+        SharedModule,
+        CyberModule,
         MongooseModule.forFeature([
             { name: ThreatActorDocument.name, schema: ThreatActorSchema },
             { name: CampaignDocument.name, schema: CampaignSchema },
@@ -87,13 +93,10 @@ import {
         IncidentService,
         AttackPatternService,
         IndicatorService,
+        StixRefResolver,
+        DetailEnricher,
     ],
     exports: [
-        ThreatActorRepository,
-        CampaignRepository,
-        IncidentRepository,
-        AttackPatternRepository,
-        IndicatorRepository,
         ThreatActorService,
         CampaignService,
         IncidentService,

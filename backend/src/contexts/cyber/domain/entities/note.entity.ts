@@ -29,7 +29,7 @@ export class Note {
     readonly updatedAt: Date;
 
     constructor(props: NoteProps) {
-        this.id = props.id ?? crypto.randomUUID();
+        this.id = props.id ?? `note--${crypto.randomUUID()}`;
         this.content = props.content;
         this.abstract = props.abstract;
         this.objectRefs = props.objectRefs ?? [];

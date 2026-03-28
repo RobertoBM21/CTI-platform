@@ -10,9 +10,7 @@ describe('Incident', () => {
 
         it('should generate an id when not provided', () => {
             const incident = new Incident({ name: 'Test Incident' });
-            expect(incident.id).toBeDefined();
-            expect(typeof incident.id).toBe('string');
-            expect(incident.id.length).toBeGreaterThan(0);
+            expect(incident.id).toMatch(/^incident--/);
         });
 
         it('should default TLP to WHITE', () => {
@@ -47,7 +45,7 @@ describe('Incident', () => {
             const lastSeen = new Date('2025-01-12');
 
             const incident = new Incident({
-                id: 'incident-id-789',
+                id: 'incident--incident-id-789',
                 name: 'False Ministry Alert',
                 description:
                     'Fabricated alert mimicking government communication',
@@ -64,7 +62,7 @@ describe('Incident', () => {
                 updatedAt: now,
             });
 
-            expect(incident.id).toBe('incident-id-789');
+            expect(incident.id).toBe('incident--incident-id-789');
             expect(incident.name).toBe('False Ministry Alert');
             expect(incident.description).toBe(
                 'Fabricated alert mimicking government communication',

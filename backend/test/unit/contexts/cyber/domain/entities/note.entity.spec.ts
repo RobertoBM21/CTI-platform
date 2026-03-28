@@ -10,8 +10,7 @@ describe('Note', () => {
 
         it('should generate an id when not provided', () => {
             const note = new Note({ content: 'Test' });
-            expect(note.id).toBeDefined();
-            expect(typeof note.id).toBe('string');
+            expect(note.id).toMatch(/^note--/);
         });
 
         it('should default TLP to WHITE', () => {
@@ -32,7 +31,7 @@ describe('Note', () => {
             const now = new Date();
 
             const note = new Note({
-                id: 'note-id-1',
+                id: 'note--note-id-1',
                 content: 'This threat actor is linked to...',
                 abstract: 'Threat actor analysis',
                 objectRefs: ['threat-actor--abc', 'malware--def'],
@@ -47,7 +46,7 @@ describe('Note', () => {
                 updatedAt: now,
             });
 
-            expect(note.id).toBe('note-id-1');
+            expect(note.id).toBe('note--note-id-1');
             expect(note.content).toBe('This threat actor is linked to...');
             expect(note.abstract).toBe('Threat actor analysis');
             expect(note.objectRefs).toEqual([

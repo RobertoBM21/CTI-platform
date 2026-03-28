@@ -35,7 +35,7 @@ export class Tool {
     readonly updatedAt: Date;
 
     constructor(props: ToolProps) {
-        this.id = props.id ?? crypto.randomUUID();
+        this.id = props.id ?? `tool--${crypto.randomUUID()}`;
         this.name = props.name;
         this.description = props.description;
         this.toolTypes = props.toolTypes ?? [];

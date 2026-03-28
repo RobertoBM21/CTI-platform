@@ -27,7 +27,7 @@ export class Relationship {
     readonly updatedAt: Date;
 
     constructor(props: RelationshipProps) {
-        this.id = props.id ?? crypto.randomUUID();
+        this.id = props.id ?? `relationship--${crypto.randomUUID()}`;
         this.relationshipType = props.relationshipType;
         this.description = props.description;
         this.sourceRef = props.sourceRef;

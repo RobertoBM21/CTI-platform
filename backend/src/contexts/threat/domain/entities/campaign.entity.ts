@@ -37,7 +37,7 @@ export class Campaign {
     readonly updatedAt: Date;
 
     constructor(props: CampaignProps) {
-        this.id = props.id ?? crypto.randomUUID();
+        this.id = props.id ?? `campaign--${crypto.randomUUID()}`;
         this.name = props.name;
         this.description = props.description;
         this.aliases = props.aliases ?? [];

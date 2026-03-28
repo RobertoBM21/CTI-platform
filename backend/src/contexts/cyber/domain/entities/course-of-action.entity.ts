@@ -25,7 +25,7 @@ export class CourseOfAction {
     readonly updatedAt: Date;
 
     constructor(props: CourseOfActionProps) {
-        this.id = props.id ?? crypto.randomUUID();
+        this.id = props.id ?? `course-of-action--${crypto.randomUUID()}`;
         this.name = props.name;
         this.description = props.description;
         this.confidence = props.confidence;

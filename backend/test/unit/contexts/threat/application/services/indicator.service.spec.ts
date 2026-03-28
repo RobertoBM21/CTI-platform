@@ -19,7 +19,7 @@ describe('IndicatorService', () => {
             findAll: jest.fn().mockResolvedValue({
                 data: [
                     new Indicator({
-                        id: 'ind-1',
+                        id: 'indicator--ind-1',
                         type: IocType.IPV4,
                         value: '10.0.0.1',
                         tlp: TLP.WHITE,
@@ -83,7 +83,7 @@ describe('IndicatorService', () => {
         const repository = createRepository({
             findById: jest.fn().mockResolvedValue(
                 new Indicator({
-                    id: 'ind-1',
+                    id: 'indicator--ind-1',
                     type: IocType.IPV4,
                     value: '10.0.0.1',
                 }),
@@ -91,10 +91,10 @@ describe('IndicatorService', () => {
         });
         const service = new IndicatorService(repository);
 
-        const result = await service.findById('ind-1');
+        const result = await service.findById('indicator--ind-1');
 
-        expect(repository.findById).toHaveBeenCalledWith('ind-1');
-        expect(result?.id).toBe('ind-1');
+        expect(repository.findById).toHaveBeenCalledWith('indicator--ind-1');
+        expect(result?.id).toBe('indicator--ind-1');
     });
 
     it('should return null when indicator is not found', async () => {

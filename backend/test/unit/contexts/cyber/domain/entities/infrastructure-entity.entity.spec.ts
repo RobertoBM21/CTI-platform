@@ -11,8 +11,7 @@ describe('InfrastructureEntity', () => {
 
         it('should generate an id when not provided', () => {
             const infra = new InfrastructureEntity({ name: 'Test' });
-            expect(infra.id).toBeDefined();
-            expect(typeof infra.id).toBe('string');
+            expect(infra.id).toMatch(/^infrastructure--/);
         });
 
         it('should default TLP to WHITE', () => {
@@ -34,7 +33,7 @@ describe('InfrastructureEntity', () => {
             const now = new Date();
 
             const infra = new InfrastructureEntity({
-                id: 'infra-id-1',
+                id: 'infrastructure--infra-id-1',
                 name: 'C2 Server',
                 description: 'Command and control infrastructure',
                 infrastructureTypes: [InfrastructureType.COMMAND_AND_CONTROL],
@@ -57,7 +56,7 @@ describe('InfrastructureEntity', () => {
                 updatedAt: now,
             });
 
-            expect(infra.id).toBe('infra-id-1');
+            expect(infra.id).toBe('infrastructure--infra-id-1');
             expect(infra.name).toBe('C2 Server');
             expect(infra.description).toBe(
                 'Command and control infrastructure',

@@ -63,7 +63,7 @@ describe('Cyber repositories integration', () => {
 
     it('should persist and query Malware with killChainPhases and externalReferences', async () => {
         const malware = new Malware({
-            id: 'malware-int-1',
+            id: 'malware--malware-int-1',
             name: 'Emotet',
             malwareTypes: [MalwareType.TROJAN],
             isFamily: true,
@@ -79,9 +79,11 @@ describe('Cyber repositories integration', () => {
         });
 
         const created = await malwareRepository.create(malware);
-        const found = await malwareRepository.findById('malware-int-1');
+        const found = await malwareRepository.findById(
+            'malware--malware-int-1',
+        );
 
-        expect(created.id).toBe('malware-int-1');
+        expect(created.id).toBe('malware--malware-int-1');
         expect(found?.name).toBe('Emotet');
         expect(found?.malwareTypes).toEqual([MalwareType.TROJAN]);
         expect(found?.isFamily).toBe(true);
@@ -97,7 +99,7 @@ describe('Cyber repositories integration', () => {
 
     it('should persist and query Location with geo data', async () => {
         const location = new Location({
-            id: 'loc-int-1',
+            id: 'location--loc-int-1',
             name: 'Madrid Office',
             latitude: 40.4168,
             longitude: -3.7038,
@@ -108,9 +110,9 @@ describe('Cyber repositories integration', () => {
         });
 
         await locationRepository.create(location);
-        const found = await locationRepository.findById('loc-int-1');
+        const found = await locationRepository.findById('location--loc-int-1');
 
-        expect(found?.id).toBe('loc-int-1');
+        expect(found?.id).toBe('location--loc-int-1');
         expect(found?.name).toBe('Madrid Office');
         expect(found?.latitude).toBeCloseTo(40.4168);
         expect(found?.longitude).toBeCloseTo(-3.7038);
@@ -121,7 +123,7 @@ describe('Cyber repositories integration', () => {
 
     it('should persist and query Opinion (non-name entity)', async () => {
         const opinion = new Opinion({
-            id: 'opinion-int-1',
+            id: 'opinion--opinion-int-1',
             opinion: OpinionValue.AGREE,
             objectRefs: ['indicator--abc-123'],
             explanation: 'Confirmed via OSINT',
@@ -131,9 +133,11 @@ describe('Cyber repositories integration', () => {
         });
 
         await opinionRepository.create(opinion);
-        const found = await opinionRepository.findById('opinion-int-1');
+        const found = await opinionRepository.findById(
+            'opinion--opinion-int-1',
+        );
 
-        expect(found?.id).toBe('opinion-int-1');
+        expect(found?.id).toBe('opinion--opinion-int-1');
         expect(found?.opinion).toBe(OpinionValue.AGREE);
         expect(found?.objectRefs).toEqual(['indicator--abc-123']);
         expect(found?.explanation).toBe('Confirmed via OSINT');
@@ -142,11 +146,18 @@ describe('Cyber repositories integration', () => {
     });
 
     it('should update and delete entities by domain id', async () => {
-        const updated = await malwareRepository.update('malware-int-1', {
-            name: 'Emotet Updated',
-        });
-        const deleted = await opinionRepository.delete('opinion-int-1');
-        const notFound = await opinionRepository.findById('opinion-int-1');
+        const updated = await malwareRepository.update(
+            'malware--malware-int-1',
+            {
+                name: 'Emotet Updated',
+            },
+        );
+        const deleted = await opinionRepository.delete(
+            'opinion--opinion-int-1',
+        );
+        const notFound = await opinionRepository.findById(
+            'opinion--opinion-int-1',
+        );
 
         expect(updated?.name).toBe('Emotet Updated');
         expect(deleted).toBe(true);
@@ -156,7 +167,7 @@ describe('Cyber repositories integration', () => {
     it('should apply requested sort order to paginated malware queries', async () => {
         await malwareRepository.create(
             new Malware({
-                id: 'malware-int-2',
+                id: 'malware--malware-int-2',
                 name: 'Zloader',
                 malwareTypes: [MalwareType.TROJAN],
                 isFamily: false,
@@ -164,7 +175,7 @@ describe('Cyber repositories integration', () => {
         );
         await malwareRepository.create(
             new Malware({
-                id: 'malware-int-3',
+                id: 'malware--malware-int-3',
                 name: 'Amadey',
                 malwareTypes: [MalwareType.BOT],
                 isFamily: false,
@@ -184,14 +195,14 @@ describe('Cyber repositories integration', () => {
     it('should apply requested sort order to paginated location queries', async () => {
         await locationRepository.create(
             new Location({
-                id: 'loc-int-2',
+                id: 'location--loc-int-2',
                 name: 'Zurich Lab',
                 country: 'CH',
             }),
         );
         await locationRepository.create(
             new Location({
-                id: 'loc-int-3',
+                id: 'location--loc-int-3',
                 name: 'Austin Campus',
                 country: 'US',
             }),

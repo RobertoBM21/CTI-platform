@@ -10,8 +10,7 @@ describe('CourseOfAction', () => {
 
         it('should generate an id when not provided', () => {
             const coa = new CourseOfAction({ name: 'Test' });
-            expect(coa.id).toBeDefined();
-            expect(typeof coa.id).toBe('string');
+            expect(coa.id).toMatch(/^course-of-action--/);
         });
 
         it('should default TLP to WHITE', () => {
@@ -30,7 +29,7 @@ describe('CourseOfAction', () => {
             const now = new Date();
 
             const coa = new CourseOfAction({
-                id: 'coa-id-1',
+                id: 'course-of-action--coa-id-1',
                 name: 'Block IP',
                 description: 'Block malicious IP at firewall',
                 confidence: 90,
@@ -43,7 +42,7 @@ describe('CourseOfAction', () => {
                 updatedAt: now,
             });
 
-            expect(coa.id).toBe('coa-id-1');
+            expect(coa.id).toBe('course-of-action--coa-id-1');
             expect(coa.name).toBe('Block IP');
             expect(coa.description).toBe('Block malicious IP at firewall');
             expect(coa.confidence).toBe(90);

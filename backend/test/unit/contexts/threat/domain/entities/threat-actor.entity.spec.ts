@@ -15,9 +15,7 @@ describe('ThreatActor', () => {
 
         it('should generate an id when not provided', () => {
             const actor = new ThreatActor({ name: 'Test Actor' });
-            expect(actor.id).toBeDefined();
-            expect(typeof actor.id).toBe('string');
-            expect(actor.id.length).toBeGreaterThan(0);
+            expect(actor.id).toMatch(/^threat-actor--/);
         });
 
         it('should default TLP to WHITE', () => {
@@ -60,7 +58,7 @@ describe('ThreatActor', () => {
             const lastSeen = new Date('2025-06-15');
 
             const actor = new ThreatActor({
-                id: 'custom-id-123',
+                id: 'threat-actor--custom-id-123',
                 name: 'APT-29 Influence',
                 description: 'A state-sponsored influence operation',
                 threatActorTypes: [
@@ -87,7 +85,7 @@ describe('ThreatActor', () => {
                 updatedAt: now,
             });
 
-            expect(actor.id).toBe('custom-id-123');
+            expect(actor.id).toBe('threat-actor--custom-id-123');
             expect(actor.name).toBe('APT-29 Influence');
             expect(actor.description).toBe(
                 'A state-sponsored influence operation',

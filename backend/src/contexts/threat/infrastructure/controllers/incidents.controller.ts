@@ -12,12 +12,15 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 import { ThreatCatalogQueryDto } from '../../application/dtos';
-import { IncidentService } from '../../application/services';
+import { DetailEnricher, IncidentService } from '../../application/services';
 
 @ApiTags('Incidents')
 @Controller('incidents')
 export class IncidentsController {
-    constructor(private readonly incidentService: IncidentService) {}
+    constructor(
+        private readonly incidentService: IncidentService,
+        private readonly detailEnricher: DetailEnricher,
+    ) {}
 
     @Get()
     @ApiOperation({ summary: 'List incidents' })
@@ -37,6 +40,6 @@ export class IncidentsController {
             throw new NotFoundException('Incident not found');
         }
 
-        return incident;
+        return this.detailEnricher.enrich(incident);
     }
 }

@@ -12,12 +12,18 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 import { ThreatCatalogQueryDto } from '../../application/dtos';
-import { AttackPatternService } from '../../application/services';
+import {
+    AttackPatternService,
+    DetailEnricher,
+} from '../../application/services';
 
 @ApiTags('Attack Patterns')
 @Controller('attack-patterns')
 export class AttackPatternsController {
-    constructor(private readonly attackPatternService: AttackPatternService) {}
+    constructor(
+        private readonly attackPatternService: AttackPatternService,
+        private readonly detailEnricher: DetailEnricher,
+    ) {}
 
     @Get()
     @ApiOperation({ summary: 'List attack patterns' })
@@ -37,6 +43,6 @@ export class AttackPatternsController {
             throw new NotFoundException('Attack pattern not found');
         }
 
-        return attackPattern;
+        return this.detailEnricher.enrich(attackPattern);
     }
 }

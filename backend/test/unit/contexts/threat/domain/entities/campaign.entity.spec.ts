@@ -11,9 +11,7 @@ describe('Campaign', () => {
 
         it('should generate an id when not provided', () => {
             const campaign = new Campaign({ name: 'Test Campaign' });
-            expect(campaign.id).toBeDefined();
-            expect(typeof campaign.id).toBe('string');
-            expect(campaign.id.length).toBeGreaterThan(0);
+            expect(campaign.id).toMatch(/^campaign--/);
         });
 
         it('should default TLP to WHITE', () => {
@@ -51,7 +49,7 @@ describe('Campaign', () => {
             const lastSeen = new Date('2025-12-31');
 
             const campaign = new Campaign({
-                id: 'campaign-id-456',
+                id: 'campaign--campaign-id-456',
                 name: 'Operation Blackout',
                 description:
                     'A coordinated influence campaign targeting energy sector',
@@ -71,7 +69,7 @@ describe('Campaign', () => {
                 updatedAt: now,
             });
 
-            expect(campaign.id).toBe('campaign-id-456');
+            expect(campaign.id).toBe('campaign--campaign-id-456');
             expect(campaign.name).toBe('Operation Blackout');
             expect(campaign.description).toBe(
                 'A coordinated influence campaign targeting energy sector',

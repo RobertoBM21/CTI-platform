@@ -40,7 +40,7 @@ export class Location {
     readonly updatedAt: Date;
 
     constructor(props: LocationProps) {
-        this.id = props.id ?? crypto.randomUUID();
+        this.id = props.id ?? `location--${crypto.randomUUID()}`;
         this.name = props.name;
         this.description = props.description;
         this.latitude = props.latitude;

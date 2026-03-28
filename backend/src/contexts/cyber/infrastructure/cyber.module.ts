@@ -1,6 +1,18 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
+    CourseOfActionService,
+    IdentityService,
+    InfrastructureEntityService,
+    IntrusionSetService,
+    LocationService,
+    MalwareService,
+    NoteService,
+    OpinionService,
+    ToolService,
+    VulnerabilityService,
+} from '../application';
+import {
     CourseOfActionRepository,
     IdentityRepository,
     InfrastructureEntityRepository,
@@ -79,6 +91,16 @@ import {
         CourseOfActionMongooseRepository,
         NoteMongooseRepository,
         OpinionMongooseRepository,
+        MalwareService,
+        ToolService,
+        VulnerabilityService,
+        InfrastructureEntityService,
+        IntrusionSetService,
+        IdentityService,
+        LocationService,
+        CourseOfActionService,
+        NoteService,
+        OpinionService,
         {
             provide: MalwareRepository,
             useExisting: MalwareMongooseRepository,
@@ -121,16 +143,16 @@ import {
         },
     ],
     exports: [
-        MalwareRepository,
-        ToolRepository,
-        VulnerabilityRepository,
-        InfrastructureEntityRepository,
-        IntrusionSetRepository,
-        IdentityRepository,
-        LocationRepository,
-        CourseOfActionRepository,
-        NoteRepository,
-        OpinionRepository,
+        MalwareService,
+        ToolService,
+        VulnerabilityService,
+        InfrastructureEntityService,
+        IntrusionSetService,
+        IdentityService,
+        LocationService,
+        CourseOfActionService,
+        NoteService,
+        OpinionService,
     ],
 })
 export class CyberModule {}

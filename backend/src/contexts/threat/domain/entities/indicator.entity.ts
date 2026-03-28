@@ -49,7 +49,7 @@ export class Indicator {
     readonly updatedAt: Date;
 
     constructor(props: IndicatorProps) {
-        this.id = props.id ?? crypto.randomUUID();
+        this.id = props.id ?? `indicator--${crypto.randomUUID()}`;
         this.name = props.name;
         this.type = props.type;
         this.value = props.value;

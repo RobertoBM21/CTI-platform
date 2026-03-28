@@ -11,8 +11,7 @@ describe('Identity', () => {
 
         it('should generate an id when not provided', () => {
             const identity = new Identity({ name: 'Test' });
-            expect(identity.id).toBeDefined();
-            expect(typeof identity.id).toBe('string');
+            expect(identity.id).toMatch(/^identity--/);
         });
 
         it('should default TLP to WHITE', () => {
@@ -33,7 +32,7 @@ describe('Identity', () => {
             const now = new Date();
 
             const identity = new Identity({
-                id: 'identity-id-1',
+                id: 'identity--identity-id-1',
                 name: 'ACME Corp',
                 description: 'Technology company',
                 identityClass: IdentityClass.ORGANIZATION,
@@ -50,7 +49,7 @@ describe('Identity', () => {
                 updatedAt: now,
             });
 
-            expect(identity.id).toBe('identity-id-1');
+            expect(identity.id).toBe('identity--identity-id-1');
             expect(identity.name).toBe('ACME Corp');
             expect(identity.identityClass).toBe(IdentityClass.ORGANIZATION);
             expect(identity.sectors).toEqual([

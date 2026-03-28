@@ -21,9 +21,7 @@ describe('Relationship', () => {
                 sourceRef: 'campaign--operation-blackout',
                 targetRef: 'identity--energy-sector',
             });
-            expect(rel.id).toBeDefined();
-            expect(typeof rel.id).toBe('string');
-            expect(rel.id.length).toBeGreaterThan(0);
+            expect(rel.id).toMatch(/^relationship--/);
         });
 
         it('should default TLP to WHITE', () => {
@@ -67,7 +65,7 @@ describe('Relationship', () => {
 
     describe('constructor with full props', () => {
         it('should assign all provided fields correctly', () => {
-            const id = 'relationship-id-001';
+            const id = 'relationship--relationship-id-001';
             const start = new Date('2025-01-15');
             const stop = new Date('2025-06-30');
             const now = new Date();

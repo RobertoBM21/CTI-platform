@@ -12,8 +12,7 @@ describe('IntrusionSet', () => {
 
         it('should generate an id when not provided', () => {
             const is = new IntrusionSet({ name: 'Test' });
-            expect(is.id).toBeDefined();
-            expect(typeof is.id).toBe('string');
+            expect(is.id).toMatch(/^intrusion-set--/);
         });
 
         it('should default TLP to WHITE', () => {
@@ -35,7 +34,7 @@ describe('IntrusionSet', () => {
             const now = new Date();
 
             const is = new IntrusionSet({
-                id: 'is-id-1',
+                id: 'intrusion-set--is-id-1',
                 name: 'APT28',
                 description: 'Russian military intelligence group',
                 aliases: ['Fancy Bear', 'Sofacy'],
@@ -55,7 +54,7 @@ describe('IntrusionSet', () => {
                 updatedAt: now,
             });
 
-            expect(is.id).toBe('is-id-1');
+            expect(is.id).toBe('intrusion-set--is-id-1');
             expect(is.name).toBe('APT28');
             expect(is.description).toBe('Russian military intelligence group');
             expect(is.aliases).toEqual(['Fancy Bear', 'Sofacy']);

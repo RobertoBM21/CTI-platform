@@ -91,22 +91,24 @@ describe('Threat repositories integration', () => {
 
     it('should persist and query ThreatActor by domain id', async () => {
         const actor = new ThreatActor({
-            id: 'actor-int-1',
+            id: 'threat-actor--actor-int-1',
             name: 'Actor Integration',
             tlp: TLP.AMBER,
         });
 
         const created = await threatActorRepository.create(actor);
-        const found = await threatActorRepository.findById('actor-int-1');
+        const found = await threatActorRepository.findById(
+            'threat-actor--actor-int-1',
+        );
 
-        expect(created.id).toBe('actor-int-1');
+        expect(created.id).toBe('threat-actor--actor-int-1');
         expect(found?.name).toBe('Actor Integration');
         expect(found?.tlp).toBe(TLP.AMBER);
     });
 
     it('should persist and query Campaign with STIX common props', async () => {
         const campaign = new Campaign({
-            id: 'camp-int-1',
+            id: 'campaign--camp-int-1',
             name: 'Campaign Integration',
             primaryMotivations: [AttackMotivation.IDEOLOGY],
             confidence: 80,
@@ -117,9 +119,9 @@ describe('Threat repositories integration', () => {
         });
 
         await campaignRepository.create(campaign);
-        const found = await campaignRepository.findById('camp-int-1');
+        const found = await campaignRepository.findById('campaign--camp-int-1');
 
-        expect(found?.id).toBe('camp-int-1');
+        expect(found?.id).toBe('campaign--camp-int-1');
         expect(found?.confidence).toBe(80);
         expect(found?.revoked).toBe(false);
         expect(found?.externalReferences).toEqual([
@@ -129,16 +131,16 @@ describe('Threat repositories integration', () => {
 
     it('should persist and query Incident with STIX common props', async () => {
         const incident = new Incident({
-            id: 'inc-int-1',
+            id: 'incident--inc-int-1',
             name: 'Incident Integration',
             confidence: 60,
             tlp: TLP.RED,
         });
 
         await incidentRepository.create(incident);
-        const found = await incidentRepository.findById('inc-int-1');
+        const found = await incidentRepository.findById('incident--inc-int-1');
 
-        expect(found?.id).toBe('inc-int-1');
+        expect(found?.id).toBe('incident--inc-int-1');
         expect(found?.confidence).toBe(60);
         expect(found?.revoked).toBe(false);
         expect(found?.externalReferences).toEqual([]);
@@ -146,7 +148,7 @@ describe('Threat repositories integration', () => {
 
     it('should persist and query AttackPattern by external reference', async () => {
         const attackPattern = new AttackPattern({
-            id: 'ap-int-1',
+            id: 'attack-pattern--ap-int-1',
             name: 'Credential Dumping',
             externalReference: 'T1003',
             confidence: 95,
@@ -159,7 +161,7 @@ describe('Threat repositories integration', () => {
             await attackPatternRepository.findByExternalReference('T1003');
 
         expect(found).not.toBeNull();
-        expect(found?.id).toBe('ap-int-1');
+        expect(found?.id).toBe('attack-pattern--ap-int-1');
         expect(found?.confidence).toBe(95);
         expect(found?.externalReferences).toEqual([
             { sourceName: 'DISARM', externalId: 'T1003' },
@@ -168,7 +170,7 @@ describe('Threat repositories integration', () => {
 
     it('should persist and query Indicator by value', async () => {
         const indicator = new Indicator({
-            id: 'ind-int-1',
+            id: 'indicator--ind-int-1',
             type: IocType.IPV4,
             value: '8.8.8.8',
             name: 'Google DNS',
@@ -189,7 +191,7 @@ describe('Threat repositories integration', () => {
         const found = await indicatorRepository.findByValue('8.8.8.8');
 
         expect(found).toHaveLength(1);
-        expect(found[0]?.id).toBe('ind-int-1');
+        expect(found[0]?.id).toBe('indicator--ind-int-1');
         expect(found[0]?.name).toBe('Google DNS');
         expect(found[0]?.confidence).toBe(50);
         expect(found[0]?.killChainPhases).toEqual([
@@ -201,11 +203,18 @@ describe('Threat repositories integration', () => {
     });
 
     it('should update and delete entities by domain id', async () => {
-        const updated = await threatActorRepository.update('actor-int-1', {
-            name: 'Actor Updated',
-        });
-        const deleted = await indicatorRepository.delete('ind-int-1');
-        const notFound = await indicatorRepository.findById('ind-int-1');
+        const updated = await threatActorRepository.update(
+            'threat-actor--actor-int-1',
+            {
+                name: 'Actor Updated',
+            },
+        );
+        const deleted = await indicatorRepository.delete(
+            'indicator--ind-int-1',
+        );
+        const notFound = await indicatorRepository.findById(
+            'indicator--ind-int-1',
+        );
 
         expect(updated?.name).toBe('Actor Updated');
         expect(deleted).toBe(true);
@@ -214,10 +223,16 @@ describe('Threat repositories integration', () => {
 
     it('should apply requested sort order to paginated threat actor queries', async () => {
         await threatActorRepository.create(
-            new ThreatActor({ id: 'actor-int-2', name: 'Zulu Actor' }),
+            new ThreatActor({
+                id: 'threat-actor--actor-int-2',
+                name: 'Zulu Actor',
+            }),
         );
         await threatActorRepository.create(
-            new ThreatActor({ id: 'actor-int-3', name: 'Alpha Actor' }),
+            new ThreatActor({
+                id: 'threat-actor--actor-int-3',
+                name: 'Alpha Actor',
+            }),
         );
 
         const page = await threatActorRepository.findAll({}, 1, 10, {
@@ -233,14 +248,14 @@ describe('Threat repositories integration', () => {
     it('should apply requested sort order to paginated indicator queries', async () => {
         await indicatorRepository.create(
             new Indicator({
-                id: 'ind-int-2',
+                id: 'indicator--ind-int-2',
                 type: IocType.DOMAIN,
                 value: 'zzz.example',
             }),
         );
         await indicatorRepository.create(
             new Indicator({
-                id: 'ind-int-3',
+                id: 'indicator--ind-int-3',
                 type: IocType.DOMAIN,
                 value: 'aaa.example',
             }),

@@ -31,7 +31,7 @@ export class AttackPattern {
     readonly updatedAt: Date;
 
     constructor(props: AttackPatternProps) {
-        this.id = props.id ?? crypto.randomUUID();
+        this.id = props.id ?? `attack-pattern--${crypto.randomUUID()}`;
         this.name = props.name;
         this.description = props.description;
         this.aliases = props.aliases ?? [];

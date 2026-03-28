@@ -11,8 +11,7 @@ describe('Tool', () => {
 
         it('should generate an id when not provided', () => {
             const tool = new Tool({ name: 'Test' });
-            expect(tool.id).toBeDefined();
-            expect(typeof tool.id).toBe('string');
+            expect(tool.id).toMatch(/^tool--/);
         });
 
         it('should default TLP to WHITE', () => {
@@ -34,7 +33,7 @@ describe('Tool', () => {
             const now = new Date();
 
             const tool = new Tool({
-                id: 'tool-id-1',
+                id: 'tool--tool-id-1',
                 name: 'Mimikatz',
                 description: 'Credential dumping tool',
                 toolTypes: [ToolType.CREDENTIAL_EXPLOITATION],
@@ -56,7 +55,7 @@ describe('Tool', () => {
                 updatedAt: now,
             });
 
-            expect(tool.id).toBe('tool-id-1');
+            expect(tool.id).toBe('tool--tool-id-1');
             expect(tool.name).toBe('Mimikatz');
             expect(tool.description).toBe('Credential dumping tool');
             expect(tool.toolTypes).toEqual([ToolType.CREDENTIAL_EXPLOITATION]);

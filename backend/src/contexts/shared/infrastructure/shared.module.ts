@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { RelationshipService, SightingService } from '../application/services';
 import { RelationshipRepository, SightingRepository } from '../domain';
 import { HealthController } from './controllers/health.controller';
 import { HealthService } from './health.service';
@@ -26,6 +27,8 @@ import {
         HealthService,
         RelationshipMongooseRepository,
         SightingMongooseRepository,
+        RelationshipService,
+        SightingService,
         {
             provide: RelationshipRepository,
             useExisting: RelationshipMongooseRepository,
@@ -35,6 +38,6 @@ import {
             useExisting: SightingMongooseRepository,
         },
     ],
-    exports: [RelationshipRepository, SightingRepository],
+    exports: [RelationshipService, SightingService],
 })
 export class SharedModule {}

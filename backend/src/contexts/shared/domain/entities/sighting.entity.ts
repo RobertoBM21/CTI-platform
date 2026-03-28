@@ -28,7 +28,7 @@ export class Sighting {
     readonly updatedAt: Date;
 
     constructor(props: SightingProps) {
-        this.id = props.id ?? crypto.randomUUID();
+        this.id = props.id ?? `sighting--${crypto.randomUUID()}`;
         this.description = props.description;
         this.firstSeen = props.firstSeen;
         this.lastSeen = props.lastSeen;

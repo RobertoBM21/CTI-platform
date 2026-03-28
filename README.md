@@ -64,11 +64,15 @@ Implementado:
 - Capa de dominio compartida (`shared`) con SROs (Relationship, Sighting) y VOs transversales STIX.
 - Modelo de dominio `Threat` con propiedades comunes STIX 2.1 (entidades, value objects y puertos).
 - Schemas Mongoose espejo del dominio `Threat`.
-- Servicios de lectura de `Threat` (catálogo, detalle, listado de Indicators).
+    - Servicios de lectura de `Threat` (catálogo, detalle, listado de Indicators).
 - Repositorios concretos Mongoose de `Threat` y wiring completo de `ThreatModule`.
-- Controladores REST de `Threat` para catálogo, detalle simple e Indicators.
+- Controladores REST de `Threat` para catálogo por entidad, detalle e Indicators.
+- Detalle enriquecido (`EnrichedDetail<T>`) con objetos relacionados resueltos y sightings.
 - Contrato HTTP validado para filtrado, ordenación y paginación en catálogo Threat e Indicators.
-- Modelo de dominio `Cyber` con 10 SDOs técnicos STIX 2.1, 6 VOs nuevos, persistencia completa y `CyberModule` wired (sin controllers ni services aún).
+- IDs de dominio en formato STIX `type--uuid` en las 17 entidades.
+- Modelo de dominio `Cyber` con 10 SDOs técnicos STIX 2.1, 6 VOs nuevos, persistencia completa, 10 servicios read-only y `CyberModule` wired (sin controllers).
+- Servicios de resolución cross-context: `StixRefResolver` (despacho por prefijo STIX) y `DetailEnricher` (orquestación de enriquecimiento).
+- Servicios SRO en Shared: `RelationshipService` y `SightingService`.
 - Suite de tests unitarios de dominio + application + integración de repositorios + e2e en verde.
 
 Frontend:
@@ -90,10 +94,10 @@ Estructura de workspace:
 
 Pendiente (siguiente fase):
 
-- Implementar servicios, DTOs y controladores REST para el contexto Cyber.
-- Posibles servicios overview de detalle enriquecido si la UI requiere respuestas compuestas en una sola llamada.
-- Filtros avanzados adicionales más allá del contrato base del MVP.
-- Ingesta automatizada.
+- Implementación del frontend: páginas funcionales que consuman la API REST del backend.
+- Ingesta manual (CRUD write): servicios de escritura + controllers + DTOs de validación.
+- Controladores REST para el contexto Cyber (cuando la UI lo requiera).
+- Ingesta automatizada (feeds STIX, TAXII).
 
 ## API expuesta actualmente
 
@@ -165,13 +169,14 @@ Pendiente (siguiente fase):
 
 ```text
 backend/src/
-	main.ts                                      # Bootstrap (pipes globales, swagger, puerto)
+	main.ts                                      # Bootstrap (pipes globales, swagger, CORS, puerto)
 	app.module.ts                                # Módulo raíz (configuración, DB, módulos de contexto)
 	config/                                      # Configuración tipada de aplicación y base de datos
 
 	contexts/
 		shared/
 			application/dtos/                        # DTOs reutilizables (p. ej. paginación)
+			application/services/                    # RelationshipService, SightingService
 			domain/entities/                         # Entidades SRO (Relationship, Sighting)
 			domain/value-objects/                    # VOs transversales STIX (TLP, RelationshipType...)
 			domain/ports/                            # Puertos de repositorio SRO
@@ -184,17 +189,19 @@ backend/src/
 			domain/value-objects/                    # Enums y tipos de valor del dominio
 			domain/ports/                            # Contratos (puertos) de repositorio
 
-			application/dtos/                        # DTOs de entrada/salida de servicios
-			application/services/                    # Servicios por entidad de Threat
+			application/dtos/                        # DTOs de entrada/salida + EnrichedDetail
+			application/services/                    # Servicios + StixRefResolver + DetailEnricher
 
 			infrastructure/controllers/              # Controladores REST de Threat
 			infrastructure/persistence/schemas/      # Schemas Mongoose (documentos)
 			infrastructure/persistence/repositories/ # Implementaciones concretas de puertos
 
 		cyber/
-			domain/entities/                         # 10 SDOs técnicos STIX 2.1
+			domain/entities/                         # SDOs técnicos STIX 2.1
 			domain/value-objects/                    # Enums STIX del dominio Cyber
 			domain/ports/                            # Contratos (puertos) de repositorio
+
+			application/services/                    # servicios read-only (findById)
 
 			infrastructure/persistence/schemas/      # Schemas Mongoose (documentos)
 			infrastructure/persistence/repositories/ # Implementaciones concretas de puertos

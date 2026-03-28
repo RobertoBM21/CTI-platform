@@ -19,9 +19,7 @@ describe('Indicator', () => {
 
         it('should generate an id when not provided', () => {
             const indicator = new Indicator(minimalProps);
-            expect(indicator.id).toBeDefined();
-            expect(typeof indicator.id).toBe('string');
-            expect(indicator.id.length).toBeGreaterThan(0);
+            expect(indicator.id).toMatch(/^indicator--/);
         });
 
         it('should default TLP to WHITE', () => {
@@ -68,7 +66,7 @@ describe('Indicator', () => {
             const validUntil = new Date('2025-12-31');
 
             const indicator = new Indicator({
-                id: 'indicator-id-555',
+                id: 'indicator--indicator-id-555',
                 name: 'Malicious IP Indicator',
                 type: IocType.HASH_SHA256,
                 value: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
@@ -104,7 +102,7 @@ describe('Indicator', () => {
                 updatedAt: now,
             });
 
-            expect(indicator.id).toBe('indicator-id-555');
+            expect(indicator.id).toBe('indicator--indicator-id-555');
             expect(indicator.name).toBe('Malicious IP Indicator');
             expect(indicator.type).toBe(IocType.HASH_SHA256);
             expect(indicator.value).toBe(

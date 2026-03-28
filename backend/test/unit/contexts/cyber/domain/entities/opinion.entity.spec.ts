@@ -15,8 +15,7 @@ describe('Opinion', () => {
             const opinion = new Opinion({
                 opinion: OpinionValue.NEUTRAL,
             });
-            expect(opinion.id).toBeDefined();
-            expect(typeof opinion.id).toBe('string');
+            expect(opinion.id).toMatch(/^opinion--/);
         });
 
         it('should default TLP to WHITE', () => {
@@ -41,7 +40,7 @@ describe('Opinion', () => {
             const now = new Date();
 
             const opinion = new Opinion({
-                id: 'opinion-id-1',
+                id: 'opinion--opinion-id-1',
                 opinion: OpinionValue.STRONGLY_AGREE,
                 objectRefs: ['indicator--abc'],
                 explanation: 'Confirmed by multiple sources',
@@ -59,7 +58,7 @@ describe('Opinion', () => {
                 updatedAt: now,
             });
 
-            expect(opinion.id).toBe('opinion-id-1');
+            expect(opinion.id).toBe('opinion--opinion-id-1');
             expect(opinion.opinion).toBe(OpinionValue.STRONGLY_AGREE);
             expect(opinion.objectRefs).toEqual(['indicator--abc']);
             expect(opinion.explanation).toBe('Confirmed by multiple sources');

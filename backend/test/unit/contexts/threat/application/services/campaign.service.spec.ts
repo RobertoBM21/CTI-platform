@@ -8,7 +8,10 @@ import {
 
 describe('CampaignService', () => {
     it('should delegate list to campaign repository', async () => {
-        const campaign = new Campaign({ id: 'camp-1', name: 'Campaign 1' });
+        const campaign = new Campaign({
+            id: 'campaign--camp-1',
+            name: 'Campaign 1',
+        });
         const repository: CampaignRepository = {
             findById: jest.fn(),
             findAll: jest.fn().mockResolvedValue({
@@ -35,16 +38,17 @@ describe('CampaignService', () => {
             20,
             { field: ThreatCatalogSortBy.UPDATED_AT, direction: 1 },
         );
-        expect(result.data[0]?.id).toBe('camp-1');
+        expect(result.data[0]?.id).toBe('campaign--camp-1');
     });
 
     it('should delegate findById to campaign repository', async () => {
         const repository: CampaignRepository = {
-            findById: jest
-                .fn()
-                .mockResolvedValue(
-                    new Campaign({ id: 'camp-1', name: 'Campaign 1' }),
-                ),
+            findById: jest.fn().mockResolvedValue(
+                new Campaign({
+                    id: 'campaign--camp-1',
+                    name: 'Campaign 1',
+                }),
+            ),
             findAll: jest.fn(),
             create: jest.fn(),
             update: jest.fn(),
@@ -52,10 +56,10 @@ describe('CampaignService', () => {
         };
 
         const service = new CampaignService(repository);
-        const result = await service.findById('camp-1');
+        const result = await service.findById('campaign--camp-1');
 
-        expect(repository.findById).toHaveBeenCalledWith('camp-1');
-        expect(result?.id).toBe('camp-1');
+        expect(repository.findById).toHaveBeenCalledWith('campaign--camp-1');
+        expect(result?.id).toBe('campaign--camp-1');
     });
 
     it('should return null when campaign is not found', async () => {

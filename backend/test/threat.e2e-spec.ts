@@ -4,6 +4,13 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
+import { Malware } from '../src/contexts/cyber/domain/entities/malware.entity';
+import { MalwareMongooseRepository } from '../src/contexts/cyber/infrastructure/persistence/repositories/malware-mongoose.repository';
+import { Relationship } from '../src/contexts/shared/domain/entities/relationship.entity';
+import { Sighting } from '../src/contexts/shared/domain/entities/sighting.entity';
+import { RelationshipType } from '../src/contexts/shared/domain/value-objects/relationship-type.vo';
+import { RelationshipMongooseRepository } from '../src/contexts/shared/infrastructure/persistence/repositories/relationship-mongoose.repository';
+import { SightingMongooseRepository } from '../src/contexts/shared/infrastructure/persistence/repositories/sighting-mongoose.repository';
 import { AttackPattern } from '../src/contexts/threat/domain/entities/attack-pattern.entity';
 import { Campaign } from '../src/contexts/threat/domain/entities/campaign.entity';
 import { Incident } from '../src/contexts/threat/domain/entities/incident.entity';
@@ -48,41 +55,48 @@ describe('Threat API (e2e)', () => {
             AttackPatternMongooseRepository,
         );
         const indicatorRepository = app.get(IndicatorMongooseRepository);
+        const malwareRepository = app.get(MalwareMongooseRepository);
+        const relationshipRepository = app.get(RelationshipMongooseRepository);
+        const sightingRepository = app.get(SightingMongooseRepository);
 
         await threatActorRepository.create(
             new ThreatActor({
-                id: 'actor-b',
+                id: 'threat-actor--actor-b',
                 name: 'Bravo Actor',
                 tlp: TLP.GREEN,
             }),
         );
         await threatActorRepository.create(
             new ThreatActor({
-                id: 'actor-a',
+                id: 'threat-actor--actor-a',
                 name: 'Alpha Actor',
                 tlp: TLP.AMBER,
             }),
         );
         await campaignRepository.create(
             new Campaign({
-                id: 'camp-1',
+                id: 'campaign--camp-1',
                 name: 'Campaign One',
                 tlp: TLP.GREEN,
             }),
         );
         await incidentRepository.create(
-            new Incident({ id: 'inc-1', name: 'Incident One', tlp: TLP.RED }),
+            new Incident({
+                id: 'incident--inc-1',
+                name: 'Incident One',
+                tlp: TLP.RED,
+            }),
         );
         await attackPatternRepository.create(
             new AttackPattern({
-                id: 'ap-1',
+                id: 'attack-pattern--ap-1',
                 name: 'Attack Pattern One',
                 tlp: TLP.WHITE,
             }),
         );
         await indicatorRepository.create(
             new Indicator({
-                id: 'ind-1',
+                id: 'indicator--ind-1',
                 type: IocType.DOMAIN,
                 value: 'zzz.example',
                 tlp: TLP.GREEN,
@@ -90,10 +104,34 @@ describe('Threat API (e2e)', () => {
         );
         await indicatorRepository.create(
             new Indicator({
-                id: 'ind-2',
+                id: 'indicator--ind-2',
                 type: IocType.IPV4,
                 value: '1.1.1.1',
                 tlp: TLP.GREEN,
+            }),
+        );
+
+        await malwareRepository.create(
+            new Malware({
+                id: 'malware--emotet',
+                name: 'Emotet',
+                malwareTypes: [],
+                isFamily: true,
+            }),
+        );
+        await relationshipRepository.create(
+            new Relationship({
+                id: 'relationship--r1',
+                relationshipType: RelationshipType.USES,
+                sourceRef: 'threat-actor--actor-a',
+                targetRef: 'malware--emotet',
+            }),
+        );
+        await sightingRepository.create(
+            new Sighting({
+                id: 'sighting--s1',
+                sightingOfRef: 'threat-actor--actor-a',
+                count: 3,
             }),
         );
     });
@@ -119,13 +157,35 @@ describe('Threat API (e2e)', () => {
             });
     });
 
-    it('GET /threat-actors/:id should return detail', () => {
+    it('GET /threat-actors/:id should return enriched detail', () => {
         return request(app.getHttpServer())
-            .get('/threat-actors/actor-a')
+            .get('/threat-actors/threat-actor--actor-a')
             .expect(200)
             .expect((res) => {
-                expect(res.body).toHaveProperty('id', 'actor-a');
-                expect(res.body).toHaveProperty('name', 'Alpha Actor');
+                expect(res.body.entity).toHaveProperty(
+                    'id',
+                    'threat-actor--actor-a',
+                );
+                expect(res.body.entity).toHaveProperty('name', 'Alpha Actor');
+                expect(res.body.relatedObjects).toBeDefined();
+                expect(res.body.sightings).toBeDefined();
+            });
+    });
+
+    it('GET /threat-actors/:id should include resolved relationships and sightings', () => {
+        return request(app.getHttpServer())
+            .get('/threat-actors/threat-actor--actor-a')
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.relatedObjects).toHaveLength(1);
+                expect(res.body.relatedObjects[0].relationship.id).toBe(
+                    'relationship--r1',
+                );
+                expect(res.body.relatedObjects[0].object.id).toBe(
+                    'malware--emotet',
+                );
+                expect(res.body.sightings).toHaveLength(1);
+                expect(res.body.sightings[0].id).toBe('sighting--s1');
             });
     });
 
@@ -141,7 +201,7 @@ describe('Threat API (e2e)', () => {
             .expect(200)
             .expect((res) => {
                 expect(res.body.meta.total).toBe(1);
-                expect(res.body.data[0]?.id).toBe('camp-1');
+                expect(res.body.data[0]?.id).toBe('campaign--camp-1');
             });
     });
 
@@ -151,12 +211,17 @@ describe('Threat API (e2e)', () => {
             .expect(400);
     });
 
-    it('GET /attack-patterns/:id should return detail', () => {
+    it('GET /attack-patterns/:id should return enriched detail', () => {
         return request(app.getHttpServer())
-            .get('/attack-patterns/ap-1')
+            .get('/attack-patterns/attack-pattern--ap-1')
             .expect(200)
             .expect((res) => {
-                expect(res.body).toHaveProperty('id', 'ap-1');
+                expect(res.body.entity).toHaveProperty(
+                    'id',
+                    'attack-pattern--ap-1',
+                );
+                expect(res.body.relatedObjects).toBeDefined();
+                expect(res.body.sightings).toBeDefined();
             });
     });
 
@@ -171,13 +236,18 @@ describe('Threat API (e2e)', () => {
             });
     });
 
-    it('GET /indicators/:id should return detail', () => {
+    it('GET /indicators/:id should return enriched detail', () => {
         return request(app.getHttpServer())
-            .get('/indicators/ind-1')
+            .get('/indicators/indicator--ind-1')
             .expect(200)
             .expect((res) => {
-                expect(res.body).toHaveProperty('id', 'ind-1');
-                expect(res.body).toHaveProperty('value', 'zzz.example');
+                expect(res.body.entity).toHaveProperty(
+                    'id',
+                    'indicator--ind-1',
+                );
+                expect(res.body.entity).toHaveProperty('value', 'zzz.example');
+                expect(res.body.relatedObjects).toBeDefined();
+                expect(res.body.sightings).toBeDefined();
             });
     });
 

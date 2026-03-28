@@ -12,12 +12,15 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 import { ThreatCatalogQueryDto } from '../../application/dtos';
-import { CampaignService } from '../../application/services';
+import { CampaignService, DetailEnricher } from '../../application/services';
 
 @ApiTags('Campaigns')
 @Controller('campaigns')
 export class CampaignsController {
-    constructor(private readonly campaignService: CampaignService) {}
+    constructor(
+        private readonly campaignService: CampaignService,
+        private readonly detailEnricher: DetailEnricher,
+    ) {}
 
     @Get()
     @ApiOperation({ summary: 'List campaigns' })
@@ -37,6 +40,6 @@ export class CampaignsController {
             throw new NotFoundException('Campaign not found');
         }
 
-        return campaign;
+        return this.detailEnricher.enrich(campaign);
     }
 }

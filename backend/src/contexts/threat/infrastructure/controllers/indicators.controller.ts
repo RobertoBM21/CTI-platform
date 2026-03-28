@@ -12,12 +12,15 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 import { IndicatorListQueryDto } from '../../application/dtos';
-import { IndicatorService } from '../../application/services';
+import { DetailEnricher, IndicatorService } from '../../application/services';
 
 @ApiTags('Indicators')
 @Controller('indicators')
 export class IndicatorsController {
-    constructor(private readonly indicatorService: IndicatorService) {}
+    constructor(
+        private readonly indicatorService: IndicatorService,
+        private readonly detailEnricher: DetailEnricher,
+    ) {}
 
     @Get()
     @ApiOperation({ summary: 'List indicators' })
@@ -37,6 +40,6 @@ export class IndicatorsController {
             throw new NotFoundException('Indicator not found');
         }
 
-        return indicator;
+        return this.detailEnricher.enrich(indicator);
     }
 }

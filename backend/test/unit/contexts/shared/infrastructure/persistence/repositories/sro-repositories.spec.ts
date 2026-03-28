@@ -59,7 +59,7 @@ describe('SRO repositories integration', () => {
 
     it('should persist and query Relationship by domain id', async () => {
         const rel = new Relationship({
-            id: 'rel-int-1',
+            id: 'relationship--rel-int-1',
             relationshipType: RelationshipType.USES,
             sourceRef: 'threat-actor--silent-eco-collective',
             targetRef: 'attack-pattern--fabricate-evidence',
@@ -67,9 +67,11 @@ describe('SRO repositories integration', () => {
         });
 
         const created = await relationshipRepository.create(rel);
-        const found = await relationshipRepository.findById('rel-int-1');
+        const found = await relationshipRepository.findById(
+            'relationship--rel-int-1',
+        );
 
-        expect(created.id).toBe('rel-int-1');
+        expect(created.id).toBe('relationship--rel-int-1');
         expect(found?.relationshipType).toBe(RelationshipType.USES);
         expect(found?.sourceRef).toBe('threat-actor--silent-eco-collective');
         expect(found?.targetRef).toBe('attack-pattern--fabricate-evidence');
@@ -82,7 +84,7 @@ describe('SRO repositories integration', () => {
         );
 
         expect(bySource).toHaveLength(1);
-        expect(bySource[0]?.id).toBe('rel-int-1');
+        expect(bySource[0]?.id).toBe('relationship--rel-int-1');
     });
 
     it('should find Relationships by targetRef', async () => {
@@ -91,13 +93,13 @@ describe('SRO repositories integration', () => {
         );
 
         expect(byTarget).toHaveLength(1);
-        expect(byTarget[0]?.id).toBe('rel-int-1');
+        expect(byTarget[0]?.id).toBe('relationship--rel-int-1');
     });
 
     it('should paginate and filter Relationships', async () => {
         await relationshipRepository.create(
             new Relationship({
-                id: 'rel-int-2',
+                id: 'relationship--rel-int-2',
                 relationshipType: RelationshipType.ATTRIBUTED_TO,
                 sourceRef: 'campaign--operation-blackout',
                 targetRef: 'threat-actor--silent-eco-collective',
@@ -113,12 +115,12 @@ describe('SRO repositories integration', () => {
         );
 
         expect(page.meta.total).toBe(1);
-        expect(page.data[0]?.id).toBe('rel-int-1');
+        expect(page.data[0]?.id).toBe('relationship--rel-int-1');
     });
 
     it('should persist and query Sighting by domain id', async () => {
         const sighting = new Sighting({
-            id: 'sig-int-1',
+            id: 'sighting--sig-int-1',
             sightingOfRef: 'indicator--cobalt-strike-c2-beacon',
             count: 3,
             observedDataRefs: ['observed-data--pcap-20250301'],
@@ -127,9 +129,9 @@ describe('SRO repositories integration', () => {
         });
 
         const created = await sightingRepository.create(sighting);
-        const found = await sightingRepository.findById('sig-int-1');
+        const found = await sightingRepository.findById('sighting--sig-int-1');
 
-        expect(created.id).toBe('sig-int-1');
+        expect(created.id).toBe('sighting--sig-int-1');
         expect(found?.sightingOfRef).toBe('indicator--cobalt-strike-c2-beacon');
         expect(found?.count).toBe(3);
         expect(found?.observedDataRefs).toEqual([
@@ -147,16 +149,21 @@ describe('SRO repositories integration', () => {
         );
 
         expect(bySightingOf).toHaveLength(1);
-        expect(bySightingOf[0]?.id).toBe('sig-int-1');
+        expect(bySightingOf[0]?.id).toBe('sighting--sig-int-1');
     });
 
     it('should update and delete SRO entities by domain id', async () => {
-        const updated = await relationshipRepository.update('rel-int-1', {
-            description:
-                'Silent Eco Collective uses fabricated evidence in campaigns',
-        });
-        const deleted = await sightingRepository.delete('sig-int-1');
-        const notFound = await sightingRepository.findById('sig-int-1');
+        const updated = await relationshipRepository.update(
+            'relationship--rel-int-1',
+            {
+                description:
+                    'Silent Eco Collective uses fabricated evidence in campaigns',
+            },
+        );
+        const deleted = await sightingRepository.delete('sighting--sig-int-1');
+        const notFound = await sightingRepository.findById(
+            'sighting--sig-int-1',
+        );
 
         expect(updated?.description).toBe(
             'Silent Eco Collective uses fabricated evidence in campaigns',

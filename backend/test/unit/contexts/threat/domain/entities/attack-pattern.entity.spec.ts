@@ -12,9 +12,7 @@ describe('AttackPattern', () => {
 
         it('should generate an id when not provided', () => {
             const pattern = new AttackPattern({ name: 'Test Pattern' });
-            expect(pattern.id).toBeDefined();
-            expect(typeof pattern.id).toBe('string');
-            expect(pattern.id.length).toBeGreaterThan(0);
+            expect(pattern.id).toMatch(/^attack-pattern--/);
         });
 
         it('should default TLP to WHITE', () => {
@@ -47,7 +45,7 @@ describe('AttackPattern', () => {
             const now = new Date();
 
             const pattern = new AttackPattern({
-                id: 'pattern-id-101',
+                id: 'attack-pattern--pattern-id-101',
                 name: 'T0097.206 - Fabricate Evidence',
                 description: 'Creating false evidence to support a narrative',
                 aliases: ['Evidence Fabrication', 'Fake Proof'],
@@ -63,7 +61,7 @@ describe('AttackPattern', () => {
                 updatedAt: now,
             });
 
-            expect(pattern.id).toBe('pattern-id-101');
+            expect(pattern.id).toBe('attack-pattern--pattern-id-101');
             expect(pattern.name).toBe('T0097.206 - Fabricate Evidence');
             expect(pattern.description).toBe(
                 'Creating false evidence to support a narrative',

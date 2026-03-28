@@ -41,7 +41,7 @@ export class IntrusionSet {
     readonly updatedAt: Date;
 
     constructor(props: IntrusionSetProps) {
-        this.id = props.id ?? crypto.randomUUID();
+        this.id = props.id ?? `intrusion-set--${crypto.randomUUID()}`;
         this.name = props.name;
         this.description = props.description;
         this.aliases = props.aliases ?? [];

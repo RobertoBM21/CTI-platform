@@ -11,8 +11,7 @@ describe('Location', () => {
 
         it('should generate an id when not provided', () => {
             const loc = new Location({ name: 'Test' });
-            expect(loc.id).toBeDefined();
-            expect(typeof loc.id).toBe('string');
+            expect(loc.id).toMatch(/^location--/);
         });
 
         it('should default TLP to WHITE', () => {
@@ -42,7 +41,7 @@ describe('Location', () => {
             const now = new Date();
 
             const loc = new Location({
-                id: 'loc-id-1',
+                id: 'location--loc-id-1',
                 name: 'Madrid',
                 description: 'Capital of Spain',
                 latitude: 40.4168,
@@ -62,7 +61,7 @@ describe('Location', () => {
                 updatedAt: now,
             });
 
-            expect(loc.id).toBe('loc-id-1');
+            expect(loc.id).toBe('location--loc-id-1');
             expect(loc.name).toBe('Madrid');
             expect(loc.latitude).toBe(40.4168);
             expect(loc.longitude).toBe(-3.7038);

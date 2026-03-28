@@ -9,7 +9,10 @@ import { TLP } from '../../../../../../src/contexts/threat/domain/value-objects'
 
 describe('IncidentService', () => {
     it('should delegate list to incident repository', async () => {
-        const incident = new Incident({ id: 'inc-1', name: 'Incident 1' });
+        const incident = new Incident({
+            id: 'incident--inc-1',
+            name: 'Incident 1',
+        });
         const repository: IncidentRepository = {
             findById: jest.fn(),
             findAll: jest.fn().mockResolvedValue({
@@ -36,7 +39,7 @@ describe('IncidentService', () => {
             10,
             { field: ThreatCatalogSortBy.CREATED_AT, direction: -1 },
         );
-        expect(result.data[0]?.id).toBe('inc-1');
+        expect(result.data[0]?.id).toBe('incident--inc-1');
     });
 
     it('should delegate findById to incident repository', async () => {
@@ -44,7 +47,7 @@ describe('IncidentService', () => {
             findById: jest
                 .fn()
                 .mockResolvedValue(
-                    new Incident({ id: 'inc-1', name: 'Incident 1' }),
+                    new Incident({ id: 'incident--inc-1', name: 'Incident 1' }),
                 ),
             findAll: jest.fn(),
             create: jest.fn(),
@@ -53,10 +56,10 @@ describe('IncidentService', () => {
         };
 
         const service = new IncidentService(repository);
-        const result = await service.findById('inc-1');
+        const result = await service.findById('incident--inc-1');
 
-        expect(repository.findById).toHaveBeenCalledWith('inc-1');
-        expect(result?.id).toBe('inc-1');
+        expect(repository.findById).toHaveBeenCalledWith('incident--inc-1');
+        expect(result?.id).toBe('incident--inc-1');
     });
 
     it('should return null when incident is not found', async () => {

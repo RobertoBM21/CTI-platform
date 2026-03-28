@@ -16,9 +16,7 @@ describe('Sighting', () => {
             const sighting = new Sighting({
                 sightingOfRef: 'indicator--malicious-ip-blocklist',
             });
-            expect(sighting.id).toBeDefined();
-            expect(typeof sighting.id).toBe('string');
-            expect(sighting.id.length).toBeGreaterThan(0);
+            expect(sighting.id).toMatch(/^sighting--/);
         });
 
         it('should default TLP to WHITE', () => {
@@ -71,7 +69,7 @@ describe('Sighting', () => {
 
     describe('constructor with full props', () => {
         it('should assign all provided fields correctly', () => {
-            const id = 'sighting-id-001';
+            const id = 'sighting--sighting-id-001';
             const firstSeen = new Date('2025-03-01');
             const lastSeen = new Date('2025-03-15');
             const now = new Date();

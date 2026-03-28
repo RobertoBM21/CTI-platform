@@ -1,3 +1,4 @@
+export { type EnrichedDetail, type RelatedObject } from './enriched-detail.dto';
 export {
     IndicatorListQueryDto,
     IndicatorListSortBy,

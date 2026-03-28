@@ -9,7 +9,7 @@ import {
 describe('AttackPatternService', () => {
     it('should delegate list to attack pattern repository', async () => {
         const attackPattern = new AttackPattern({
-            id: 'ap-1',
+            id: 'attack-pattern--ap-1',
             name: 'Attack Pattern 1',
         });
         const repository: AttackPatternRepository = {
@@ -38,16 +38,17 @@ describe('AttackPatternService', () => {
             5,
             { field: ThreatCatalogSortBy.NAME, direction: 1 },
         );
-        expect(result.data[0]?.id).toBe('ap-1');
+        expect(result.data[0]?.id).toBe('attack-pattern--ap-1');
     });
 
     it('should delegate findById to attack pattern repository', async () => {
         const repository: AttackPatternRepository = {
-            findById: jest
-                .fn()
-                .mockResolvedValue(
-                    new AttackPattern({ id: 'ap-1', name: 'Attack Pattern 1' }),
-                ),
+            findById: jest.fn().mockResolvedValue(
+                new AttackPattern({
+                    id: 'attack-pattern--ap-1',
+                    name: 'Attack Pattern 1',
+                }),
+            ),
             findAll: jest.fn(),
             findByExternalReference: jest.fn(),
             create: jest.fn(),
@@ -56,10 +57,12 @@ describe('AttackPatternService', () => {
         };
 
         const service = new AttackPatternService(repository);
-        const result = await service.findById('ap-1');
+        const result = await service.findById('attack-pattern--ap-1');
 
-        expect(repository.findById).toHaveBeenCalledWith('ap-1');
-        expect(result?.id).toBe('ap-1');
+        expect(repository.findById).toHaveBeenCalledWith(
+            'attack-pattern--ap-1',
+        );
+        expect(result?.id).toBe('attack-pattern--ap-1');
     });
 
     it('should return null when attack pattern is not found', async () => {

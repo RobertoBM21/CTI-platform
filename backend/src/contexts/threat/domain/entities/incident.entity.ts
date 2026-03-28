@@ -31,7 +31,7 @@ export class Incident {
     readonly updatedAt: Date;
 
     constructor(props: IncidentProps) {
-        this.id = props.id ?? crypto.randomUUID();
+        this.id = props.id ?? `incident--${crypto.randomUUID()}`;
         this.name = props.name;
         this.description = props.description;
         this.firstSeen = props.firstSeen;

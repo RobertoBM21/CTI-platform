@@ -34,7 +34,7 @@ export class Identity {
     readonly updatedAt: Date;
 
     constructor(props: IdentityProps) {
-        this.id = props.id ?? crypto.randomUUID();
+        this.id = props.id ?? `identity--${crypto.randomUUID()}`;
         this.name = props.name;
         this.description = props.description;
         this.identityClass = props.identityClass;

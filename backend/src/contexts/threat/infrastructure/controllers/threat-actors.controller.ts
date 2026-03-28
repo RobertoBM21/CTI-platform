@@ -12,12 +12,15 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 import { ThreatCatalogQueryDto } from '../../application/dtos';
-import { ThreatActorService } from '../../application/services';
+import { DetailEnricher, ThreatActorService } from '../../application/services';
 
 @ApiTags('Threat Actors')
 @Controller('threat-actors')
 export class ThreatActorsController {
-    constructor(private readonly threatActorService: ThreatActorService) {}
+    constructor(
+        private readonly threatActorService: ThreatActorService,
+        private readonly detailEnricher: DetailEnricher,
+    ) {}
 
     @Get()
     @ApiOperation({ summary: 'List threat actors' })
@@ -37,6 +40,6 @@ export class ThreatActorsController {
             throw new NotFoundException('Threat actor not found');
         }
 
-        return threatActor;
+        return this.detailEnricher.enrich(threatActor);
     }
 }

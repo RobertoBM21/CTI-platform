@@ -37,7 +37,7 @@ export class InfrastructureEntity {
     readonly updatedAt: Date;
 
     constructor(props: InfrastructureEntityProps) {
-        this.id = props.id ?? crypto.randomUUID();
+        this.id = props.id ?? `infrastructure--${crypto.randomUUID()}`;
         this.name = props.name;
         this.description = props.description;
         this.infrastructureTypes = props.infrastructureTypes ?? [];
