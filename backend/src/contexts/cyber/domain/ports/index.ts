@@ -1,0 +1,10 @@
+export { CourseOfActionRepository } from './course-of-action.repository';
+export { IdentityRepository } from './identity.repository';
+export { InfrastructureEntityRepository } from './infrastructure-entity.repository';
+export { IntrusionSetRepository } from './intrusion-set.repository';
+export { LocationRepository } from './location.repository';
+export { MalwareRepository } from './malware.repository';
+export { NoteRepository } from './note.repository';
+export { OpinionRepository } from './opinion.repository';
+export { ToolRepository } from './tool.repository';
+export { VulnerabilityRepository } from './vulnerability.repository';

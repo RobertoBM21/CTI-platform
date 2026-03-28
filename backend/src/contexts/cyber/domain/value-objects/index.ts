@@ -1,0 +1,11 @@
+export { AttackMotivation } from '../../../shared/domain/value-objects/attack-motivation.vo';
+export { type ExternalReference } from '../../../shared/domain/value-objects/external-reference.vo';
+export { type KillChainPhase } from '../../../shared/domain/value-objects/kill-chain-phase.vo';
+export { ResourceLevel } from '../../../shared/domain/value-objects/resource-level.vo';
+export { TLP } from '../../../shared/domain/value-objects/tlp.vo';
+export { IdentityClass } from './identity-class.vo';
+export { InfrastructureType } from './infrastructure-type.vo';
+export { MalwareType } from './malware-type.vo';
+export { OpinionValue } from './opinion-value.vo';
+export { Region } from './region.vo';
+export { ToolType } from './tool-type.vo';

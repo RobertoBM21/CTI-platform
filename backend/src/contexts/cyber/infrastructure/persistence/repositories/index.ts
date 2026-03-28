@@ -1,0 +1,10 @@
+export { CourseOfActionMongooseRepository } from './course-of-action-mongoose.repository';
+export { IdentityMongooseRepository } from './identity-mongoose.repository';
+export { InfrastructureEntityMongooseRepository } from './infrastructure-entity-mongoose.repository';
+export { IntrusionSetMongooseRepository } from './intrusion-set-mongoose.repository';
+export { LocationMongooseRepository } from './location-mongoose.repository';
+export { MalwareMongooseRepository } from './malware-mongoose.repository';
+export { NoteMongooseRepository } from './note-mongoose.repository';
+export { OpinionMongooseRepository } from './opinion-mongoose.repository';
+export { ToolMongooseRepository } from './tool-mongoose.repository';
+export { VulnerabilityMongooseRepository } from './vulnerability-mongoose.repository';

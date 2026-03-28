@@ -1,0 +1,136 @@
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import {
+    CourseOfActionRepository,
+    IdentityRepository,
+    InfrastructureEntityRepository,
+    IntrusionSetRepository,
+    LocationRepository,
+    MalwareRepository,
+    NoteRepository,
+    OpinionRepository,
+    ToolRepository,
+    VulnerabilityRepository,
+} from '../domain';
+import {
+    CourseOfActionMongooseRepository,
+    IdentityMongooseRepository,
+    InfrastructureEntityMongooseRepository,
+    IntrusionSetMongooseRepository,
+    LocationMongooseRepository,
+    MalwareMongooseRepository,
+    NoteMongooseRepository,
+    OpinionMongooseRepository,
+    ToolMongooseRepository,
+    VulnerabilityMongooseRepository,
+} from './persistence/repositories';
+import {
+    CourseOfActionDocument,
+    CourseOfActionSchema,
+    IdentityDocument,
+    IdentitySchema,
+    InfrastructureEntityDocument,
+    InfrastructureEntitySchema,
+    IntrusionSetDocument,
+    IntrusionSetSchema,
+    LocationDocument,
+    LocationSchema,
+    MalwareDocument,
+    MalwareSchema,
+    NoteDocument,
+    NoteSchema,
+    OpinionDocument,
+    OpinionSchema,
+    ToolDocument,
+    ToolSchema,
+    VulnerabilityDocument,
+    VulnerabilitySchema,
+} from './persistence/schemas';
+
+@Module({
+    imports: [
+        MongooseModule.forFeature([
+            { name: MalwareDocument.name, schema: MalwareSchema },
+            { name: ToolDocument.name, schema: ToolSchema },
+            { name: VulnerabilityDocument.name, schema: VulnerabilitySchema },
+            {
+                name: InfrastructureEntityDocument.name,
+                schema: InfrastructureEntitySchema,
+            },
+            { name: IntrusionSetDocument.name, schema: IntrusionSetSchema },
+            { name: IdentityDocument.name, schema: IdentitySchema },
+            { name: LocationDocument.name, schema: LocationSchema },
+            {
+                name: CourseOfActionDocument.name,
+                schema: CourseOfActionSchema,
+            },
+            { name: NoteDocument.name, schema: NoteSchema },
+            { name: OpinionDocument.name, schema: OpinionSchema },
+        ]),
+    ],
+    providers: [
+        MalwareMongooseRepository,
+        ToolMongooseRepository,
+        VulnerabilityMongooseRepository,
+        InfrastructureEntityMongooseRepository,
+        IntrusionSetMongooseRepository,
+        IdentityMongooseRepository,
+        LocationMongooseRepository,
+        CourseOfActionMongooseRepository,
+        NoteMongooseRepository,
+        OpinionMongooseRepository,
+        {
+            provide: MalwareRepository,
+            useExisting: MalwareMongooseRepository,
+        },
+        {
+            provide: ToolRepository,
+            useExisting: ToolMongooseRepository,
+        },
+        {
+            provide: VulnerabilityRepository,
+            useExisting: VulnerabilityMongooseRepository,
+        },
+        {
+            provide: InfrastructureEntityRepository,
+            useExisting: InfrastructureEntityMongooseRepository,
+        },
+        {
+            provide: IntrusionSetRepository,
+            useExisting: IntrusionSetMongooseRepository,
+        },
+        {
+            provide: IdentityRepository,
+            useExisting: IdentityMongooseRepository,
+        },
+        {
+            provide: LocationRepository,
+            useExisting: LocationMongooseRepository,
+        },
+        {
+            provide: CourseOfActionRepository,
+            useExisting: CourseOfActionMongooseRepository,
+        },
+        {
+            provide: NoteRepository,
+            useExisting: NoteMongooseRepository,
+        },
+        {
+            provide: OpinionRepository,
+            useExisting: OpinionMongooseRepository,
+        },
+    ],
+    exports: [
+        MalwareRepository,
+        ToolRepository,
+        VulnerabilityRepository,
+        InfrastructureEntityRepository,
+        IntrusionSetRepository,
+        IdentityRepository,
+        LocationRepository,
+        CourseOfActionRepository,
+        NoteRepository,
+        OpinionRepository,
+    ],
+})
+export class CyberModule {}

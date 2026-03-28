@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
+import { CyberModule } from './contexts/cyber/infrastructure/cyber.module';
 import { SharedModule } from './contexts/shared/infrastructure/shared.module';
 import { ThreatModule } from './contexts/threat/infrastructure/threat.module';
 
@@ -26,6 +27,7 @@ import { ThreatModule } from './contexts/threat/infrastructure/threat.module';
 
         SharedModule,
         ThreatModule,
+        CyberModule,
     ],
 })
 export class AppModule {}

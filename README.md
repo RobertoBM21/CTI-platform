@@ -9,7 +9,7 @@ Desarrollar una plataforma mantenible y testeable para gestionar inteligencia de
 En esta fase:
 
 - No se implementa autenticación.
-- El foco funcional está en el contexto `Threat`.
+- El foco funcional está en los contextos `Threat` y `Cyber` (SDOs técnicos STIX 2.1).
 - Se prioriza una arquitectura clara y desacoplada entre dominio y adaptadores.
 - Backend y frontend operan como aplicaciones separadas en un monorepo pnpm.
 
@@ -41,15 +41,15 @@ En esta fase:
 Se aplica arquitectura hexagonal pragmática por contextos:
 
 - **Domain**: modelo y reglas de negocio puras.
-- **Application**: casos de uso y orquestación.
+- **Application**: servicios por entidad y orquestación.
 - **Infrastructure**: controladores HTTP, repositorios y persistencia.
 
 ```mermaid
 flowchart LR
     Client[Cliente HTTP] --> Controller[Infrastructure: Controllers]
-    Controller --> UseCase[Application: Use Cases]
-    UseCase --> Domain[Domain: Entities + VOs + Ports]
-    UseCase --> Repo[Infrastructure: Repository Adapters]
+    Controller --> Service[Application: Services]
+    Service --> Domain[Domain: Entities + VOs + Ports]
+    Service --> Repo[Infrastructure: Repository Adapters]
     Repo --> DB[(MongoDB)]
 ```
 
@@ -62,12 +62,13 @@ Implementado:
 - Bootstrap Nest + Swagger (`/api`).
 - Endpoint `GET /health` en contexto `shared` con estado de DB.
 - Capa de dominio compartida (`shared`) con SROs (Relationship, Sighting) y VOs transversales STIX.
-- Modelo de dominio `Threat` (entidades, value objects y puertos).
+- Modelo de dominio `Threat` con propiedades comunes STIX 2.1 (entidades, value objects y puertos).
 - Schemas Mongoose espejo del dominio `Threat`.
-- Casos de uso de lectura de `Threat` (catálogo, detalle, listado de IoCs).
+- Servicios de lectura de `Threat` (catálogo, detalle, listado de Indicators).
 - Repositorios concretos Mongoose de `Threat` y wiring completo de `ThreatModule`.
-- Controladores REST de `Threat` para catálogo, detalle simple e IoCs.
-- Contrato HTTP validado para filtrado, ordenación y paginación en catálogo Threat e IoCs.
+- Controladores REST de `Threat` para catálogo, detalle simple e Indicators.
+- Contrato HTTP validado para filtrado, ordenación y paginación en catálogo Threat e Indicators.
+- Modelo de dominio `Cyber` con 10 SDOs técnicos STIX 2.1, 6 VOs nuevos, persistencia completa y `CyberModule` wired (sin controllers ni services aún).
 - Suite de tests unitarios de dominio + application + integración de repositorios + e2e en verde.
 
 Frontend:
@@ -89,7 +90,8 @@ Estructura de workspace:
 
 Pendiente (siguiente fase):
 
-- Posibles use-cases overview de detalle enriquecido si la UI requiere respuestas compuestas en una sola llamada.
+- Implementar servicios, DTOs y controladores REST para el contexto Cyber.
+- Posibles servicios overview de detalle enriquecido si la UI requiere respuestas compuestas en una sola llamada.
 - Filtros avanzados adicionales más allá del contrato base del MVP.
 - Ingesta automatizada.
 
@@ -105,7 +107,7 @@ Pendiente (siguiente fase):
 - `GET /incidents/:id`
 - `GET /attack-patterns`
 - `GET /attack-patterns/:id`
-- `GET /iocs`
+- `GET /indicators`
 
 ### Health
 
@@ -120,11 +122,10 @@ Pendiente (siguiente fase):
 - Sort: `sortBy`, `sortOrder`
 - Campos de ordenación permitidos: `createdAt`, `updatedAt`, `name`
 
-### IoCs
+### Indicators
 
 - Paginación: `page`, `limit`
-- Filtros: `type`, `value`, `tlp`
-- Contexto opcional por origen: `sourceType`, `sourceId`
+- Filtros: `type`, `value`, `name`, `tlp`
 - Sort: `sortBy`, `sortOrder`
 - Campos de ordenación permitidos: `createdAt`, `updatedAt`, `value`, `type`
 
@@ -148,10 +149,17 @@ Pendiente (siguiente fase):
 
 ### Threat
 
-- **Entidades**: `ThreatActor`, `Campaign`, `Incident`, `AttackPattern`, `Ioc`.
-- **Value Objects / enums propios**: `IocType`, `ThreatActorType`, `ThreatActorRole`, `ThreatActorSophistication`.
-- **Puertos de repositorio**: `ThreatActorRepository`, `CampaignRepository`, `IncidentRepository`, `AttackPatternRepository`, `IocRepository`.
-- **Persistencia (Mongoose)**: `ThreatActorDocument`, `CampaignDocument`, `IncidentDocument`, `AttackPatternDocument`, `IocDocument`.
+- **Entidades**: `ThreatActor`, `Campaign`, `Incident`, `AttackPattern`, `Indicator`.
+- **Value Objects / enums propios**: `IocType`, `IndicatorType`, `PatternType`, `ThreatActorType`, `ThreatActorRole`, `ThreatActorSophistication`.
+- **Puertos de repositorio**: `ThreatActorRepository`, `CampaignRepository`, `IncidentRepository`, `AttackPatternRepository`, `IndicatorRepository`.
+- **Persistencia (Mongoose)**: `ThreatActorDocument`, `CampaignDocument`, `IncidentDocument`, `AttackPatternDocument`, `IndicatorDocument`.
+
+### Cyber
+
+- **Entidades**: `Malware`, `Tool`, `Vulnerability`, `InfrastructureEntity`, `IntrusionSet`, `Identity`, `Location`, `CourseOfAction`, `Note`, `Opinion`.
+- **Value Objects / enums propios**: `MalwareType`, `ToolType`, `InfrastructureType`, `IdentityClass`, `OpinionValue`, `Region`.
+- **Puertos de repositorio**: `MalwareRepository`, `ToolRepository`, `VulnerabilityRepository`, `InfrastructureEntityRepository`, `IntrusionSetRepository`, `IdentityRepository`, `LocationRepository`, `CourseOfActionRepository`, `NoteRepository`, `OpinionRepository`.
+- **Persistencia (Mongoose)**: documentos Mongoose espejo por cada entidad.
 
 ## Estructura de carpetas backend
 
@@ -180,6 +188,14 @@ backend/src/
 			application/services/                    # Servicios por entidad de Threat
 
 			infrastructure/controllers/              # Controladores REST de Threat
+			infrastructure/persistence/schemas/      # Schemas Mongoose (documentos)
+			infrastructure/persistence/repositories/ # Implementaciones concretas de puertos
+
+		cyber/
+			domain/entities/                         # 10 SDOs técnicos STIX 2.1
+			domain/value-objects/                    # Enums STIX del dominio Cyber
+			domain/ports/                            # Contratos (puertos) de repositorio
+
 			infrastructure/persistence/schemas/      # Schemas Mongoose (documentos)
 			infrastructure/persistence/repositories/ # Implementaciones concretas de puertos
 ```
