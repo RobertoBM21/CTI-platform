@@ -5,4 +5,6 @@ export default registerAs('app', () => ({
     port: parseInt(process.env['PORT'] ?? '3000', 10),
     // eslint-disable-next-line @typescript-eslint/dot-notation
     environment: process.env['NODE_ENV'] ?? 'development',
+    // eslint-disable-next-line @typescript-eslint/dot-notation
+    corsOrigin: process.env['CORS_ORIGIN'] ?? 'http://localhost:3001',
 }));

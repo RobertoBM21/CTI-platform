@@ -7,6 +7,11 @@ import { AppModule } from './app.module';
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
+    // CORS
+    const configService = app.get(ConfigService);
+    const corsOrigin = configService.getOrThrow<string>('app.corsOrigin');
+    app.enableCors({ origin: corsOrigin });
+
     // Global validation pipe
     app.useGlobalPipes(
         new ValidationPipe({
@@ -27,8 +32,7 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup('api', app, document);
 
-    const configService = app.get(ConfigService);
-    const port = configService.get<number>('app.port', 3000);
+    const port = configService.getOrThrow<number>('app.port');
 
     await app.listen(port);
 }
