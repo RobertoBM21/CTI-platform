@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { SortCriteria } from '../../../../shared/application/dtos/sort.dto';
+import { BaseMongooseRepository } from '../../../../shared/infrastructure/persistence/base-mongoose.repository';
 import {
     Indicator,
     IndicatorRepository,
@@ -12,113 +12,35 @@ import {
 } from '../../../domain';
 import { IndicatorDoc, IndicatorDocument } from '../schemas/indicator.schema';
 
+type IndicatorFilter = Partial<{
+    type: string;
+    value: string;
+    name: string;
+    tlp: string;
+}>;
+
 @Injectable()
-export class IndicatorMongooseRepository extends IndicatorRepository {
+export class IndicatorMongooseRepository
+    extends BaseMongooseRepository<Indicator, IndicatorDoc, IndicatorFilter>
+    implements IndicatorRepository
+{
+    protected override readonly regexFields = new Set(['name', 'value']);
+
     constructor(
-        @InjectModel(IndicatorDocument.name)
-        private readonly indicatorModel: Model<IndicatorDoc>,
+        @InjectModel(IndicatorDocument.name) model: Model<IndicatorDoc>,
     ) {
-        super();
-    }
-
-    async findById(id: string): Promise<Indicator | null> {
-        const doc = await this.indicatorModel.findOne({ domainId: id }).exec();
-        return doc ? this.toDomain(doc) : null;
-    }
-
-    async findAll(
-        filter: Partial<{
-            type: string;
-            value: string;
-            name: string;
-            tlp: string;
-        }>,
-        page: number,
-        limit: number,
-        sort: SortCriteria,
-    ) {
-        const safePage = Math.max(1, page);
-        const safeLimit = Math.max(1, limit);
-        const query: Record<string, unknown> = {};
-        const sortQuery = { [sort.field]: sort.direction };
-
-        if (filter.type) {
-            query.type = filter.type;
-        }
-
-        if (filter.value) {
-            query.value = { $regex: filter.value, $options: 'i' };
-        }
-
-        if (filter.name) {
-            query.name = { $regex: filter.name, $options: 'i' };
-        }
-
-        if (filter.tlp) {
-            query.tlp = filter.tlp;
-        }
-
-        const [docs, total] = await Promise.all([
-            this.indicatorModel
-                .find(query)
-                .sort(sortQuery)
-                .skip((safePage - 1) * safeLimit)
-                .limit(safeLimit)
-                .exec(),
-            this.indicatorModel.countDocuments(query).exec(),
-        ]);
-
-        return {
-            data: docs.map((doc) => this.toDomain(doc)),
-            meta: {
-                total,
-                page: safePage,
-                limit: safeLimit,
-                totalPages: Math.ceil(total / safeLimit),
-            },
-        };
+        super(model);
     }
 
     async findByValue(value: string): Promise<Indicator[]> {
-        const docs = await this.indicatorModel
+        const docs = await this.model
             .find({ value })
             .sort({ createdAt: -1 })
             .exec();
         return docs.map((doc) => this.toDomain(doc));
     }
 
-    async create(entity: Indicator): Promise<Indicator> {
-        const doc = await this.indicatorModel.create(
-            this.toPersistence(entity),
-        );
-        return this.toDomain(doc);
-    }
-
-    async update(
-        id: string,
-        entity: Partial<Indicator>,
-    ): Promise<Indicator | null> {
-        const doc = await this.indicatorModel
-            .findOneAndUpdate(
-                { domainId: id },
-                this.toPersistencePartial(entity),
-                {
-                    new: true,
-                },
-            )
-            .exec();
-
-        return doc ? this.toDomain(doc) : null;
-    }
-
-    async delete(id: string): Promise<boolean> {
-        const result = await this.indicatorModel
-            .deleteOne({ domainId: id })
-            .exec();
-        return result.deletedCount > 0;
-    }
-
-    private toDomain(doc: IndicatorDoc): Indicator {
+    protected toDomain(doc: IndicatorDoc): Indicator {
         return new Indicator({
             id: doc.domainId,
             name: doc.name,
@@ -154,7 +76,7 @@ export class IndicatorMongooseRepository extends IndicatorRepository {
         });
     }
 
-    private toPersistence(entity: Indicator): Record<string, unknown> {
+    protected toPersistence(entity: Indicator): Record<string, unknown> {
         return {
             domainId: entity.id,
             name: entity.name,
@@ -176,38 +98,5 @@ export class IndicatorMongooseRepository extends IndicatorRepository {
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
         };
-    }
-
-    private toPersistencePartial(
-        entity: Partial<Indicator>,
-    ): Record<string, unknown> {
-        const update: Record<string, unknown> = { updatedAt: new Date() };
-
-        if (entity.name !== undefined) update.name = entity.name;
-        if (entity.type !== undefined) update.type = entity.type;
-        if (entity.value !== undefined) update.value = entity.value;
-        if (entity.description !== undefined)
-            update.description = entity.description;
-        if (entity.indicatorTypes !== undefined)
-            update.indicatorTypes = entity.indicatorTypes;
-        if (entity.pattern !== undefined) update.pattern = entity.pattern;
-        if (entity.patternType !== undefined)
-            update.patternType = entity.patternType;
-        if (entity.patternVersion !== undefined)
-            update.patternVersion = entity.patternVersion;
-        if (entity.validFrom !== undefined) update.validFrom = entity.validFrom;
-        if (entity.validUntil !== undefined)
-            update.validUntil = entity.validUntil;
-        if (entity.killChainPhases !== undefined)
-            update.killChainPhases = entity.killChainPhases;
-        if (entity.tags !== undefined) update.tags = entity.tags;
-        if (entity.confidence !== undefined)
-            update.confidence = entity.confidence;
-        if (entity.revoked !== undefined) update.revoked = entity.revoked;
-        if (entity.externalReferences !== undefined)
-            update.externalReferences = entity.externalReferences;
-        if (entity.tlp !== undefined) update.tlp = entity.tlp;
-
-        return update;
     }
 }

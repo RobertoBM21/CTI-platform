@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { SortCriteria } from '../../../../shared/application/dtos/sort.dto';
+import { BaseMongooseRepository } from '../../../../shared/infrastructure/persistence/base-mongoose.repository';
 import { AttackPattern, AttackPatternRepository, TLP } from '../../../domain';
 import {
     AttackPatternDoc,
@@ -9,100 +9,23 @@ import {
 } from '../schemas/attack-pattern.schema';
 
 @Injectable()
-export class AttackPatternMongooseRepository extends AttackPatternRepository {
+export class AttackPatternMongooseRepository
+    extends BaseMongooseRepository<AttackPattern, AttackPatternDoc>
+    implements AttackPatternRepository
+{
     constructor(
         @InjectModel(AttackPatternDocument.name)
-        private readonly attackPatternModel: Model<AttackPatternDoc>,
+        model: Model<AttackPatternDoc>,
     ) {
-        super();
-    }
-
-    async findById(id: string): Promise<AttackPattern | null> {
-        const doc = await this.attackPatternModel
-            .findOne({ domainId: id })
-            .exec();
-        return doc ? this.toDomain(doc) : null;
-    }
-
-    async findAll(
-        filter: Partial<{ name: string; tlp: string }>,
-        page: number,
-        limit: number,
-        sort: SortCriteria,
-    ) {
-        const safePage = Math.max(1, page);
-        const safeLimit = Math.max(1, limit);
-        const query: Record<string, unknown> = {};
-        const sortQuery = { [sort.field]: sort.direction };
-
-        if (filter.name) {
-            query.name = { $regex: filter.name, $options: 'i' };
-        }
-
-        if (filter.tlp) {
-            query.tlp = filter.tlp;
-        }
-
-        const [docs, total] = await Promise.all([
-            this.attackPatternModel
-                .find(query)
-                .sort(sortQuery)
-                .skip((safePage - 1) * safeLimit)
-                .limit(safeLimit)
-                .exec(),
-            this.attackPatternModel.countDocuments(query).exec(),
-        ]);
-
-        return {
-            data: docs.map((doc) => this.toDomain(doc)),
-            meta: {
-                total,
-                page: safePage,
-                limit: safeLimit,
-                totalPages: Math.ceil(total / safeLimit),
-            },
-        };
+        super(model);
     }
 
     async findByExternalReference(ref: string): Promise<AttackPattern | null> {
-        const doc = await this.attackPatternModel
-            .findOne({ externalReference: ref })
-            .exec();
+        const doc = await this.model.findOne({ externalReference: ref }).exec();
         return doc ? this.toDomain(doc) : null;
     }
 
-    async create(entity: AttackPattern): Promise<AttackPattern> {
-        const doc = await this.attackPatternModel.create(
-            this.toPersistence(entity),
-        );
-        return this.toDomain(doc);
-    }
-
-    async update(
-        id: string,
-        entity: Partial<AttackPattern>,
-    ): Promise<AttackPattern | null> {
-        const doc = await this.attackPatternModel
-            .findOneAndUpdate(
-                { domainId: id },
-                this.toPersistencePartial(entity),
-                {
-                    new: true,
-                },
-            )
-            .exec();
-
-        return doc ? this.toDomain(doc) : null;
-    }
-
-    async delete(id: string): Promise<boolean> {
-        const result = await this.attackPatternModel
-            .deleteOne({ domainId: id })
-            .exec();
-        return result.deletedCount > 0;
-    }
-
-    private toDomain(doc: AttackPatternDoc): AttackPattern {
+    protected toDomain(doc: AttackPatternDoc): AttackPattern {
         return new AttackPattern({
             id: doc.domainId,
             name: doc.name,
@@ -128,7 +51,7 @@ export class AttackPatternMongooseRepository extends AttackPatternRepository {
         });
     }
 
-    private toPersistence(entity: AttackPattern): Record<string, unknown> {
+    protected toPersistence(entity: AttackPattern): Record<string, unknown> {
         return {
             domainId: entity.id,
             name: entity.name,
@@ -143,28 +66,5 @@ export class AttackPatternMongooseRepository extends AttackPatternRepository {
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
         };
-    }
-
-    private toPersistencePartial(
-        entity: Partial<AttackPattern>,
-    ): Record<string, unknown> {
-        const update: Record<string, unknown> = { updatedAt: new Date() };
-
-        if (entity.name !== undefined) update.name = entity.name;
-        if (entity.description !== undefined)
-            update.description = entity.description;
-        if (entity.aliases !== undefined) update.aliases = entity.aliases;
-        if (entity.externalReference !== undefined)
-            update.externalReference = entity.externalReference;
-        if (entity.killChainPhase !== undefined)
-            update.killChainPhase = entity.killChainPhase;
-        if (entity.confidence !== undefined)
-            update.confidence = entity.confidence;
-        if (entity.revoked !== undefined) update.revoked = entity.revoked;
-        if (entity.externalReferences !== undefined)
-            update.externalReferences = entity.externalReferences;
-        if (entity.tlp !== undefined) update.tlp = entity.tlp;
-
-        return update;
     }
 }

@@ -1,100 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { SortCriteria } from '../../../application/dtos/sort.dto';
 import { Sighting, SightingRepository, TLP } from '../../../domain';
+import { BaseMongooseRepository } from '../base-mongoose.repository';
 import { SightingDoc, SightingDocument } from '../schemas/sighting.schema';
 
+type SightingFilter = Partial<{
+    sightingOfRef: string;
+    tlp: string;
+}>;
+
 @Injectable()
-export class SightingMongooseRepository extends SightingRepository {
+export class SightingMongooseRepository
+    extends BaseMongooseRepository<Sighting, SightingDoc, SightingFilter>
+    implements SightingRepository
+{
     constructor(
         @InjectModel(SightingDocument.name)
-        private readonly sightingModel: Model<SightingDoc>,
+        model: Model<SightingDoc>,
     ) {
-        super();
-    }
-
-    async findById(id: string): Promise<Sighting | null> {
-        const doc = await this.sightingModel.findOne({ domainId: id }).exec();
-        return doc ? this.toDomain(doc) : null;
-    }
-
-    async findAll(
-        filter: Partial<{
-            sightingOfRef: string;
-            tlp: string;
-        }>,
-        page: number,
-        limit: number,
-        sort: SortCriteria,
-    ) {
-        const safePage = Math.max(1, page);
-        const safeLimit = Math.max(1, limit);
-        const query: Record<string, unknown> = {};
-        const sortQuery = { [sort.field]: sort.direction };
-
-        if (filter.sightingOfRef) {
-            query.sightingOfRef = filter.sightingOfRef;
-        }
-
-        if (filter.tlp) {
-            query.tlp = filter.tlp;
-        }
-
-        const [docs, total] = await Promise.all([
-            this.sightingModel
-                .find(query)
-                .sort(sortQuery)
-                .skip((safePage - 1) * safeLimit)
-                .limit(safeLimit)
-                .exec(),
-            this.sightingModel.countDocuments(query).exec(),
-        ]);
-
-        return {
-            data: docs.map((doc) => this.toDomain(doc)),
-            meta: {
-                total,
-                page: safePage,
-                limit: safeLimit,
-                totalPages: Math.ceil(total / safeLimit),
-            },
-        };
+        super(model);
     }
 
     async findBySightingOfRef(sightingOfRef: string): Promise<Sighting[]> {
-        const docs = await this.sightingModel.find({ sightingOfRef }).exec();
+        const docs = await this.model.find({ sightingOfRef }).exec();
         return docs.map((doc) => this.toDomain(doc));
     }
 
-    async create(entity: Sighting): Promise<Sighting> {
-        const doc = await this.sightingModel.create(this.toPersistence(entity));
-        return this.toDomain(doc);
-    }
-
-    async update(
-        id: string,
-        entity: Partial<Sighting>,
-    ): Promise<Sighting | null> {
-        const doc = await this.sightingModel
-            .findOneAndUpdate(
-                { domainId: id },
-                this.toPersistencePartial(entity),
-                { new: true },
-            )
-            .exec();
-
-        return doc ? this.toDomain(doc) : null;
-    }
-
-    async delete(id: string): Promise<boolean> {
-        const result = await this.sightingModel
-            .deleteOne({ domainId: id })
-            .exec();
-        return result.deletedCount > 0;
-    }
-
-    private toDomain(doc: SightingDoc): Sighting {
+    protected toDomain(doc: SightingDoc): Sighting {
         return new Sighting({
             id: doc.domainId,
             description: doc.description,
@@ -110,7 +43,7 @@ export class SightingMongooseRepository extends SightingRepository {
         });
     }
 
-    private toPersistence(entity: Sighting): Record<string, unknown> {
+    protected toPersistence(entity: Sighting): Record<string, unknown> {
         return {
             domainId: entity.id,
             description: entity.description,
@@ -124,26 +57,5 @@ export class SightingMongooseRepository extends SightingRepository {
             createdAt: entity.createdAt,
             updatedAt: entity.updatedAt,
         };
-    }
-
-    private toPersistencePartial(
-        entity: Partial<Sighting>,
-    ): Record<string, unknown> {
-        const update: Record<string, unknown> = { updatedAt: new Date() };
-
-        if (entity.description !== undefined)
-            update.description = entity.description;
-        if (entity.firstSeen !== undefined) update.firstSeen = entity.firstSeen;
-        if (entity.lastSeen !== undefined) update.lastSeen = entity.lastSeen;
-        if (entity.count !== undefined) update.count = entity.count;
-        if (entity.sightingOfRef !== undefined)
-            update.sightingOfRef = entity.sightingOfRef;
-        if (entity.observedDataRefs !== undefined)
-            update.observedDataRefs = entity.observedDataRefs;
-        if (entity.whereSightedRefs !== undefined)
-            update.whereSightedRefs = entity.whereSightedRefs;
-        if (entity.tlp !== undefined) update.tlp = entity.tlp;
-
-        return update;
     }
 }
