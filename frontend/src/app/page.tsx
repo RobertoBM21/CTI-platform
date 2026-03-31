@@ -6,7 +6,7 @@ export default function Home() {
             <h1 className="text-3xl font-semibold tracking-tight">
                 CTI Platform
             </h1>
-            <p className="max-w-md text-center text-muted-foreground">
+            <p className="text-muted-foreground max-w-md text-center">
                 Cyber Threat Intelligence Platform — MVP
             </p>
             <div className="flex gap-3">
