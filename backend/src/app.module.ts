@@ -4,6 +4,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import { CyberModule } from './contexts/cyber/infrastructure/cyber.module';
+import { BundleIngestionService } from './contexts/shared/application/services/bundle-ingestion.service';
+import { StixMapper } from './contexts/shared/application/services/stix-mapper.service';
+import { IngestionController } from './contexts/shared/infrastructure/controllers/ingestion.controller';
 import { SharedModule } from './contexts/shared/infrastructure/shared.module';
 import { ThreatModule } from './contexts/threat/infrastructure/threat.module';
 
@@ -29,5 +32,7 @@ import { ThreatModule } from './contexts/threat/infrastructure/threat.module';
         ThreatModule,
         CyberModule,
     ],
+    controllers: [IngestionController],
+    providers: [StixMapper, BundleIngestionService],
 })
 export class AppModule {}

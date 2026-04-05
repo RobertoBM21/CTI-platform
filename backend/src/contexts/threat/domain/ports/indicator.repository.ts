@@ -19,7 +19,7 @@ export abstract class IndicatorRepository {
 
     abstract findByValue(value: string): Promise<Indicator[]>;
 
-    abstract create(entity: Indicator): Promise<Indicator>;
+    abstract save(entity: Indicator): Promise<Indicator>;
 
     abstract update(
         id: string,

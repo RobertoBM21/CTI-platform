@@ -59,42 +59,42 @@ describe('Threat API (e2e)', () => {
         const relationshipRepository = app.get(RelationshipMongooseRepository);
         const sightingRepository = app.get(SightingMongooseRepository);
 
-        await threatActorRepository.create(
+        await threatActorRepository.save(
             new ThreatActor({
                 id: 'threat-actor--actor-b',
                 name: 'Bravo Actor',
                 tlp: TLP.GREEN,
             }),
         );
-        await threatActorRepository.create(
+        await threatActorRepository.save(
             new ThreatActor({
                 id: 'threat-actor--actor-a',
                 name: 'Alpha Actor',
                 tlp: TLP.AMBER,
             }),
         );
-        await campaignRepository.create(
+        await campaignRepository.save(
             new Campaign({
                 id: 'campaign--camp-1',
                 name: 'Campaign One',
                 tlp: TLP.GREEN,
             }),
         );
-        await incidentRepository.create(
+        await incidentRepository.save(
             new Incident({
                 id: 'incident--inc-1',
                 name: 'Incident One',
                 tlp: TLP.RED,
             }),
         );
-        await attackPatternRepository.create(
+        await attackPatternRepository.save(
             new AttackPattern({
                 id: 'attack-pattern--ap-1',
                 name: 'Attack Pattern One',
                 tlp: TLP.WHITE,
             }),
         );
-        await indicatorRepository.create(
+        await indicatorRepository.save(
             new Indicator({
                 id: 'indicator--ind-1',
                 type: IocType.DOMAIN,
@@ -102,7 +102,7 @@ describe('Threat API (e2e)', () => {
                 tlp: TLP.GREEN,
             }),
         );
-        await indicatorRepository.create(
+        await indicatorRepository.save(
             new Indicator({
                 id: 'indicator--ind-2',
                 type: IocType.IPV4,
@@ -111,7 +111,7 @@ describe('Threat API (e2e)', () => {
             }),
         );
 
-        await malwareRepository.create(
+        await malwareRepository.save(
             new Malware({
                 id: 'malware--emotet',
                 name: 'Emotet',
@@ -119,7 +119,7 @@ describe('Threat API (e2e)', () => {
                 isFamily: true,
             }),
         );
-        await relationshipRepository.create(
+        await relationshipRepository.save(
             new Relationship({
                 id: 'relationship--r1',
                 relationshipType: RelationshipType.USES,
@@ -127,7 +127,7 @@ describe('Threat API (e2e)', () => {
                 targetRef: 'malware--emotet',
             }),
         );
-        await sightingRepository.create(
+        await sightingRepository.save(
             new Sighting({
                 id: 'sighting--s1',
                 sightingOfRef: 'threat-actor--actor-a',

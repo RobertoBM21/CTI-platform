@@ -78,7 +78,7 @@ describe('Cyber repositories integration', () => {
             confidence: 90,
         });
 
-        const created = await malwareRepository.create(malware);
+        const created = await malwareRepository.save(malware);
         const found = await malwareRepository.findById(
             'malware--malware-int-1',
         );
@@ -109,7 +109,7 @@ describe('Cyber repositories integration', () => {
             tlp: TLP.GREEN,
         });
 
-        await locationRepository.create(location);
+        await locationRepository.save(location);
         const found = await locationRepository.findById('location--loc-int-1');
 
         expect(found?.id).toBe('location--loc-int-1');
@@ -132,7 +132,7 @@ describe('Cyber repositories integration', () => {
             confidence: 75,
         });
 
-        await opinionRepository.create(opinion);
+        await opinionRepository.save(opinion);
         const found = await opinionRepository.findById(
             'opinion--opinion-int-1',
         );
@@ -165,7 +165,7 @@ describe('Cyber repositories integration', () => {
     });
 
     it('should apply requested sort order to paginated malware queries', async () => {
-        await malwareRepository.create(
+        await malwareRepository.save(
             new Malware({
                 id: 'malware--malware-int-2',
                 name: 'Zloader',
@@ -173,7 +173,7 @@ describe('Cyber repositories integration', () => {
                 isFamily: false,
             }),
         );
-        await malwareRepository.create(
+        await malwareRepository.save(
             new Malware({
                 id: 'malware--malware-int-3',
                 name: 'Amadey',
@@ -193,14 +193,14 @@ describe('Cyber repositories integration', () => {
     });
 
     it('should apply requested sort order to paginated location queries', async () => {
-        await locationRepository.create(
+        await locationRepository.save(
             new Location({
                 id: 'location--loc-int-2',
                 name: 'Zurich Lab',
                 country: 'CH',
             }),
         );
-        await locationRepository.create(
+        await locationRepository.save(
             new Location({
                 id: 'location--loc-int-3',
                 name: 'Austin Campus',

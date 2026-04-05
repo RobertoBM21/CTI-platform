@@ -37,4 +37,8 @@ export class IndicatorService {
     findById(id: string): Promise<Indicator | null> {
         return this.indicatorRepository.findById(id);
     }
+
+    save(entity: Indicator): Promise<Indicator> {
+        return this.indicatorRepository.save(entity);
+    }
 }

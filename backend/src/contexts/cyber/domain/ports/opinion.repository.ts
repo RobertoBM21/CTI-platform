@@ -12,7 +12,7 @@ export abstract class OpinionRepository {
         sort: SortCriteria,
     ): Promise<PaginatedResponse<Opinion>>;
 
-    abstract create(entity: Opinion): Promise<Opinion>;
+    abstract save(entity: Opinion): Promise<Opinion>;
 
     abstract update(
         id: string,

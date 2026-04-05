@@ -31,4 +31,8 @@ export class CampaignService {
     findById(id: string): Promise<Campaign | null> {
         return this.campaignRepository.findById(id);
     }
+
+    save(entity: Campaign): Promise<Campaign> {
+        return this.campaignRepository.save(entity);
+    }
 }

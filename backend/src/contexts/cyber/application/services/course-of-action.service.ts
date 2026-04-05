@@ -10,4 +10,8 @@ export class CourseOfActionService {
     findById(id: string): Promise<CourseOfAction | null> {
         return this.courseOfActionRepository.findById(id);
     }
+
+    save(entity: CourseOfAction): Promise<CourseOfAction> {
+        return this.courseOfActionRepository.save(entity);
+    }
 }

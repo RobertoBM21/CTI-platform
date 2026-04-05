@@ -16,7 +16,7 @@ export abstract class AttackPatternRepository {
         ref: string,
     ): Promise<AttackPattern | null>;
 
-    abstract create(entity: AttackPattern): Promise<AttackPattern>;
+    abstract save(entity: AttackPattern): Promise<AttackPattern>;
 
     abstract update(
         id: string,

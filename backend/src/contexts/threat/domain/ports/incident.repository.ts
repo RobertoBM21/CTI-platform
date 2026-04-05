@@ -12,7 +12,7 @@ export abstract class IncidentRepository {
         sort: SortCriteria,
     ): Promise<PaginatedResponse<Incident>>;
 
-    abstract create(entity: Incident): Promise<Incident>;
+    abstract save(entity: Incident): Promise<Incident>;
 
     abstract update(
         id: string,

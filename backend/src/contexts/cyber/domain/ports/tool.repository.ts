@@ -14,7 +14,7 @@ export abstract class ToolRepository {
 
     abstract findByName(name: string): Promise<Tool | null>;
 
-    abstract create(entity: Tool): Promise<Tool>;
+    abstract save(entity: Tool): Promise<Tool>;
 
     abstract update(id: string, entity: Partial<Tool>): Promise<Tool | null>;
 

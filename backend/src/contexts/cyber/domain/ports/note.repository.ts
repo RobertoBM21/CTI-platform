@@ -12,7 +12,7 @@ export abstract class NoteRepository {
         sort: SortCriteria,
     ): Promise<PaginatedResponse<Note>>;
 
-    abstract create(entity: Note): Promise<Note>;
+    abstract save(entity: Note): Promise<Note>;
 
     abstract update(id: string, entity: Partial<Note>): Promise<Note | null>;
 

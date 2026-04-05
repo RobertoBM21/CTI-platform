@@ -8,4 +8,8 @@ export class IdentityService {
     findById(id: string): Promise<Identity | null> {
         return this.identityRepository.findById(id);
     }
+
+    save(entity: Identity): Promise<Identity> {
+        return this.identityRepository.save(entity);
+    }
 }

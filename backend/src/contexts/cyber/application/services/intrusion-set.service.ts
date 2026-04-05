@@ -10,4 +10,8 @@ export class IntrusionSetService {
     findById(id: string): Promise<IntrusionSet | null> {
         return this.intrusionSetRepository.findById(id);
     }
+
+    save(entity: IntrusionSet): Promise<IntrusionSet> {
+        return this.intrusionSetRepository.save(entity);
+    }
 }

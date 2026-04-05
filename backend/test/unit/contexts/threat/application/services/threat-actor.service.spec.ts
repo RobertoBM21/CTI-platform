@@ -22,7 +22,7 @@ describe('ThreatActorService', () => {
                 meta: { total: 1, page: 1, limit: 10, totalPages: 1 },
             }),
             findByName: jest.fn(),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
         };
@@ -57,7 +57,7 @@ describe('ThreatActorService', () => {
             ),
             findAll: jest.fn(),
             findByName: jest.fn(),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
         };
@@ -76,7 +76,7 @@ describe('ThreatActorService', () => {
             findById: jest.fn().mockResolvedValue(null),
             findAll: jest.fn(),
             findByName: jest.fn(),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
         };
@@ -96,7 +96,7 @@ describe('ThreatActorService', () => {
                 meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
             }),
             findByName: jest.fn(),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
         };

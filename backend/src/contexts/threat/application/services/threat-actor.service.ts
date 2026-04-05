@@ -35,4 +35,8 @@ export class ThreatActorService {
     findById(id: string): Promise<ThreatActor | null> {
         return this.threatActorRepository.findById(id);
     }
+
+    save(entity: ThreatActor): Promise<ThreatActor> {
+        return this.threatActorRepository.save(entity);
+    }
 }

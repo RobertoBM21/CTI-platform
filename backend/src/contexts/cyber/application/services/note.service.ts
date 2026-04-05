@@ -8,4 +8,8 @@ export class NoteService {
     findById(id: string): Promise<Note | null> {
         return this.noteRepository.findById(id);
     }
+
+    save(entity: Note): Promise<Note> {
+        return this.noteRepository.save(entity);
+    }
 }

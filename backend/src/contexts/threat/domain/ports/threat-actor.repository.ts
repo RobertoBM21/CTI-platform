@@ -14,7 +14,7 @@ export abstract class ThreatActorRepository {
 
     abstract findByName(name: string): Promise<ThreatActor | null>;
 
-    abstract create(entity: ThreatActor): Promise<ThreatActor>;
+    abstract save(entity: ThreatActor): Promise<ThreatActor>;
 
     abstract update(
         id: string,

@@ -12,4 +12,8 @@ export class SightingService {
     findBySightingOfRef(sightingOfRef: string): Promise<Sighting[]> {
         return this.sightingRepository.findBySightingOfRef(sightingOfRef);
     }
+
+    save(entity: Sighting): Promise<Sighting> {
+        return this.sightingRepository.save(entity);
+    }
 }

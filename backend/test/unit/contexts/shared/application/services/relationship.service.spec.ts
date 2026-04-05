@@ -21,7 +21,7 @@ describe('RelationshipService', () => {
             findBySourceRef: jest.fn().mockResolvedValue([rel]),
             findByTargetRef: jest.fn().mockResolvedValue([rel]),
             findAll: jest.fn(),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
             ...overrides,

@@ -17,7 +17,7 @@ export abstract class SightingRepository {
 
     abstract findBySightingOfRef(sightingOfRef: string): Promise<Sighting[]>;
 
-    abstract create(entity: Sighting): Promise<Sighting>;
+    abstract save(entity: Sighting): Promise<Sighting>;
 
     abstract update(
         id: string,

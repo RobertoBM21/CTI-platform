@@ -18,4 +18,8 @@ export class RelationshipService {
     findByTargetRef(targetRef: string): Promise<Relationship[]> {
         return this.relationshipRepository.findByTargetRef(targetRef);
     }
+
+    save(entity: Relationship): Promise<Relationship> {
+        return this.relationshipRepository.save(entity);
+    }
 }

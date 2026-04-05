@@ -21,7 +21,7 @@ export abstract class RelationshipRepository {
 
     abstract findByTargetRef(targetRef: string): Promise<Relationship[]>;
 
-    abstract create(entity: Relationship): Promise<Relationship>;
+    abstract save(entity: Relationship): Promise<Relationship>;
 
     abstract update(
         id: string,

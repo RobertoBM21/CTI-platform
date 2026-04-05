@@ -96,7 +96,7 @@ describe('Threat repositories integration', () => {
             tlp: TLP.AMBER,
         });
 
-        const created = await threatActorRepository.create(actor);
+        const created = await threatActorRepository.save(actor);
         const found = await threatActorRepository.findById(
             'threat-actor--actor-int-1',
         );
@@ -118,7 +118,7 @@ describe('Threat repositories integration', () => {
             tlp: TLP.GREEN,
         });
 
-        await campaignRepository.create(campaign);
+        await campaignRepository.save(campaign);
         const found = await campaignRepository.findById('campaign--camp-int-1');
 
         expect(found?.id).toBe('campaign--camp-int-1');
@@ -137,7 +137,7 @@ describe('Threat repositories integration', () => {
             tlp: TLP.RED,
         });
 
-        await incidentRepository.create(incident);
+        await incidentRepository.save(incident);
         const found = await incidentRepository.findById('incident--inc-int-1');
 
         expect(found?.id).toBe('incident--inc-int-1');
@@ -156,7 +156,7 @@ describe('Threat repositories integration', () => {
             tlp: TLP.WHITE,
         });
 
-        await attackPatternRepository.create(attackPattern);
+        await attackPatternRepository.save(attackPattern);
         const found =
             await attackPatternRepository.findByExternalReference('T1003');
 
@@ -187,7 +187,7 @@ describe('Threat repositories integration', () => {
             tlp: TLP.GREEN,
         });
 
-        await indicatorRepository.create(indicator);
+        await indicatorRepository.save(indicator);
         const found = await indicatorRepository.findByValue('8.8.8.8');
 
         expect(found).toHaveLength(1);
@@ -222,13 +222,13 @@ describe('Threat repositories integration', () => {
     });
 
     it('should apply requested sort order to paginated threat actor queries', async () => {
-        await threatActorRepository.create(
+        await threatActorRepository.save(
             new ThreatActor({
                 id: 'threat-actor--actor-int-2',
                 name: 'Zulu Actor',
             }),
         );
-        await threatActorRepository.create(
+        await threatActorRepository.save(
             new ThreatActor({
                 id: 'threat-actor--actor-int-3',
                 name: 'Alpha Actor',
@@ -246,14 +246,14 @@ describe('Threat repositories integration', () => {
     });
 
     it('should apply requested sort order to paginated indicator queries', async () => {
-        await indicatorRepository.create(
+        await indicatorRepository.save(
             new Indicator({
                 id: 'indicator--ind-int-2',
                 type: IocType.DOMAIN,
                 value: 'zzz.example',
             }),
         );
-        await indicatorRepository.create(
+        await indicatorRepository.save(
             new Indicator({
                 id: 'indicator--ind-int-3',
                 type: IocType.DOMAIN,

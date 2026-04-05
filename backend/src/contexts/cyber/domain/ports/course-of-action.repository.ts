@@ -14,7 +14,7 @@ export abstract class CourseOfActionRepository {
 
     abstract findByName(name: string): Promise<CourseOfAction | null>;
 
-    abstract create(entity: CourseOfAction): Promise<CourseOfAction>;
+    abstract save(entity: CourseOfAction): Promise<CourseOfAction>;
 
     abstract update(
         id: string,

@@ -64,7 +64,7 @@ Implementado:
 - Capa de dominio compartida (`shared`) con SROs (Relationship, Sighting) y VOs transversales STIX.
 - Modelo de dominio `Threat` con propiedades comunes STIX 2.1 (entidades, value objects y puertos).
 - Schemas Mongoose espejo del dominio `Threat`.
-    - Servicios de lectura de `Threat` (catálogo, detalle, listado de Indicators).
+  - Servicios de lectura de `Threat` (catálogo, detalle, listado de Indicators).
 - Repositorios concretos Mongoose de `Threat` y wiring completo de `ThreatModule`.
 - Controladores REST de `Threat` para catálogo por entidad, detalle e Indicators.
 - Detalle enriquecido (`EnrichedDetail<T>`) con objetos relacionados resueltos y sightings.
@@ -73,6 +73,8 @@ Implementado:
 - Modelo de dominio `Cyber` con 10 SDOs técnicos STIX 2.1, 6 VOs nuevos, persistencia completa, 10 servicios read-only y `CyberModule` wired (sin controllers).
 - Servicios de resolución cross-context: `StixRefResolver` (despacho por prefijo STIX) y `DetailEnricher` (orquestación de enriquecimiento).
 - Servicios SRO en Shared: `RelationshipService` y `SightingService`.
+- Ingesta manual de bundles STIX 2.1 mediante `POST /ingestion/bundles`, con mapeo de 17 tipos soportados y respuesta de resumen (`total`, `processed`, `skipped`, `failed`).
+- Persistencia idempotente por `domainId` mediante `save()` en servicios y repositorios, usando upsert atómico y preservando `createdAt` cuando viene informado en el STIX original.
 - Suite de tests unitarios de dominio + application + integración de repositorios + e2e en verde.
 
 Frontend:
@@ -95,7 +97,6 @@ Estructura de workspace:
 Pendiente (siguiente fase):
 
 - Implementación del frontend: páginas funcionales que consuman la API REST del backend.
-- Ingesta manual (CRUD write): servicios de escritura + controllers + DTOs de validación.
 - Controladores REST para el contexto Cyber (cuando la UI lo requiera).
 - Ingesta automatizada (feeds STIX, TAXII).
 
@@ -116,6 +117,10 @@ Pendiente (siguiente fase):
 ### Health
 
 - `GET /health`
+
+### Ingestion
+
+- `POST /ingestion/bundles`
 
 ## Contrato de consulta del MVP
 
@@ -140,6 +145,17 @@ Pendiente (siguiente fase):
 - estado general del servicio (`ok` o `degraded`)
 - timestamp de la comprobación
 - estado de la conexión a MongoDB (`up` o `down`)
+
+## Ingesta manual de bundles STIX 2.1
+
+El backend expone `POST /ingestion/bundles` para cargar manualmente un bundle STIX 2.1 completo.
+
+- Acepta un DTO con `type = bundle`, `id` y un array `objects` no vacío.
+- Soporta los 17 tipos del dominio implementado (`Threat`, `Cyber` y SROs de `Shared`).
+- Los tipos desconocidos se ignoran sin abortar la ingesta.
+- Cada objeto se persiste mediante `save()` con semántica de upsert idempotente por `domainId`.
+- Si el objeto ya existe, se actualizan los campos mutables y se preserva el `createdAt` original de STIX cuando venía en el payload inicial.
+- La respuesta devuelve un resumen con `total`, `processed`, `skipped` y `failed`.
 
 ## Modelo de dominio (implementado)
 
@@ -175,12 +191,12 @@ backend/src/
 
 	contexts/
 		shared/
-			application/dtos/                        # DTOs reutilizables (p. ej. paginación)
-			application/services/                    # RelationshipService, SightingService
+			application/dtos/                        # DTOs reutilizables (p. ej. paginación, StixBundleDto)
+			application/services/                    # RelationshipService, SightingService, StixMapper, BundleIngestionService
 			domain/entities/                         # Entidades SRO (Relationship, Sighting)
 			domain/value-objects/                    # VOs transversales STIX (TLP, RelationshipType...)
 			domain/ports/                            # Puertos de repositorio SRO
-			infrastructure/controllers/              # Endpoints transversales (p. ej. health)
+			infrastructure/controllers/              # Endpoints transversales (p. ej. health, ingestion)
 			infrastructure/persistence/schemas/      # Schemas Mongoose SRO
 			infrastructure/persistence/repositories/ # Repositorios Mongoose SRO
 

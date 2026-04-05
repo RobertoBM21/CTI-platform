@@ -1,4 +1,4 @@
-import { Model, QueryFilter } from 'mongoose';
+import { Model, QueryFilter, UpdateQuery } from 'mongoose';
 import { PaginatedResponse } from '../../application/dtos/pagination.dto';
 import { SortCriteria } from '../../application/dtos/sort.dto';
 
@@ -53,8 +53,26 @@ export abstract class BaseMongooseRepository<
         };
     }
 
-    async create(entity: Entity): Promise<Entity> {
-        const doc = await this.model.create(this.toPersistence(entity) as Doc);
+    async save(entity: Entity): Promise<Entity> {
+        const data = this.toPersistence(entity);
+        const { domainId, createdAt, ...mutableFields } = data as Record<
+            string,
+            unknown
+        > & { domainId: string; createdAt: unknown };
+        const filter = { domainId } as QueryFilter<Doc>;
+        const update = {
+            $set: mutableFields,
+            $setOnInsert: { domainId, createdAt },
+        } as unknown as UpdateQuery<Doc>;
+
+        const doc = await this.model
+            .findOneAndUpdate(filter, update, {
+                upsert: true,
+                returnDocument: 'after',
+                timestamps: false,
+            })
+            .exec();
+
         return this.toDomain(doc);
     }
 
@@ -63,7 +81,7 @@ export abstract class BaseMongooseRepository<
             .findOneAndUpdate(
                 { domainId: id } as QueryFilter<Doc>,
                 this.toPersistencePartial(entity),
-                { new: true },
+                { returnDocument: 'after' },
             )
             .exec();
         return doc ? this.toDomain(doc) : null;

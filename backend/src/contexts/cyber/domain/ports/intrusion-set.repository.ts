@@ -14,7 +14,7 @@ export abstract class IntrusionSetRepository {
 
     abstract findByName(name: string): Promise<IntrusionSet | null>;
 
-    abstract create(entity: IntrusionSet): Promise<IntrusionSet>;
+    abstract save(entity: IntrusionSet): Promise<IntrusionSet>;
 
     abstract update(
         id: string,

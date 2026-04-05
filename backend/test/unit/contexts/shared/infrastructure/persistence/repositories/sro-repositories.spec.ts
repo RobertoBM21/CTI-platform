@@ -66,7 +66,7 @@ describe('SRO repositories integration', () => {
             tlp: TLP.AMBER,
         });
 
-        const created = await relationshipRepository.create(rel);
+        const created = await relationshipRepository.save(rel);
         const found = await relationshipRepository.findById(
             'relationship--rel-int-1',
         );
@@ -97,7 +97,7 @@ describe('SRO repositories integration', () => {
     });
 
     it('should paginate and filter Relationships', async () => {
-        await relationshipRepository.create(
+        await relationshipRepository.save(
             new Relationship({
                 id: 'relationship--rel-int-2',
                 relationshipType: RelationshipType.ATTRIBUTED_TO,
@@ -128,7 +128,7 @@ describe('SRO repositories integration', () => {
             tlp: TLP.RED,
         });
 
-        const created = await sightingRepository.create(sighting);
+        const created = await sightingRepository.save(sighting);
         const found = await sightingRepository.findById('sighting--sig-int-1');
 
         expect(created.id).toBe('sighting--sig-int-1');

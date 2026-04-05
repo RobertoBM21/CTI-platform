@@ -8,4 +8,8 @@ export class LocationService {
     findById(id: string): Promise<Location | null> {
         return this.locationRepository.findById(id);
     }
+
+    save(entity: Location): Promise<Location> {
+        return this.locationRepository.save(entity);
+    }
 }

@@ -12,7 +12,7 @@ export abstract class CampaignRepository {
         sort: SortCriteria,
     ): Promise<PaginatedResponse<Campaign>>;
 
-    abstract create(entity: Campaign): Promise<Campaign>;
+    abstract save(entity: Campaign): Promise<Campaign>;
 
     abstract update(
         id: string,

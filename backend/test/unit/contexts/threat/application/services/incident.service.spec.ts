@@ -19,7 +19,7 @@ describe('IncidentService', () => {
                 data: [incident],
                 meta: { total: 1, page: 2, limit: 10, totalPages: 1 },
             }),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
         };
@@ -50,7 +50,7 @@ describe('IncidentService', () => {
                     new Incident({ id: 'incident--inc-1', name: 'Incident 1' }),
                 ),
             findAll: jest.fn(),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
         };
@@ -66,7 +66,7 @@ describe('IncidentService', () => {
         const repository: IncidentRepository = {
             findById: jest.fn().mockResolvedValue(null),
             findAll: jest.fn(),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
         };
@@ -85,7 +85,7 @@ describe('IncidentService', () => {
                 data: [],
                 meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
             }),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
         };

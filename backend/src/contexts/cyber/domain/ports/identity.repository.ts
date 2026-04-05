@@ -14,7 +14,7 @@ export abstract class IdentityRepository {
 
     abstract findByName(name: string): Promise<Identity | null>;
 
-    abstract create(entity: Identity): Promise<Identity>;
+    abstract save(entity: Identity): Promise<Identity>;
 
     abstract update(
         id: string,

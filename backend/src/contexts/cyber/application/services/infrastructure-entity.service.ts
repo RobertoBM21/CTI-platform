@@ -13,4 +13,8 @@ export class InfrastructureEntityService {
     findById(id: string): Promise<InfrastructureEntity | null> {
         return this.infrastructureEntityRepository.findById(id);
     }
+
+    save(entity: InfrastructureEntity): Promise<InfrastructureEntity> {
+        return this.infrastructureEntityRepository.save(entity);
+    }
 }

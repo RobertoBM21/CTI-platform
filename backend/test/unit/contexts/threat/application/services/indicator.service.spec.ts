@@ -28,7 +28,7 @@ describe('IndicatorService', () => {
                 meta: { total: 1, page: 1, limit: 10, totalPages: 1 },
             }),
             findByValue: jest.fn(),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
             ...overrides,

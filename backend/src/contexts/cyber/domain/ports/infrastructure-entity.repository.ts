@@ -14,9 +14,7 @@ export abstract class InfrastructureEntityRepository {
 
     abstract findByName(name: string): Promise<InfrastructureEntity | null>;
 
-    abstract create(
-        entity: InfrastructureEntity,
-    ): Promise<InfrastructureEntity>;
+    abstract save(entity: InfrastructureEntity): Promise<InfrastructureEntity>;
 
     abstract update(
         id: string,

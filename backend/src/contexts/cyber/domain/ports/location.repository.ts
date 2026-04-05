@@ -14,7 +14,7 @@ export abstract class LocationRepository {
 
     abstract findByName(name: string): Promise<Location | null>;
 
-    abstract create(entity: Location): Promise<Location>;
+    abstract save(entity: Location): Promise<Location>;
 
     abstract update(
         id: string,

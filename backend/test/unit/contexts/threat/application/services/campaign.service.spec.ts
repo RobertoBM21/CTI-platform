@@ -18,7 +18,7 @@ describe('CampaignService', () => {
                 data: [campaign],
                 meta: { total: 1, page: 1, limit: 20, totalPages: 1 },
             }),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
         };
@@ -50,7 +50,7 @@ describe('CampaignService', () => {
                 }),
             ),
             findAll: jest.fn(),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
         };
@@ -66,7 +66,7 @@ describe('CampaignService', () => {
         const repository: CampaignRepository = {
             findById: jest.fn().mockResolvedValue(null),
             findAll: jest.fn(),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
         };
@@ -85,7 +85,7 @@ describe('CampaignService', () => {
                 data: [],
                 meta: { total: 0, page: 1, limit: 20, totalPages: 0 },
             }),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
         };

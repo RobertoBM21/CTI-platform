@@ -31,4 +31,8 @@ export class IncidentService {
     findById(id: string): Promise<Incident | null> {
         return this.incidentRepository.findById(id);
     }
+
+    save(entity: Incident): Promise<Incident> {
+        return this.incidentRepository.save(entity);
+    }
 }

@@ -35,4 +35,8 @@ export class AttackPatternService {
     findById(id: string): Promise<AttackPattern | null> {
         return this.attackPatternRepository.findById(id);
     }
+
+    save(entity: AttackPattern): Promise<AttackPattern> {
+        return this.attackPatternRepository.save(entity);
+    }
 }

@@ -8,4 +8,8 @@ export class ToolService {
     findById(id: string): Promise<Tool | null> {
         return this.toolRepository.findById(id);
     }
+
+    save(entity: Tool): Promise<Tool> {
+        return this.toolRepository.save(entity);
+    }
 }

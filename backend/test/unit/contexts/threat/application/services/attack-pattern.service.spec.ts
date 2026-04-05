@@ -19,7 +19,7 @@ describe('AttackPatternService', () => {
                 meta: { total: 1, page: 1, limit: 5, totalPages: 1 },
             }),
             findByExternalReference: jest.fn(),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
         };
@@ -51,7 +51,7 @@ describe('AttackPatternService', () => {
             ),
             findAll: jest.fn(),
             findByExternalReference: jest.fn(),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
         };
@@ -70,7 +70,7 @@ describe('AttackPatternService', () => {
             findById: jest.fn().mockResolvedValue(null),
             findAll: jest.fn(),
             findByExternalReference: jest.fn(),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
         };
@@ -90,7 +90,7 @@ describe('AttackPatternService', () => {
                 meta: { total: 0, page: 1, limit: 5, totalPages: 0 },
             }),
             findByExternalReference: jest.fn(),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
         };

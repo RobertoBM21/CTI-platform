@@ -17,7 +17,7 @@ describe('SightingService', () => {
             findById: jest.fn().mockResolvedValue(sighting),
             findBySightingOfRef: jest.fn().mockResolvedValue([sighting]),
             findAll: jest.fn(),
-            create: jest.fn(),
+            save: jest.fn(),
             update: jest.fn(),
             delete: jest.fn(),
             ...overrides,
