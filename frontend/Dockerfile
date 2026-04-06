@@ -21,8 +21,9 @@ CMD ["pnpm", "--filter", "@cti-platform/frontend", "dev"]
 
 # ---- Build ----
 FROM dependencies AS build
-ARG NEXT_PUBLIC_API_URL=http://localhost:3000
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ARG API_URL=http://localhost:3000
+ENV API_URL=$API_URL
+ENV NEXT_TELEMETRY_DISABLED=1 
 COPY frontend/src ./frontend/src
 COPY frontend/public ./frontend/public
 COPY frontend/next.config.ts frontend/next.config.ts
@@ -34,8 +35,12 @@ RUN pnpm --filter @cti-platform/frontend build
 # ---- Production ----
 FROM base AS production
 ENV NODE_ENV=production
-COPY --from=build /app/frontend/.next/standalone ./
-COPY --from=build /app/frontend/.next/static ./frontend/.next/static
-COPY --from=build /app/frontend/public ./frontend/public
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV HOSTNAME="0.0.0.0"
+ENV PORT=3000
+COPY --chown=node:node --from=build /app/frontend/.next/standalone ./
+COPY --chown=node:node --from=build /app/frontend/.next/static ./frontend/.next/static
+COPY --chown=node:node --from=build /app/frontend/public ./frontend/public
+USER node
 EXPOSE 3000
 CMD ["node", "frontend/server.js"]

@@ -252,8 +252,11 @@ Variables actuales:
 
 - `PORT` — Puerto del backend (default: 3000)
 - `NODE_ENV` — Entorno de ejecución
-- `MONGODB_URI` — URI de conexión a MongoDB
-- `NEXT_PUBLIC_API_URL` — URL del backend para el frontend
+- `CORS_ORIGIN` — Origen permitido para CORS
+- `MONGODB_URI` — URI de conexión a MongoDB (local)
+- `API_URL` — URL interna del backend para el proxy del frontend (local)
+- `MONGODB_URI_DOCKER` — URI de MongoDB con hostname Docker (`mongo`)
+- `API_URL_DOCKER` — URL del backend con hostname Docker (`app`)
 
 ## Ejecución local
 
@@ -297,7 +300,7 @@ pnpm test:e2e
 
 El proyecto mantiene dos opciones:
 
-- `docker-compose.dev.yml`: entorno de desarrollo (hot reload, volumen y puerto debug 9229).
+- `docker-compose.dev.yml`: entorno de desarrollo (hot reload y volúmenes).
 - `docker-compose.yml`: entorno de ejecución para producción.
 
 ### Desarrollo con Docker

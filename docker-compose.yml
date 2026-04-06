@@ -1,46 +1,48 @@
 services:
-    app:
-        build:
-            context: .
-            dockerfile: backend/Dockerfile
-            target: production
-        ports:
-            - '3000:3000'
-        environment:
-            - MONGODB_URI=mongodb://mongo:27017/cti-platform
-            - NODE_ENV=production
-        depends_on:
-            mongo:
-                condition: service_healthy
-        restart: unless-stopped
+  app:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: production
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      - PORT=${PORT}
+      - NODE_ENV=production
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      - MONGODB_URI=${MONGODB_URI_DOCKER}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
 
-    frontend:
-        build:
-            context: .
-            dockerfile: frontend/Dockerfile
-            target: production
-            args:
-                - NEXT_PUBLIC_API_URL=http://app:3000
-        ports:
-            - '3001:3000'
-        environment:
-            - NODE_ENV=production
-        depends_on:
-            - app
-        restart: unless-stopped
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      target: production
+      args:
+        - API_URL=${API_URL_DOCKER}
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - app
+    restart: unless-stopped
 
-    mongo:
-        image: mongo:7
-        ports:
-            - '27017:27017'
-        volumes:
-            - mongo-data:/data/db
-        healthcheck:
-            test: echo 'db.runCommand("ping").ok' | mongosh --quiet
-            interval: 10s
-            timeout: 5s
-            retries: 5
-        restart: unless-stopped
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
 volumes:
-    mongo-data:
+  mongo-data:

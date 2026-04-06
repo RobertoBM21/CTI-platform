@@ -1,52 +1,53 @@
 services:
-    app:
-        build:
-            context: .
-            dockerfile: backend/Dockerfile
-            target: development
-        ports:
-            - '3000:3000'
-            - '9229:9229'
-        volumes:
-            - .:/app
-            - /app/node_modules
-            - /app/backend/node_modules
-        environment:
-            - MONGODB_URI=mongodb://mongo:27017/cti-platform
-            - NODE_ENV=development
-        depends_on:
-            mongo:
-                condition: service_healthy
+  app:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: development
+    ports:
+      - "${PORT}:${PORT}"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/backend/node_modules
+    environment:
+      - PORT=${PORT}
+      - NODE_ENV=development
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      - MONGODB_URI=${MONGODB_URI_DOCKER}
+    depends_on:
+      mongo:
+        condition: service_healthy
 
-    frontend:
-        build:
-            context: .
-            dockerfile: frontend/Dockerfile
-            target: development
-        ports:
-            - '3001:3001'
-        volumes:
-            - .:/app
-            - /app/node_modules
-            - /app/frontend/node_modules
-            - /app/frontend/.next
-        environment:
-            - NEXT_PUBLIC_API_URL=http://app:3000
-            - NODE_ENV=development
-        depends_on:
-            - app
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      target: development
+    ports:
+      - "3001:3001"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/frontend/node_modules
+      - /app/frontend/.next
+    environment:
+      - NODE_ENV=development
+      - API_URL=${API_URL_DOCKER}
+    depends_on:
+      - app
 
-    mongo:
-        image: mongo:7
-        ports:
-            - '27017:27017'
-        volumes:
-            - mongo-data:/data/db
-        healthcheck:
-            test: echo 'db.runCommand("ping").ok' | mongosh --quiet
-            interval: 10s
-            timeout: 5s
-            retries: 5
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
-    mongo-data:
+  mongo-data:

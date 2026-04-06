@@ -1,5 +1,3 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
-
 export interface PaginatedResponse<T> {
     data: T[];
     meta: {
@@ -14,7 +12,7 @@ export async function apiFetch<T>(
     path: string,
     init?: RequestInit,
 ): Promise<T> {
-    const url = `${BASE_URL}${path}`;
+    const url = `/api${path}`;
     const res = await fetch(url, {
         ...init,
         headers: {

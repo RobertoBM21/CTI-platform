@@ -32,5 +32,6 @@ ENV NODE_ENV=production
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY backend/package.json backend/package.json
 RUN pnpm install --filter @cti-platform/backend --frozen-lockfile --prod
-COPY --from=build /app/backend/dist ./backend/dist
+COPY --chown=node:node --from=build /app/backend/dist ./backend/dist
+USER node
 CMD ["node", "backend/dist/main.js"]
