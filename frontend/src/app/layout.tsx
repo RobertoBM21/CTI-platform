@@ -1,18 +1,18 @@
 import { QueryProvider } from '@/providers/query-provider';
+import { AppHeader } from '@/shared/components/app-header';
+import { AppSidebar } from '@/shared/components/app-sidebar';
 import type { Metadata } from 'next';
-import { IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google';
+import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
-const ibmPlexSans = IBM_Plex_Sans({
+const geistSans = Geist({
     variable: '--font-sans',
     subsets: ['latin'],
-    weight: ['300', '400', '500', '600', '700'],
 });
 
-const ibmPlexMono = IBM_Plex_Mono({
+const geistMono = Geist_Mono({
     variable: '--font-mono',
     subsets: ['latin'],
-    weight: ['400', '500'],
 });
 
 export const metadata: Metadata = {
@@ -26,11 +26,30 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
-            <body
-                className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} antialiased`}
-            >
-                <QueryProvider>{children}</QueryProvider>
+        <html
+            lang="en"
+            suppressHydrationWarning
+            className={`${geistSans.variable} ${geistMono.variable}`}
+        >
+            <head>
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.classList.add('dark')}catch(e){}})()`,
+                    }}
+                />
+            </head>
+            <body className="selection:bg-primary/20 antialiased">
+                <QueryProvider>
+                    <div className="bg-background text-foreground flex h-screen overflow-hidden">
+                        <AppSidebar />
+                        <div className="flex flex-1 flex-col overflow-hidden">
+                            <AppHeader />
+                            <main className="flex-1 overflow-y-auto">
+                                {children}
+                            </main>
+                        </div>
+                    </div>
+                </QueryProvider>
             </body>
         </html>
     );

@@ -1,0 +1,122 @@
+import { TLP } from '@/shared/types/enums';
+import type { Incident } from './types';
+
+export const MOCK_INCIDENTS: Incident[] = [
+    {
+        id: 'incident--a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+        name: 'Ukrainian neo-Nazis will kill Zelenskyy if he agrees to territorial concessions',
+        description:
+            'An influence operation utilizing a Brazilian-targeted news outlet to spread a pro-Kremlin narrative claiming President Zelenskyy is under the lethal control of neo-Nazi militias, aiming to delegitimize Ukrainian sovereignty and peace negotiations.',
+        entityType: 'incident',
+        tlp: TLP.WHITE,
+        confidence: 85,
+        createdBy: 'EUvsDisinfo',
+        source: 'EUvsDisinfo',
+        createdAt: '2026-01-03T10:00:00Z',
+        updatedAt: '2026-01-04T08:30:00Z',
+    },
+    {
+        id: 'incident--b2c3d4e5-f6a7-8901-bcde-f12345678901',
+        name: 'The CIA and Ratcliffe participated in a drone attack on the Russian presidential residence in Valdai',
+        description:
+            'A coordinated disinformation incident alleging a CIA-led assassination attempt on Vladimir Putin. It utilizes fabricated evidence of a drone strike in Valdai to damage US-Ukraine diplomatic relations during high-level meetings.',
+        entityType: 'incident',
+        tlp: TLP.WHITE,
+        confidence: 90,
+        createdBy: 'EUvsDisinfo',
+        source: 'EUvsDisinfo',
+        createdAt: '2025-12-29T14:00:00Z',
+        updatedAt: '2025-12-30T09:15:00Z',
+    },
+    {
+        id: 'incident--c3d4e5f6-a7b8-9012-cdef-123456789012',
+        name: "Zelenskyy's regime is doomed after its terror attack on Putin's residence",
+        description:
+            "A coordinated disinformation incident utilizing a fabricated 'kinetic event' (drone attack) to influence U.S.-Russia-Ukraine diplomatic negotiations. The incident involved Russian state-linked media (Sputnik/NoticiasLatam) disseminating claims of a terrorist strike on Vladimir Putin's Valdai residence to justify a pivot away from peace agreements.",
+        entityType: 'incident',
+        tlp: TLP.WHITE,
+        confidence: 88,
+        createdBy: 'EUvsDisinfo',
+        source: 'EUvsDisinfo',
+        createdAt: '2026-01-05T16:00:00Z',
+        updatedAt: '2026-01-06T11:00:00Z',
+    },
+    {
+        id: 'incident--d4e5f6a7-b8c9-0123-defa-234567890123',
+        name: 'Ukrainians head the list of the "worst of the worst" criminals in the US',
+        description:
+            'A disinformation operation framing Ukrainian nationals as dominant figures in US criminal activity, leveraging selective crime statistics to undermine public support for Ukraine aid packages during congressional debates.',
+        entityType: 'incident',
+        tlp: TLP.GREEN,
+        confidence: 72,
+        createdBy: 'OSINT Analyst',
+        source: 'EUvsDisinfo',
+        createdAt: '2026-01-02T09:00:00Z',
+        updatedAt: '2026-01-03T14:20:00Z',
+    },
+    {
+        id: 'incident--e5f6a7b8-c9d0-1234-efab-345678901234',
+        name: "Zelenskyy's appointment of Chrystia Freeland shows Ukraine is a haven for neo-Nazis",
+        description:
+            'A recurring narrative exploiting the political appointment of Canadian politician Chrystia Freeland to spread anti-Ukraine propaganda, falsely connecting her family history to Nazi collaboration.',
+        entityType: 'incident',
+        tlp: TLP.AMBER,
+        confidence: 65,
+        createdBy: 'ThreatWatch',
+        source: 'EU STRAT',
+        createdAt: '2025-12-28T11:00:00Z',
+        updatedAt: '2025-12-29T16:45:00Z',
+    },
+    {
+        id: 'incident--f6a7b8c9-d0e1-2345-fabc-456789012345',
+        name: "EU sabotaged Trump's Ukraine peace plan, says The Guardian",
+        description:
+            'A disinformation incident involving the fabrication of a Guardian article headline to suggest EU interference in US peace negotiations with Russia over the Ukraine conflict.',
+        entityType: 'incident',
+        tlp: TLP.RED,
+        confidence: 45,
+        createdBy: 'MediaWatch',
+        source: 'OSINT Feed',
+        createdAt: '2026-01-01T08:00:00Z',
+        updatedAt: '2026-01-02T10:30:00Z',
+    },
+    {
+        id: 'incident--a7b8c9d0-e1f2-3456-abcd-567890123456',
+        name: 'NATO biological weapons labs found in Ukrainian hospitals',
+        description:
+            'Coordinated social media campaign promoting fabricated evidence of NATO-funded biological weapons programs operating within Ukrainian medical facilities, aimed at undermining Western military support.',
+        entityType: 'incident',
+        tlp: TLP.AMBER_STRICT,
+        confidence: 92,
+        createdBy: 'BioWatch',
+        source: 'EUvsDisinfo',
+        createdAt: '2025-12-25T07:00:00Z',
+        updatedAt: '2025-12-26T13:15:00Z',
+    },
+    {
+        id: 'incident--b8c9d0e1-f2a3-4567-bcde-678901234567',
+        name: 'French military secretly deployed troops to Odessa region',
+        description:
+            'False reports circulated across Russian state media claiming France deployed special forces to the Odessa region, designed to provoke Franco-Russian tensions and weaken European unity on Ukraine sanctions.',
+        entityType: 'incident',
+        tlp: TLP.GREEN,
+        confidence: 78,
+        createdBy: 'EUvsDisinfo',
+        source: 'EUvsDisinfo',
+        createdAt: '2025-12-20T15:00:00Z',
+        updatedAt: '2025-12-22T09:00:00Z',
+    },
+    {
+        id: 'incident--c9d0e1f2-a3b4-5678-cdef-789012345678',
+        name: 'Poland planning to annex Western Ukraine under NATO cover',
+        description:
+            'A persistent disinformation narrative claiming Poland intends to use NATO membership as justification to reclaim historically Polish territories in western Ukraine, aimed at fracturing Polish-Ukrainian relations.',
+        entityType: 'incident',
+        tlp: TLP.WHITE,
+        confidence: 81,
+        createdBy: 'EUvsDisinfo',
+        source: 'EU STRAT',
+        createdAt: '2025-12-18T12:00:00Z',
+        updatedAt: '2025-12-19T18:30:00Z',
+    },
+];
