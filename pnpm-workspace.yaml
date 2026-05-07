@@ -1,3 +1,12 @@
 packages:
   - backend
   - frontend
+allowBuilds:
+  '@nestjs/core': true
+  '@scarf/scarf': true
+  '@swc/core': true
+  esbuild: true
+  mongodb-memory-server: true
+  msw: true
+  sharp: true
+  unrs-resolver: true

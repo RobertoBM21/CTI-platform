@@ -1,16 +1,14 @@
 'use client';
 
 import { ResultPagination } from '@/shared/components/result-pagination';
-import { Search } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { MOCK_INCIDENTS } from '../mock-data';
+import { Loader2, Search } from 'lucide-react';
+import { useState } from 'react';
+import { useIncidents } from '../hooks/use-incidents';
 import type { IncidentFilters, ViewMode } from '../types';
 import { IncidentCard } from './incident-card';
 import { IncidentFiltersBar } from './incident-filters-bar';
 import { IncidentFiltersPanel } from './incident-filters-panel';
 import { IncidentListRow } from './incident-list-row';
-
-const PAGE_SIZE = 3;
 
 export function IncidentCatalog() {
     const [search, setSearch] = useState('');
@@ -19,47 +17,15 @@ export function IncidentCatalog() {
     const [page, setPage] = useState(1);
     const [filters, setFilters] = useState<IncidentFilters>({});
 
-    const filteredIncidents = useMemo(() => {
-        let result = [...MOCK_INCIDENTS];
+    const { data, isLoading, isError } = useIncidents(search, filters, page);
 
-        // Text search
-        if (search.trim()) {
-            const term = search.toLowerCase();
-            result = result.filter(
-                (i) =>
-                    i.name.toLowerCase().includes(term) ||
-                    i.description?.toLowerCase().includes(term) ||
-                    i.createdBy.toLowerCase().includes(term),
-            );
-        }
-
-        // TLP filter
-        if (filters.tlp) {
-            result = result.filter((i) => i.tlp === filters.tlp);
-        }
-
-        // Sorting
-        const sortOrder = filters.sortOrder ?? 'desc';
-        result.sort((a, b) => {
-            const comparison =
-                new Date(a.createdAt).getTime() -
-                new Date(b.createdAt).getTime();
-            return sortOrder === 'desc' ? -comparison : comparison;
-        });
-
-        return result;
-    }, [search, filters]);
-
-    const totalIncidents = filteredIncidents.length;
-    const totalPages = Math.max(1, Math.ceil(totalIncidents / PAGE_SIZE));
-    const currentPage = Math.min(page, totalPages);
-    const paginatedIncidents = filteredIncidents.slice(
-        (currentPage - 1) * PAGE_SIZE,
-        currentPage * PAGE_SIZE,
-    );
+    const incidents = data?.data ?? [];
+    const meta = data?.meta;
+    const totalIncidents = meta?.total ?? 0;
+    const totalPages = meta?.totalPages ?? 1;
     const visibleStart =
-        totalIncidents === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
-    const visibleEnd = Math.min(currentPage * PAGE_SIZE, totalIncidents);
+        totalIncidents === 0 ? 0 : (page - 1) * (meta?.limit ?? 3) + 1;
+    const visibleEnd = Math.min(page * (meta?.limit ?? 3), totalIncidents);
 
     const handleSearchChange = (value: string) => {
         setSearch(value);
@@ -111,7 +77,26 @@ export function IncidentCatalog() {
                 )}
 
                 {/* Results */}
-                {totalIncidents === 0 ? (
+                {isLoading ? (
+                    <div className="py-24 text-center">
+                        <Loader2 className="text-foreground/30 mx-auto mb-4 size-10 animate-spin" />
+                        <p className="text-foreground/50 text-sm">
+                            Loading incidents…
+                        </p>
+                    </div>
+                ) : isError ? (
+                    <div className="py-24 text-center">
+                        <div className="bg-card border-card mx-auto mb-6 flex size-20 items-center justify-center rounded-full border shadow-sm">
+                            <Search className="text-foreground/20 size-8" />
+                        </div>
+                        <h3 className="text-lg font-bold">
+                            Failed to load incidents
+                        </h3>
+                        <p className="text-foreground/50 mt-2">
+                            Check your connection and try again.
+                        </p>
+                    </div>
+                ) : totalIncidents === 0 ? (
                     <div className="py-24 text-center">
                         <div className="bg-card border-card mx-auto mb-6 flex size-20 items-center justify-center rounded-full border shadow-sm">
                             <Search className="text-foreground/20 size-8" />
@@ -138,7 +123,7 @@ export function IncidentCatalog() {
 
                         {viewMode === 'list' ? (
                             <div className="flex flex-col gap-5">
-                                {paginatedIncidents.map((incident) => (
+                                {incidents.map((incident) => (
                                     <IncidentListRow
                                         key={incident.id}
                                         incident={incident}
@@ -147,7 +132,7 @@ export function IncidentCatalog() {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                                {paginatedIncidents.map((incident) => (
+                                {incidents.map((incident) => (
                                     <IncidentCard
                                         key={incident.id}
                                         incident={incident}
@@ -158,7 +143,7 @@ export function IncidentCatalog() {
 
                         {totalPages > 1 && (
                             <ResultPagination
-                                currentPage={currentPage}
+                                currentPage={page}
                                 totalPages={totalPages}
                                 onPageChange={setPage}
                                 className="mt-8"

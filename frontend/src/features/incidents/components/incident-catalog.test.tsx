@@ -2,11 +2,42 @@ import { IncidentCatalog } from '@/features/incidents';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
+import { MOCK_INCIDENTS } from '../mock-data';
 
 vi.mock('next/navigation', () => ({
     usePathname: () => '/incidents',
     useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
     redirect: vi.fn(),
+}));
+
+vi.mock('../hooks/use-incidents', () => ({
+    useIncidents: (search: string, filters: { tlp?: string }) => {
+        let data = [...MOCK_INCIDENTS];
+        if (search.trim()) {
+            const term = search.toLowerCase();
+            data = data.filter(
+                (i) =>
+                    i.name.toLowerCase().includes(term) ||
+                    i.description?.toLowerCase().includes(term),
+            );
+        }
+        if (filters.tlp) {
+            data = data.filter((i) => i.tlp === filters.tlp);
+        }
+        return {
+            data: {
+                data: data.slice(0, 3),
+                meta: {
+                    total: data.length,
+                    page: 1,
+                    limit: 3,
+                    totalPages: Math.ceil(data.length / 3),
+                },
+            },
+            isLoading: false,
+            isError: false,
+        };
+    },
 }));
 
 describe('IncidentCatalog', () => {

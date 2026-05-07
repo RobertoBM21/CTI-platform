@@ -36,6 +36,7 @@ import {
     AttackMotivation,
     RelationshipType,
     ResourceLevel,
+    TLP,
 } from '../../domain/value-objects';
 
 export interface MappedStixObject {
@@ -82,6 +83,7 @@ export class StixMapper {
             confidence: o.confidence as number | undefined,
             revoked: o.revoked as boolean | undefined,
             externalReferences: this.mapExternalReferences(o),
+            tlp: this.asEnumValue(o.x_tlp, TLP),
             createdAt: o.created ? new Date(o.created as string) : undefined,
             updatedAt: o.modified ? new Date(o.modified as string) : undefined,
         };

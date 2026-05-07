@@ -7,8 +7,8 @@ export interface Incident {
     entityType: EntityType;
     tlp: TLP;
     confidence: number | null;
-    createdBy: string;
-    source: string;
+    createdBy: string | null;
+    source: string | null;
     createdAt: string;
     updatedAt: string;
 }

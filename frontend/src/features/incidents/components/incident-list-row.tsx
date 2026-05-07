@@ -50,19 +50,29 @@ export function IncidentListRow({ incident, className }: IncidentListRowProps) {
                     <EntityTypeBadge entityType={incident.entityType} />
                     <TlpBadge tlp={incident.tlp} />
 
-                    <div className="text-foreground/72 flex items-center gap-2.5">
-                        <div className="bg-muted/50 text-foreground flex size-6 items-center justify-center rounded-full text-[0.6rem] font-bold">
-                            {incident.createdBy.charAt(0).toUpperCase()}
+                    {(incident.createdBy ?? incident.source) && (
+                        <div className="text-foreground/72 flex items-center gap-2.5">
+                            <div className="bg-muted/50 text-foreground flex size-6 items-center justify-center rounded-full text-[0.6rem] font-bold">
+                                {(incident.createdBy ?? incident.source)!
+                                    .charAt(0)
+                                    .toUpperCase()}
+                            </div>
+                            <span className="text-xs font-semibold">
+                                {incident.createdBy ?? incident.source}
+                            </span>
+                            {incident.source && (
+                                <>
+                                    <span className="text-foreground/20">
+                                        •
+                                    </span>
+                                    <div className="text-foreground/58 flex items-center gap-1.5 text-xs">
+                                        <Building2 className="size-3" />
+                                        <span>{incident.source}</span>
+                                    </div>
+                                </>
+                            )}
                         </div>
-                        <span className="text-xs font-semibold">
-                            {incident.createdBy}
-                        </span>
-                        <span className="text-foreground/20">•</span>
-                        <div className="text-foreground/58 flex items-center gap-1.5 text-xs">
-                            <Building2 className="size-3" />
-                            <span>{incident.source}</span>
-                        </div>
-                    </div>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-3">

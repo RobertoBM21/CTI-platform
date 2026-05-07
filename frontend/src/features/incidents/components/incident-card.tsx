@@ -51,19 +51,26 @@ export function IncidentCard({ incident, className }: IncidentCardProps) {
             )}
 
             {/* Author section */}
-            <div className="bg-muted/30 mb-5 flex items-center gap-3 rounded-xl p-2">
-                <div className="bg-card flex size-8 items-center justify-center rounded-full text-xs font-bold shadow-sm">
-                    {incident.createdBy.charAt(0).toUpperCase()}
+            {(incident.createdBy ?? incident.source) && (
+                <div className="bg-muted/30 mb-5 flex items-center gap-3 rounded-xl p-2">
+                    <div className="bg-card flex size-8 items-center justify-center rounded-full text-xs font-bold shadow-sm">
+                        {(incident.createdBy ?? incident.source)!
+                            .charAt(0)
+                            .toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-bold">
+                            {incident.createdBy ?? incident.source}
+                        </p>
+                        {incident.source && (
+                            <p className="text-foreground/60 mt-0.5 flex items-center gap-1 truncate text-[0.6rem]">
+                                <Building2 className="size-[10px]" />{' '}
+                                {incident.source}
+                            </p>
+                        )}
+                    </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-bold">
-                        {incident.createdBy}
-                    </p>
-                    <p className="text-foreground/60 mt-0.5 flex items-center gap-1 truncate text-[0.6rem]">
-                        <Building2 className="size-[10px]" /> {incident.source}
-                    </p>
-                </div>
-            </div>
+            )}
 
             {/* Footer */}
             <div className="border-border/50 mt-auto flex items-center justify-between border-t pt-4">
