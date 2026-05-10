@@ -4,14 +4,17 @@ import { Identity } from '../../../cyber/domain/entities/identity.entity';
 import { InfrastructureEntity } from '../../../cyber/domain/entities/infrastructure-entity.entity';
 import { IntrusionSet } from '../../../cyber/domain/entities/intrusion-set.entity';
 import { Location } from '../../../cyber/domain/entities/location.entity';
+import { MalwareAnalysis } from '../../../cyber/domain/entities/malware-analysis.entity';
 import { Malware } from '../../../cyber/domain/entities/malware.entity';
 import { Note } from '../../../cyber/domain/entities/note.entity';
+import { ObservedData } from '../../../cyber/domain/entities/observed-data.entity';
 import { Opinion } from '../../../cyber/domain/entities/opinion.entity';
 import { Tool } from '../../../cyber/domain/entities/tool.entity';
 import { Vulnerability } from '../../../cyber/domain/entities/vulnerability.entity';
 import {
     IdentityClass,
     InfrastructureType,
+    MalwareAnalysisResult,
     MalwareType,
     OpinionValue,
     Region,
@@ -65,6 +68,8 @@ export class StixMapper {
         ['course-of-action', (o) => this.mapCourseOfAction(o)],
         ['note', (o) => this.mapNote(o)],
         ['opinion', (o) => this.mapOpinion(o)],
+        ['malware-analysis', (o) => this.mapMalwareAnalysis(o)],
+        ['observed-data', (o) => this.mapObservedData(o)],
         ['relationship', (o) => this.mapRelationship(o)],
         ['sighting', (o) => this.mapSighting(o)],
     ]);
@@ -418,6 +423,50 @@ export class StixMapper {
             objectRefs: o.object_refs as string[] | undefined,
             explanation: o.explanation as string | undefined,
             authors: o.authors as string[] | undefined,
+        });
+    }
+
+    private mapMalwareAnalysis(o: Record<string, unknown>) {
+        return new MalwareAnalysis({
+            ...this.commonProps(o),
+            product: o.product as string,
+            version: o.version as string | undefined,
+            hostVmRef: o.host_vm_ref as string | undefined,
+            operatingSystemRef: o.operating_system_ref as string | undefined,
+            installedSoftwareRefs: o.installed_software_refs as
+                | string[]
+                | undefined,
+            configurationVersion: o.configuration_version as string | undefined,
+            modules: o.modules as string[] | undefined,
+            analysisEngineVersion: o.analysis_engine_version as
+                | string
+                | undefined,
+            analysisDefinitionVersion: o.analysis_definition_version as
+                | string
+                | undefined,
+            submitted: o.submitted
+                ? new Date(o.submitted as string)
+                : undefined,
+            analysisStarted: o.analysis_started
+                ? new Date(o.analysis_started as string)
+                : undefined,
+            analysisEnded: o.analysis_ended
+                ? new Date(o.analysis_ended as string)
+                : undefined,
+            resultName: o.result_name as string | undefined,
+            result: this.asEnumValue(o.result, MalwareAnalysisResult),
+            analysisScoRefs: o.analysis_sco_refs as string[] | undefined,
+            sampleRef: o.sample_ref as string | undefined,
+        });
+    }
+
+    private mapObservedData(o: Record<string, unknown>) {
+        return new ObservedData({
+            ...this.commonProps(o),
+            firstObserved: new Date(o.first_observed as string),
+            lastObserved: new Date(o.last_observed as string),
+            numberObserved: o.number_observed as number,
+            objectRefs: o.object_refs as string[] | undefined,
         });
     }
 

@@ -5,8 +5,10 @@ import {
     InfrastructureEntityService,
     IntrusionSetService,
     LocationService,
+    MalwareAnalysisService,
     MalwareService,
     NoteService,
+    ObservedDataService,
     OpinionService,
     ToolService,
     VulnerabilityService,
@@ -44,6 +46,8 @@ export class StixRefResolver {
         private readonly courseOfActionService: CourseOfActionService,
         private readonly noteService: NoteService,
         private readonly opinionService: OpinionService,
+        private readonly malwareAnalysisService: MalwareAnalysisService,
+        private readonly observedDataService: ObservedDataService,
         private readonly relationshipService: RelationshipService,
         private readonly sightingService: SightingService,
     ) {
@@ -66,6 +70,8 @@ export class StixRefResolver {
             ['course-of-action', this.courseOfActionService],
             ['note', this.noteService],
             ['opinion', this.opinionService],
+            ['malware-analysis', this.malwareAnalysisService],
+            ['observed-data', this.observedDataService],
             ['relationship', this.relationshipService],
             ['sighting', this.sightingService],
         ]);

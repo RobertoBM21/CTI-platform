@@ -4,8 +4,10 @@ import { IdentityService } from '../../../cyber/application/services/identity.se
 import { InfrastructureEntityService } from '../../../cyber/application/services/infrastructure-entity.service';
 import { IntrusionSetService } from '../../../cyber/application/services/intrusion-set.service';
 import { LocationService } from '../../../cyber/application/services/location.service';
+import { MalwareAnalysisService } from '../../../cyber/application/services/malware-analysis.service';
 import { MalwareService } from '../../../cyber/application/services/malware.service';
 import { NoteService } from '../../../cyber/application/services/note.service';
+import { ObservedDataService } from '../../../cyber/application/services/observed-data.service';
 import { OpinionService } from '../../../cyber/application/services/opinion.service';
 import { ToolService } from '../../../cyber/application/services/tool.service';
 import { VulnerabilityService } from '../../../cyber/application/services/vulnerability.service';
@@ -46,6 +48,8 @@ export class BundleIngestionService {
         courseOfActionService: CourseOfActionService,
         noteService: NoteService,
         opinionService: OpinionService,
+        malwareAnalysisService: MalwareAnalysisService,
+        observedDataService: ObservedDataService,
         relationshipService: RelationshipService,
         sightingService: SightingService,
     ) {
@@ -68,6 +72,8 @@ export class BundleIngestionService {
             ['course-of-action', courseOfActionService],
             ['note', noteService],
             ['opinion', opinionService],
+            ['malware-analysis', malwareAnalysisService],
+            ['observed-data', observedDataService],
             ['relationship', relationshipService],
             ['sighting', sightingService],
         ]);

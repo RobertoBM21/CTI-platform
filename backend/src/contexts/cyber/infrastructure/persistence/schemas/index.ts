@@ -24,11 +24,21 @@ export {
     type LocationDoc,
 } from './location.schema';
 export {
+    MalwareAnalysisDocument,
+    MalwareAnalysisSchema,
+    type MalwareAnalysisDoc,
+} from './malware-analysis.schema';
+export {
     MalwareDocument,
     MalwareSchema,
     type MalwareDoc,
 } from './malware.schema';
 export { NoteDocument, NoteSchema, type NoteDoc } from './note.schema';
+export {
+    ObservedDataDocument,
+    ObservedDataSchema,
+    type ObservedDataDoc,
+} from './observed-data.schema';
 export {
     OpinionDocument,
     OpinionSchema,

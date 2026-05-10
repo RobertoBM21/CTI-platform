@@ -5,6 +5,7 @@ export { ResourceLevel } from '../../../shared/domain/value-objects/resource-lev
 export { TLP } from '../../../shared/domain/value-objects/tlp.vo';
 export { IdentityClass } from './identity-class.vo';
 export { InfrastructureType } from './infrastructure-type.vo';
+export { MalwareAnalysisResult } from './malware-analysis-result.vo';
 export { MalwareType } from './malware-type.vo';
 export { OpinionValue } from './opinion-value.vo';
 export { Region } from './region.vo';

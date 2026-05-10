@@ -31,6 +31,8 @@ describe('BundleIngestionService', () => {
         const courseOfActionService = buildMockService();
         const noteService = buildMockService();
         const opinionService = buildMockService();
+        const malwareAnalysisService = buildMockService();
+        const observedDataService = buildMockService();
         const relationshipService = buildMockService();
         const sightingService = buildMockService();
 
@@ -51,6 +53,8 @@ describe('BundleIngestionService', () => {
             courseOfActionService as never,
             noteService as never,
             opinionService as never,
+            malwareAnalysisService as never,
+            observedDataService as never,
             relationshipService as never,
             sightingService as never,
         ) as unknown as BundleIngestionService;
