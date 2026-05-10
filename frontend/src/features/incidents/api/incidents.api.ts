@@ -1,6 +1,15 @@
 import { apiFetch, type PaginatedResponse } from '@/lib/api-client';
 import type { TLP } from '@/shared/types/enums';
-import type { Incident, IncidentFilters } from '../types';
+import type {
+    Incident,
+    IncidentDetail,
+    IncidentDetailEntity,
+    IncidentFilters,
+    RelatedObjectItem,
+    SightingItem,
+    StixExternalRef,
+    StixObject,
+} from '../types';
 
 interface BackendIncident {
     id: string;
@@ -11,12 +20,7 @@ interface BackendIncident {
     objective?: string;
     confidence?: number;
     revoked: boolean;
-    externalReferences: Array<{
-        sourceName: string;
-        description?: string;
-        externalId?: string;
-        url?: string;
-    }>;
+    externalReferences: StixExternalRef[];
     tlp: TLP;
     createdAt: string;
     updatedAt: string;
@@ -38,6 +42,17 @@ function adaptIncident(b: BackendIncident): Incident {
     };
 }
 
+function adaptIncidentDetail(b: BackendIncident): IncidentDetailEntity {
+    return {
+        ...adaptIncident(b),
+        firstSeen: b.firstSeen,
+        lastSeen: b.lastSeen,
+        objective: b.objective,
+        revoked: b.revoked,
+        externalReferences: b.externalReferences,
+    };
+}
+
 export async function fetchIncidents(
     filters: IncidentFilters & { limit?: number },
 ): Promise<PaginatedResponse<Incident>> {
@@ -56,5 +71,22 @@ export async function fetchIncidents(
     return {
         data: raw.data.map(adaptIncident),
         meta: raw.meta,
+    };
+}
+
+export async function fetchIncidentDetail(id: string): Promise<IncidentDetail> {
+    const raw = await apiFetch<{
+        entity: BackendIncident;
+        relatedObjects: Array<{
+            relationship: RelatedObjectItem['relationship'];
+            object: StixObject | null;
+        }>;
+        sightings: SightingItem[];
+    }>(`/incidents/${encodeURIComponent(id)}`);
+
+    return {
+        entity: adaptIncidentDetail(raw.entity),
+        relatedObjects: raw.relatedObjects,
+        sightings: raw.sightings,
     };
 }

@@ -1,5 +1,5 @@
 services:
-  app:
+  backend:
     build:
       context: .
       dockerfile: backend/Dockerfile
@@ -28,7 +28,7 @@ services:
     environment:
       - NODE_ENV=production
     depends_on:
-      - app
+      - backend
     restart: unless-stopped
 
   mongo:

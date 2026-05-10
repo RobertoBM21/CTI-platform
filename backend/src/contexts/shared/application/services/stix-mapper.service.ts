@@ -69,11 +69,30 @@ export class StixMapper {
         ['sighting', (o) => this.mapSighting(o)],
     ]);
 
-    map(stixObject: Record<string, unknown>): MappedStixObject | null {
+    private _markingContext?: ReadonlyMap<string, TLP>;
+
+    map(
+        stixObject: Record<string, unknown>,
+        markingContext?: ReadonlyMap<string, TLP>,
+    ): MappedStixObject | null {
         const type = stixObject.type as string;
         const mapper = this.mappers.get(type);
         if (!mapper) return null;
-        return { type, entity: mapper(stixObject) };
+        this._markingContext = markingContext;
+        const entity = mapper(stixObject);
+        this._markingContext = undefined;
+        return { type, entity };
+    }
+
+    private resolveTlp(o: Record<string, unknown>): TLP | undefined {
+        if (!this._markingContext) return undefined;
+        const refs = o.object_marking_refs as string[] | undefined;
+        if (!Array.isArray(refs)) return undefined;
+        for (const ref of refs) {
+            const tlp = this._markingContext.get(ref);
+            if (tlp !== undefined) return tlp;
+        }
+        return undefined;
     }
 
     private commonProps(o: Record<string, unknown>) {
@@ -83,7 +102,7 @@ export class StixMapper {
             confidence: o.confidence as number | undefined,
             revoked: o.revoked as boolean | undefined,
             externalReferences: this.mapExternalReferences(o),
-            tlp: this.asEnumValue(o.x_tlp, TLP),
+            tlp: this.resolveTlp(o),
             createdAt: o.created ? new Date(o.created as string) : undefined,
             updatedAt: o.modified ? new Date(o.modified as string) : undefined,
         };

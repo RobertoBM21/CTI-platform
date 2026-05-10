@@ -1,3 +1,4 @@
+import { PageTitleProvider } from '@/providers/page-title-context';
 import { QueryProvider } from '@/providers/query-provider';
 import { AppHeader } from '@/shared/components/app-header';
 import { AppSidebar } from '@/shared/components/app-sidebar';
@@ -40,15 +41,17 @@ export default function RootLayout({
             </head>
             <body className="selection:bg-primary/20 antialiased">
                 <QueryProvider>
-                    <div className="bg-background text-foreground flex h-screen overflow-hidden">
-                        <AppSidebar />
-                        <div className="flex flex-1 flex-col overflow-hidden">
-                            <AppHeader />
-                            <main className="flex-1 overflow-y-auto">
-                                {children}
-                            </main>
+                    <PageTitleProvider>
+                        <div className="bg-background text-foreground flex h-screen overflow-hidden">
+                            <AppSidebar />
+                            <div className="flex flex-1 flex-col overflow-hidden">
+                                <AppHeader />
+                                <main className="flex-1 overflow-y-auto">
+                                    {children}
+                                </main>
+                            </div>
                         </div>
-                    </div>
+                    </PageTitleProvider>
                 </QueryProvider>
             </body>
         </html>

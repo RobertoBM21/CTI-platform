@@ -1,4 +1,5 @@
 import { StixMapper } from '../../../../../../src/contexts/shared/application/services/stix-mapper.service';
+import { TLP } from '../../../../../../src/contexts/shared/domain/value-objects';
 
 describe('StixMapper', () => {
     let mapper: StixMapper;
@@ -407,5 +408,48 @@ describe('StixMapper', () => {
         expect(entity.externalReferences).toHaveLength(1);
         expect(entity.externalReferences[0].sourceName).toBe('cve');
         expect(entity.externalReferences[0].externalId).toBe('CVE-2021-1234');
+    });
+
+    describe('TLP resolution', () => {
+        const stixObject = {
+            type: 'vulnerability',
+            id: 'vulnerability--abc',
+            name: 'CVE-2021-1234',
+            created: '2021-01-01T00:00:00.000Z',
+            modified: '2021-01-01T00:00:00.000Z',
+        };
+
+        it('should resolve TLP from object_marking_refs via markingContext', () => {
+            const mdId =
+                'marking-definition--f88d31f6-1088-4870-be49-4d8e449f5b8a';
+            const markingContext = new Map([[mdId, TLP.AMBER]]);
+            const result = mapper.map(
+                { ...stixObject, object_marking_refs: [mdId] },
+                markingContext,
+            );
+            assertNonNull(result);
+            expect((result.entity as { tlp: TLP }).tlp).toBe(TLP.AMBER);
+        });
+
+        it('should resolve TLP.CLEAR from object_marking_refs', () => {
+            const mdId =
+                'marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9';
+            const markingContext = new Map([[mdId, TLP.CLEAR]]);
+            const result = mapper.map(
+                { ...stixObject, object_marking_refs: [mdId] },
+                markingContext,
+            );
+            assertNonNull(result);
+            expect((result.entity as { tlp: TLP }).tlp).toBe(TLP.CLEAR);
+        });
+
+        it('should return TLP.WHITE (entity default) when no markingContext is provided', () => {
+            const result = mapper.map(stixObject);
+            assertNonNull(result);
+            // Entities default tlp to TLP.WHITE when no marking is resolved
+            expect((result.entity as { tlp: TLP | undefined }).tlp).toBe(
+                TLP.WHITE,
+            );
+        });
     });
 });

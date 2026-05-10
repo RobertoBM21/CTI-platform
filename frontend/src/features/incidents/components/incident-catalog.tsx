@@ -45,7 +45,6 @@ export function IncidentCatalog() {
     return (
         <div className="animate-in fade-in flex-1 px-6 pb-10 duration-300 lg:px-12">
             <div className="mx-auto max-w-6xl">
-                {/* Title */}
                 <div className="mt-4 mb-10">
                     <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
                         Intelligence Library
@@ -76,7 +75,6 @@ export function IncidentCatalog() {
                     />
                 )}
 
-                {/* Results */}
                 {isLoading ? (
                     <div className="py-24 text-center">
                         <Loader2 className="text-foreground/30 mx-auto mb-4 size-10 animate-spin" />
@@ -101,7 +99,9 @@ export function IncidentCatalog() {
                         <div className="bg-card border-card mx-auto mb-6 flex size-20 items-center justify-center rounded-full border shadow-sm">
                             <Search className="text-foreground/20 size-8" />
                         </div>
-                        <h3 className="text-lg font-bold">No reports found</h3>
+                        <h3 className="text-lg font-bold">
+                            No incidents found
+                        </h3>
                         <p className="text-foreground/50 mt-2">
                             Try adjusting your filters or search query.
                         </p>

@@ -40,9 +40,8 @@ export function IncidentFiltersBar({
                 className,
             )}
         >
-            {/* Search input */}
             <div className="relative flex-1">
-                <Search className="text-foreground/40 pointer-events-none absolute top-1/2 left-4 size-[18px] -translate-y-1/2" />
+                <Search className="text-foreground/40 pointer-events-none absolute top-1/2 left-4 size-4.5 -translate-y-1/2" />
                 <input
                     type="text"
                     placeholder="Search by title, keyword or author..."
@@ -52,12 +51,9 @@ export function IncidentFiltersBar({
                 />
             </div>
 
-            {/* Separator */}
             <div className="bg-border mx-2 my-auto hidden h-8 w-px md:block" />
 
-            {/* Controls */}
             <div className="flex items-center gap-2 overflow-x-auto pr-2 pb-2 md:pb-0">
-                {/* Filters toggle */}
                 <Button
                     variant={filtersOpen ? 'secondary' : 'outline'}
                     size="sm"
@@ -68,7 +64,6 @@ export function IncidentFiltersBar({
                     Filters
                 </Button>
 
-                {/* View mode toggle with sliding animation */}
                 <SlidingToggle
                     options={viewModeOptions}
                     value={viewMode}

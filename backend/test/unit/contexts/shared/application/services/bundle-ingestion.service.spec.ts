@@ -1,5 +1,6 @@
 import { BundleIngestionService } from '../../../../../../src/contexts/shared/application/services/bundle-ingestion.service';
 import { StixMapper } from '../../../../../../src/contexts/shared/application/services/stix-mapper.service';
+import { TLP } from '../../../../../../src/contexts/shared/domain/value-objects';
 
 describe('BundleIngestionService', () => {
     const mockSave = jest.fn().mockResolvedValue({});
@@ -160,5 +161,75 @@ describe('BundleIngestionService', () => {
             skipped: 0,
             failed: 0,
         });
+    });
+
+    it('should resolve TLP from marking-definition in the same bundle', async () => {
+        const mdId = 'marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9';
+        const objects = [
+            {
+                type: 'marking-definition',
+                id: mdId,
+                definition_type: 'tlp',
+                definition: { tlp: 'white' },
+            },
+            {
+                type: 'threat-actor',
+                id: 'threat-actor--abc',
+                name: 'Test Actor',
+                created: '2020-01-01T00:00:00.000Z',
+                modified: '2020-01-01T00:00:00.000Z',
+                object_marking_refs: [mdId],
+            },
+        ];
+
+        const mapSpy = jest.spyOn(mapper, 'map');
+        const result = await service.ingest(objects);
+
+        expect(result.total).toBe(2);
+        expect(result.processed).toBe(1);
+        expect(result.skipped).toBe(1); // marking-definition is skipped
+
+        const callArgs = mapSpy.mock.calls;
+        const callForThreatActor = callArgs.find(
+            (args) => args[0].type === 'threat-actor',
+        );
+        expect(callForThreatActor).toBeDefined();
+        const [, passedContext] = callForThreatActor as [
+            Record<string, unknown>,
+            ReadonlyMap<string, TLP>,
+        ];
+        expect(passedContext.get(mdId)).toBe(TLP.WHITE);
+    });
+
+    it('should map TLP.CLEAR from marking-definition with label "clear"', async () => {
+        const mdId = 'marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9';
+        const objects = [
+            {
+                type: 'marking-definition',
+                id: mdId,
+                definition_type: 'tlp',
+                definition: { tlp: 'clear' },
+            },
+            {
+                type: 'vulnerability',
+                id: 'vulnerability--abc',
+                name: 'CVE-2025-0001',
+                created: '2025-01-01T00:00:00.000Z',
+                modified: '2025-01-01T00:00:00.000Z',
+                object_marking_refs: [mdId],
+            },
+        ];
+
+        const mapSpy = jest.spyOn(mapper, 'map');
+        await service.ingest(objects);
+
+        const callArgs = mapSpy.mock.calls;
+        const call = callArgs.find((args) => args[0].type === 'vulnerability');
+        expect(call).toBeDefined();
+        const [, passedContext] = call as [
+            Record<string, unknown>,
+            ReadonlyMap<string, TLP>,
+        ];
+        expect(passedContext.get(mdId)).toBe(TLP.CLEAR);
     });
 });

@@ -24,6 +24,12 @@ const tlpStyles: Record<
         dotClassName: 'bg-foreground/45 dark:bg-white/45',
         label: 'TLP:WHITE',
     },
+    [TLP.CLEAR]: {
+        activeClassName:
+            'border-foreground/18 bg-card text-foreground/85 dark:border-white/15 dark:bg-white/6 dark:text-white/90',
+        dotClassName: 'bg-foreground/45 dark:bg-white/45',
+        label: 'TLP:CLEAR',
+    },
     [TLP.GREEN]: {
         activeClassName:
             'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-700/60 dark:bg-emerald-950/50 dark:text-emerald-300',
@@ -95,7 +101,7 @@ export function IncidentFiltersPanel({
                                         })
                                     }
                                     className={cn(
-                                        'border-border text-foreground/78 flex h-10 min-w-[10.5rem] items-center gap-2.5 rounded-xl border px-3.5 text-left text-[0.72rem] font-bold tracking-[0.02em] transition-colors',
+                                        'border-border text-foreground/78 flex h-10 min-w-42 items-center gap-2.5 rounded-xl border px-3.5 text-left text-[0.72rem] font-bold tracking-[0.02em] transition-colors',
                                         isActive
                                             ? config.activeClassName
                                             : 'bg-background hover:border-foreground/15 hover:bg-secondary dark:hover:border-white/10 dark:hover:bg-white/5',
@@ -132,7 +138,7 @@ export function IncidentFiltersPanel({
                                         })
                                     }
                                     className={cn(
-                                        'border-border text-foreground/78 flex h-10 min-w-[10.5rem] items-center rounded-xl border px-3.5 text-left text-[0.72rem] font-bold tracking-[0.02em] transition-colors',
+                                        'border-border text-foreground/78 flex h-10 min-w-42 items-center rounded-xl border px-3.5 text-left text-[0.72rem] font-bold tracking-[0.02em] transition-colors',
                                         isActive
                                             ? 'bg-primary text-primary-foreground border-primary shadow-sm'
                                             : 'bg-background hover:border-foreground/15 hover:bg-secondary dark:hover:border-white/10 dark:hover:bg-white/5',

@@ -9,6 +9,12 @@ const tlpConfig: Record<
     { label: string; className: string; dotClassName: string }
 > = {
     [TLP.WHITE]: {
+        label: 'TLP:WHITE',
+        className:
+            'border-foreground/15 bg-white text-foreground/85 dark:border-white/15 dark:bg-white/6 dark:text-white/88',
+        dotClassName: 'bg-foreground/45 dark:bg-white/45',
+    },
+    [TLP.CLEAR]: {
         label: 'TLP:CLEAR',
         className:
             'border-foreground/15 bg-white text-foreground/85 dark:border-white/15 dark:bg-white/6 dark:text-white/88',

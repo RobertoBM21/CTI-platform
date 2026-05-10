@@ -14,6 +14,7 @@ import { CampaignService } from '../../../threat/application/services/campaign.s
 import { IncidentService } from '../../../threat/application/services/incident.service';
 import { IndicatorService } from '../../../threat/application/services/indicator.service';
 import { ThreatActorService } from '../../../threat/application/services/threat-actor.service';
+import { TLP } from '../../domain/value-objects';
 import { type IngestionSummary } from '../dtos/stix-bundle.dto';
 import { RelationshipService } from './relationship.service';
 import { SightingService } from './sighting.service';
@@ -82,8 +83,10 @@ export class BundleIngestionService {
             failed: 0,
         };
 
+        const markingContext = this.buildMarkingContext(objects);
+
         for (const obj of objects) {
-            const mapped = this.stixMapper.map(obj);
+            const mapped = this.stixMapper.map(obj, markingContext);
 
             if (!mapped) {
                 summary.skipped++;
@@ -108,5 +111,31 @@ export class BundleIngestionService {
         }
 
         return summary;
+    }
+
+    private buildMarkingContext(
+        objects: Record<string, unknown>[],
+    ): ReadonlyMap<string, TLP> {
+        const ctx = new Map<string, TLP>();
+        for (const obj of objects) {
+            if (
+                obj.type !== 'marking-definition' ||
+                obj.definition_type !== 'tlp'
+            ) {
+                continue;
+            }
+            const id = obj.id as string;
+            const def = obj.definition as Record<string, unknown> | undefined;
+            const label = (def?.tlp as string | undefined)?.toLowerCase();
+            let tlp: TLP | undefined;
+            if (label === 'white') tlp = TLP.WHITE;
+            else if (label === 'clear') tlp = TLP.CLEAR;
+            else if (label === 'green') tlp = TLP.GREEN;
+            else if (label === 'amber') tlp = TLP.AMBER;
+            else if (label === 'amber+strict') tlp = TLP.AMBER_STRICT;
+            else if (label === 'red') tlp = TLP.RED;
+            if (tlp !== undefined) ctx.set(id, tlp);
+        }
+        return ctx;
     }
 }

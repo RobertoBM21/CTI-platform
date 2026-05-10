@@ -3,12 +3,13 @@ import { TLP } from '../../../../../../src/contexts/shared/domain/value-objects/
 describe('TLP', () => {
     const values = Object.values(TLP);
 
-    it('should have exactly 5 values', () => {
-        expect(values).toHaveLength(5);
+    it('should have exactly 6 values', () => {
+        expect(values).toHaveLength(6);
     });
 
     it('should have all expected values', () => {
         expect(TLP.WHITE).toBe('white');
+        expect(TLP.CLEAR).toBe('clear');
         expect(TLP.GREEN).toBe('green');
         expect(TLP.AMBER).toBe('amber');
         expect(TLP.AMBER_STRICT).toBe('amber+strict');
