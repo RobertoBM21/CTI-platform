@@ -1,15 +1,17 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { ConfidenceBadge } from '@/shared/components/confidence-badge';
-import { EntityTypeBadge } from '@/shared/components/entity-type-badge';
-import { TlpBadge } from '@/shared/components/tlp-badge';
 import { Building2 } from 'lucide-react';
 import Link from 'next/link';
-import type { Incident } from '../types';
+import type { CatalogEntity } from '../types/entity';
+import { ConfidenceBadge } from './confidence-badge';
+import { EntityTypeBadge } from './entity-type-badge';
+import { TlpBadge } from './tlp-badge';
 
-interface IncidentCardProps {
-    incident: Incident;
+interface EntityCardProps {
+    entity: CatalogEntity;
+    /** Route prefix, e.g. "/incidents" or "/campaigns" */
+    basePath: string;
     className?: string;
 }
 
@@ -17,10 +19,10 @@ function formatDate(iso: string): string {
     return new Date(iso).toISOString().split('T')[0];
 }
 
-export function IncidentCard({ incident, className }: IncidentCardProps) {
+export function EntityCard({ entity, basePath, className }: EntityCardProps) {
     return (
         <Link
-            href={`/incidents/${incident.id}`}
+            href={`${basePath}/${entity.id}`}
             className={cn('block h-full', className)}
         >
             <article
@@ -30,24 +32,23 @@ export function IncidentCard({ incident, className }: IncidentCardProps) {
             >
                 {/* Top badges */}
                 <div className="mb-4 flex flex-col items-start gap-2">
-                    <EntityTypeBadge entityType={incident.entityType} />
-                    <TlpBadge tlp={incident.tlp} />
+                    <EntityTypeBadge entityType={entity.entityType} />
+                    <TlpBadge tlp={entity.tlp} />
                 </div>
 
                 <h3 className="group-hover:text-primary mb-3 text-lg leading-tight font-bold tracking-tight transition-colors">
-                    {incident.name}
+                    {entity.name}
                 </h3>
 
-                {incident.description && (
+                {entity.description && (
                     <p className="text-foreground/60 mb-5 line-clamp-3 flex-1 text-sm leading-relaxed">
-                        {incident.description}
+                        {entity.description}
                     </p>
                 )}
 
                 {/* Author section */}
                 {(() => {
-                    const author =
-                        incident.createdBy ?? incident.source ?? null;
+                    const author = entity.createdBy ?? entity.source ?? null;
                     return (
                         <div className="bg-muted/30 mb-5 flex items-center gap-3 rounded-xl p-2">
                             <div className="bg-card flex size-8 items-center justify-center rounded-full text-xs font-bold shadow-sm">
@@ -57,10 +58,10 @@ export function IncidentCard({ incident, className }: IncidentCardProps) {
                                 <p className="truncate text-xs font-bold">
                                     {author ?? 'Unknown'}
                                 </p>
-                                {incident.source && (
+                                {entity.source && (
                                     <p className="text-foreground/60 mt-0.5 flex items-center gap-1 truncate text-[0.6rem]">
                                         <Building2 className="size-2.5" />{' '}
-                                        {incident.source}
+                                        {entity.source}
                                     </p>
                                 )}
                             </div>
@@ -71,7 +72,7 @@ export function IncidentCard({ incident, className }: IncidentCardProps) {
                 {/* Footer */}
                 <div className="border-border/50 mt-auto border-t pt-4">
                     <div className="mb-3 flex items-center justify-between">
-                        <ConfidenceBadge confidence={incident.confidence} />
+                        <ConfidenceBadge confidence={entity.confidence} />
                     </div>
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center justify-between gap-2">
@@ -79,7 +80,7 @@ export function IncidentCard({ incident, className }: IncidentCardProps) {
                                 Created
                             </span>
                             <span className="text-foreground/50 text-xs font-medium">
-                                {formatDate(incident.createdAt)}
+                                {formatDate(entity.createdAt)}
                             </span>
                         </div>
                         <div className="flex items-center justify-between gap-2">
@@ -87,7 +88,7 @@ export function IncidentCard({ incident, className }: IncidentCardProps) {
                                 Updated
                             </span>
                             <span className="text-foreground/50 text-xs font-medium">
-                                {formatDate(incident.updatedAt)}
+                                {formatDate(entity.updatedAt)}
                             </span>
                         </div>
                     </div>

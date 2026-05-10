@@ -1,15 +1,17 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { ConfidenceBadge } from '@/shared/components/confidence-badge';
-import { EntityTypeBadge } from '@/shared/components/entity-type-badge';
-import { TlpBadge } from '@/shared/components/tlp-badge';
 import { Building2, Clock, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
-import type { Incident } from '../types';
+import type { CatalogEntity } from '../types/entity';
+import { ConfidenceBadge } from './confidence-badge';
+import { EntityTypeBadge } from './entity-type-badge';
+import { TlpBadge } from './tlp-badge';
 
-interface IncidentListRowProps {
-    incident: Incident;
+interface EntityListRowProps {
+    entity: CatalogEntity;
+    /** Route prefix, e.g. "/incidents" or "/campaigns" */
+    basePath: string;
     className?: string;
 }
 
@@ -17,10 +19,14 @@ function formatDate(iso: string): string {
     return new Date(iso).toISOString().split('T')[0];
 }
 
-export function IncidentListRow({ incident, className }: IncidentListRowProps) {
+export function EntityListRow({
+    entity,
+    basePath,
+    className,
+}: EntityListRowProps) {
     return (
         <Link
-            href={`/incidents/${incident.id}`}
+            href={`${basePath}/${entity.id}`}
             className={cn('block', className)}
         >
             <article
@@ -31,12 +37,12 @@ export function IncidentListRow({ incident, className }: IncidentListRowProps) {
                 <div>
                     <div className="mb-3">
                         <h3 className="group-hover:text-primary text-lg font-bold tracking-tight transition-colors">
-                            {incident.name}
+                            {entity.name}
                         </h3>
                     </div>
-                    {incident.description && (
+                    {entity.description && (
                         <p className="text-foreground/60 max-w-4xl text-sm leading-relaxed">
-                            {incident.description}
+                            {entity.description}
                         </p>
                     )}
                 </div>
@@ -44,12 +50,12 @@ export function IncidentListRow({ incident, className }: IncidentListRowProps) {
                 {/* Meta row */}
                 <div className="border-border/50 flex flex-wrap items-center justify-between gap-4 border-t pt-5 text-sm">
                     <div className="flex flex-wrap items-center gap-3.5 md:gap-4">
-                        <EntityTypeBadge entityType={incident.entityType} />
-                        <TlpBadge tlp={incident.tlp} />
+                        <EntityTypeBadge entityType={entity.entityType} />
+                        <TlpBadge tlp={entity.tlp} />
 
                         {(() => {
                             const author =
-                                incident.createdBy ?? incident.source ?? null;
+                                entity.createdBy ?? entity.source ?? null;
                             return (
                                 <div className="text-foreground/72 flex items-center gap-2.5">
                                     <div className="bg-muted/50 text-foreground flex size-6 items-center justify-center rounded-full text-[0.6rem] font-bold">
@@ -60,14 +66,14 @@ export function IncidentListRow({ incident, className }: IncidentListRowProps) {
                                     <span className="text-xs font-semibold">
                                         {author ?? 'Unknown'}
                                     </span>
-                                    {incident.source && (
+                                    {entity.source && (
                                         <>
                                             <span className="text-foreground/20">
                                                 •
                                             </span>
                                             <div className="text-foreground/58 flex items-center gap-1.5 text-xs">
                                                 <Building2 className="size-3" />
-                                                <span>{incident.source}</span>
+                                                <span>{entity.source}</span>
                                             </div>
                                         </>
                                     )}
@@ -77,14 +83,14 @@ export function IncidentListRow({ incident, className }: IncidentListRowProps) {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <ConfidenceBadge confidence={incident.confidence} />
+                        <ConfidenceBadge confidence={entity.confidence} />
                         <div className="bg-muted/30 text-foreground/52 flex h-6 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium">
                             <Clock className="size-3" />
-                            {formatDate(incident.createdAt)}
+                            {formatDate(entity.createdAt)}
                         </div>
                         <div className="bg-muted/30 text-foreground/52 flex h-6 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium">
                             <RefreshCw className="size-3" />
-                            {formatDate(incident.updatedAt)}
+                            {formatDate(entity.updatedAt)}
                         </div>
                     </div>
                 </div>

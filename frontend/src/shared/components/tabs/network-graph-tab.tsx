@@ -5,6 +5,8 @@ import '@xyflow/react/dist/style.css';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { formatDateTime, getStixConfig, getStixType } from '@/shared/lib/stix';
+import type { EntityBase, EntityDetail } from '@/shared/types/entity';
 import {
     Background,
     BackgroundVariant,
@@ -17,9 +19,8 @@ import {
     type Node,
     type NodeProps,
 } from '@xyflow/react';
+import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import type { IncidentDetail } from '../../types';
-import { formatDateTime, getStixConfig, getStixType } from '../../utils';
 
 // ── Node data type ─────────────────────────────────────────────────────
 
@@ -110,7 +111,9 @@ function radialPos(index: number, count: number, r: number) {
 
 type NodeMeta = StixNodeData & { id: string };
 
-function buildGraph(detail: IncidentDetail): {
+function buildGraph<TEntity extends EntityBase>(
+    detail: EntityDetail<TEntity>,
+): {
     nodes: Node[];
     edges: Edge[];
     meta: NodeMeta[];
@@ -120,15 +123,16 @@ function buildGraph(detail: IncidentDetail): {
     const meta: NodeMeta[] = [];
 
     const { entity, relatedObjects } = detail;
-    const cfg = getStixConfig('incident');
+    const entityStixType = getStixType(entity.id);
+    const cfg = getStixConfig(entityStixType);
 
-    const incidentMeta: NodeMeta = {
+    const centerMeta: NodeMeta = {
         id: entity.id,
         name: entity.name,
         abbr: cfg.abbr,
         color: cfg.color,
         isCenter: true,
-        entityType: 'incident',
+        entityType: entityStixType,
         confidence: entity.confidence ?? undefined,
         createdAt: entity.createdAt,
         description: entity.description ?? undefined,
@@ -138,10 +142,10 @@ function buildGraph(detail: IncidentDetail): {
         id: entity.id,
         type: 'stixNode',
         position: { x: 0, y: 0 },
-        data: incidentMeta,
+        data: centerMeta,
         selectable: true,
     });
-    meta.push(incidentMeta);
+    meta.push(centerMeta);
 
     const valid = relatedObjects.filter((r) => r.object !== null);
     const radius = valid.length <= 4 ? 160 : valid.length <= 9 ? 200 : 240;
@@ -194,11 +198,13 @@ function buildGraph(detail: IncidentDetail): {
 
 // ── Component ──────────────────────────────────────────────────────────
 
-interface NetworkGraphTabProps {
-    detail: IncidentDetail;
+interface NetworkGraphTabProps<TEntity extends EntityBase = EntityBase> {
+    detail: EntityDetail<TEntity>;
 }
 
-export function NetworkGraphTab({ detail }: NetworkGraphTabProps) {
+export function NetworkGraphTab<TEntity extends EntityBase = EntityBase>({
+    detail,
+}: NetworkGraphTabProps<TEntity>) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const { nodes, edges, meta } = useMemo(() => buildGraph(detail), [detail]);
 

@@ -3,6 +3,8 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { ConfidenceBar } from '@/shared/components/confidence-bar';
+import { getStixConfig, getStixType, type StixDomain } from '@/shared/lib/stix';
+import type { EntityBase, EntityDetail } from '@/shared/types/entity';
 import {
     AlertCircle,
     FileText,
@@ -14,8 +16,8 @@ import {
 } from 'lucide-react';
 import type React from 'react';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { IncidentDetail } from '../../types';
-import { getStixConfig, getStixType, type StixDomain } from '../../utils';
+
+// ── Timeline event type ────────────────────────────────────────────────
 
 interface TimelineEvent {
     id: string;
@@ -106,19 +108,26 @@ const DEMO_EVENTS: TimelineEvent[] = [
 
 // ── Event builder ──────────────────────────────────────────────────────
 
-function buildEvents(detail: IncidentDetail): TimelineEvent[] {
+function buildEvents<TEntity extends EntityBase>(
+    detail: EntityDetail<TEntity>,
+): TimelineEvent[] {
     const events: TimelineEvent[] = [];
     const { entity, relatedObjects, sightings } = detail;
+
+    const entityStixType = getStixType(entity.id);
+    const entityCfg = getStixConfig(entityStixType);
+    const entityLabel =
+        entityCfg.label !== 'Unknown' ? entityCfg.label : 'Entity';
 
     events.push({
         id: `${entity.id}--created`,
         timestamp: new Date(entity.createdAt).getTime(),
         domain: 'cognitive',
-        title: 'Incident registered',
+        title: `${entityLabel} registered`,
         description: entity.description ?? undefined,
         source: entity.createdBy ?? undefined,
-        entityType: 'incident',
-        color: getStixConfig('incident').color,
+        entityType: entityStixType,
+        color: entityCfg.color,
         confidence: entity.confidence ?? undefined,
     });
 
@@ -184,7 +193,7 @@ function buildEvents(detail: IncidentDetail): TimelineEvent[] {
 
     const sorted = events.sort((a, b) => b.timestamp - a.timestamp);
 
-    // Inject demo events when only the base "incident registered" event exists
+    // Inject demo events when only the base "entity registered" event exists
     if (sorted.length <= 1) {
         return [...DEMO_EVENTS, ...sorted].sort(
             (a, b) => b.timestamp - a.timestamp,
@@ -259,7 +268,7 @@ function EventDot({
     );
 }
 
-// ── Single event row (inline — no per-event card) ─────────────────────
+// ── Single event row ───────────────────────────────────────────────────
 
 function EventRow({
     event,
@@ -293,7 +302,7 @@ function EventRow({
                 />
             </div>
 
-            {/* Content — inline, no card */}
+            {/* Content */}
             <div
                 role="button"
                 tabIndex={0}
@@ -545,7 +554,13 @@ function DualTrackTimeline({
 
 // ── Component ──────────────────────────────────────────────────────────
 
-export function TimelineTab({ detail }: { detail: IncidentDetail }) {
+interface TimelineTabProps<TEntity extends EntityBase = EntityBase> {
+    detail: EntityDetail<TEntity>;
+}
+
+export function TimelineTab<TEntity extends EntityBase = EntityBase>({
+    detail,
+}: TimelineTabProps<TEntity>) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const events = useMemo(() => buildEvents(detail), [detail]);
 
@@ -591,7 +606,7 @@ export function TimelineTab({ detail }: { detail: IncidentDetail }) {
                 {events.length === 0 ? (
                     <div className="py-16 text-center">
                         <p className="text-foreground/40 text-sm">
-                            No timeline events available for this incident.
+                            No timeline events available.
                         </p>
                     </div>
                 ) : isHybrid ? (

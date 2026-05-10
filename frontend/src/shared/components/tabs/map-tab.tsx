@@ -1,10 +1,14 @@
 'use client';
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { getStixType } from '@/shared/lib/stix';
+import type {
+    EntityBase,
+    EntityDetail,
+    StixObject,
+} from '@/shared/types/entity';
 import { Building2, Globe, MapPin, Target, Users } from 'lucide-react';
 import Map, { Marker, NavigationControl } from 'react-map-gl/maplibre';
-import type { IncidentDetail, StixObject } from '../../types';
-import { getStixType } from '../../utils';
 
 const CARTO_LIGHT =
     'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
@@ -66,12 +70,12 @@ function LocationMarkerPin({ obj }: LocationMarkerProps) {
     );
 }
 
-interface MapTabProps {
-    detail: IncidentDetail;
+interface MapTabProps<TEntity extends EntityBase = EntityBase> {
+    detail: EntityDetail<TEntity>;
 }
 
-function getRelatedByTypes(
-    detail: IncidentDetail,
+function getRelatedByTypes<TEntity extends EntityBase>(
+    detail: EntityDetail<TEntity>,
     types: string[],
 ): StixObject[] {
     return detail.relatedObjects
@@ -131,7 +135,9 @@ function TargetRow({ obj }: { obj: StixObject }) {
     );
 }
 
-export function MapTab({ detail }: MapTabProps) {
+export function MapTab<TEntity extends EntityBase = EntityBase>({
+    detail,
+}: MapTabProps<TEntity>) {
     const realLocations = getRelatedByTypes(detail, ['location']);
     const realTargets = getRelatedByTypes(detail, ['identity']);
     const isDemoLocations = realLocations.length === 0;

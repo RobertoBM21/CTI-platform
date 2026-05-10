@@ -1,13 +1,17 @@
 'use client';
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { formatDate, getStixType } from '@/shared/lib/stix';
+import type {
+    EntityBase,
+    EntityDetail,
+    StixObject,
+} from '@/shared/types/entity';
 import { Download, FileText, Link2, Shield } from 'lucide-react';
 import { useState } from 'react';
-import type { IncidentDetail, StixObject } from '../../types';
-import { formatDate, getStixType } from '../../utils';
 
-interface ArtifactsTabProps {
-    detail: IncidentDetail;
+interface ArtifactsTabProps<TEntity extends EntityBase = EntityBase> {
+    detail: EntityDetail<TEntity>;
 }
 
 /** Demo indicators shown when no real IoCs are linked */
@@ -51,10 +55,9 @@ const DEMO_INDICATORS: Array<{ obj: StixObject; relType: string }> = [
     },
 ];
 
-function getIndicators(detail: IncidentDetail): Array<{
-    obj: StixObject;
-    relType: string;
-}> {
+function getIndicators<TEntity extends EntityBase>(
+    detail: EntityDetail<TEntity>,
+): Array<{ obj: StixObject; relType: string }> {
     return detail.relatedObjects
         .filter(
             ({ object }) => object && getStixType(object.id) === 'indicator',
@@ -101,7 +104,9 @@ function downloadIndicator(obj: StixObject): void {
     URL.revokeObjectURL(url);
 }
 
-export function ArtifactsTab({ detail }: ArtifactsTabProps) {
+export function ArtifactsTab<TEntity extends EntityBase = EntityBase>({
+    detail,
+}: ArtifactsTabProps<TEntity>) {
     const [selected, setSelected] = useState<StixObject | null>(null);
     const realIndicators = getIndicators(detail);
     const isDemo = realIndicators.length === 0;
@@ -122,7 +127,7 @@ export function ArtifactsTab({ detail }: ArtifactsTabProps) {
                             <div className="border-b px-6 py-3">
                                 <p className="text-[0.6rem] font-bold tracking-widest text-amber-500 uppercase">
                                     Demo data — no real IoCs linked to this
-                                    incident
+                                    entity
                                 </p>
                             </div>
                         )}
