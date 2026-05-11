@@ -1,7 +1,8 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { ChevronLeft, ChevronRight, Settings, Shield } from 'lucide-react';
+import { entityConfig } from '@/shared/components/entity-type-badge';
+import { ChevronLeft, ChevronRight, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -13,7 +14,16 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-    { label: 'Incidents', href: '/incidents', icon: Shield },
+    {
+        label: 'Incidents',
+        href: '/incidents',
+        icon: entityConfig.incident.icon,
+    },
+    {
+        label: 'Campaigns',
+        href: '/campaigns',
+        icon: entityConfig.campaign.icon,
+    },
 ];
 
 const bottomItems: NavItem[] = [

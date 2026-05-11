@@ -12,12 +12,12 @@ import { ExecutiveSummaryTab } from '@/shared/components/tabs/executive-summary-
 import { MapTab } from '@/shared/components/tabs/map-tab';
 import { NetworkGraphTab } from '@/shared/components/tabs/network-graph-tab';
 import { TimelineTab } from '@/shared/components/tabs/timeline-tab';
+import { getStixType } from '@/shared/lib/stix';
 import { TLP } from '@/shared/types/enums';
 import { Activity, Clock, FileText, Link2, MapPin } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { useIncidentDetail } from '../hooks/use-incident-detail';
-import { getStixType } from '../utils';
 
 const TABS = [
     { id: 'summary', label: 'Executive Summary', icon: FileText },

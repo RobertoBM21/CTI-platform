@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import type { EntityType } from '@/shared/types/enums';
 import { Crosshair, Globe, Shield, Swords, Target } from 'lucide-react';
 
-const entityConfig: Record<
+export const entityConfig: Record<
     EntityType,
     {
         label: string;
