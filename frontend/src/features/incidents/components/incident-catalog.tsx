@@ -1,12 +1,12 @@
 'use client';
 
+import { CatalogFiltersPanel } from '@/shared/components/catalog-filters-panel';
 import { EntityCard } from '@/shared/components/entity-card';
 import { EntityCatalog } from '@/shared/components/entity-catalog';
 import { EntityListRow } from '@/shared/components/entity-list-row';
 import { useState } from 'react';
 import { useIncidents } from '../hooks/use-incidents';
 import type { IncidentFilters, ViewMode } from '../types';
-import { IncidentFiltersPanel } from './incident-filters-panel';
 
 export function IncidentCatalog() {
     const [search, setSearch] = useState('');
@@ -40,7 +40,7 @@ export function IncidentCatalog() {
             filtersOpen={filtersOpen}
             onFiltersToggle={() => setFiltersOpen((o) => !o)}
             filtersPanel={
-                <IncidentFiltersPanel
+                <CatalogFiltersPanel
                     filters={filters}
                     onFiltersChange={(f) => {
                         setFilters(f);

@@ -1,112 +1,112 @@
 name: CI CTI Platform
 
 on:
-    push:
-        branches: [main]
-        paths:
-            - 'backend/**'
-            - 'frontend/**'
-            - 'package.json'
-            - 'pnpm-*.yaml'
-            - '.github/workflows/**'
-            - 'docker-compose*.yml'
-    pull_request:
-        branches: [main]
-        paths:
-            - 'backend/**'
-            - 'frontend/**'
-            - 'package.json'
-            - 'pnpm-*.yaml'
-            - '.github/workflows/**'
-            - 'docker-compose*.yml'
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "package.json"
+      - "pnpm-*.yaml"
+      - ".github/workflows/**"
+      - "docker-compose*.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "package.json"
+      - "pnpm-*.yaml"
+      - ".github/workflows/**"
+      - "docker-compose*.yml"
 
 jobs:
-    changes:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            pull-requests: read
-        outputs:
-            backend: ${{ steps.filter.outputs.backend }}
-            frontend: ${{ steps.filter.outputs.frontend }}
-        steps:
-            - uses: actions/checkout@v6
-            - uses: dorny/paths-filter@v4
-              id: filter
-              with:
-                  filters: |
-                      backend:
-                        - 'backend/**'
-                        - 'package.json'
-                        - 'pnpm-*.yaml'
-                        - '.github/workflows/**'
-                      frontend:
-                        - 'frontend/**'
-                        - 'package.json'
-                        - 'pnpm-*.yaml'
-                        - '.github/workflows/**'
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - 'package.json'
+              - 'pnpm-*.yaml' 
+              - '.github/workflows/**'
+            frontend:
+              - 'frontend/**'
+              - 'package.json'
+              - 'pnpm-*.yaml'
+              - '.github/workflows/**'
 
-    backend:
-        needs: changes
-        if: needs.changes.outputs.backend == 'true'
-        runs-on: ubuntu-latest
+  backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v6
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-            - name: Install pnpm
-              uses: pnpm/action-setup@v5
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
 
-            - name: Use Node.js 24.x
-              uses: actions/setup-node@v6
-              with:
-                  node-version: 24
-                  cache: 'pnpm'
-                  cache-dependency-path: pnpm-lock.yaml
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
 
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-            - name: Linting (ESLint)
-              run: pnpm backend:lint
+      - name: Linting (ESLint)
+        run: pnpm backend:lint
 
-            - name: Run unit tests (Jest + SWC)
-              run: pnpm backend:test
+      - name: Run unit tests (Jest + SWC)
+        run: pnpm backend:test
 
-            - name: Run E2E tests (Supertest + Mongo In-Memory)
-              run: pnpm backend:test:e2e
+      - name: Run E2E tests (Supertest + Mongo In-Memory)
+        run: pnpm backend:test:e2e
 
-            - name: Build application (SWC)
-              run: pnpm backend:build
+      - name: Build application (SWC)
+        run: pnpm backend:build
 
-    frontend:
-        needs: changes
-        if: needs.changes.outputs.frontend == 'true'
-        runs-on: ubuntu-latest
+  frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v6
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-            - name: Install pnpm
-              uses: pnpm/action-setup@v5
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
 
-            - name: Use Node.js 24.x
-              uses: actions/setup-node@v6
-              with:
-                  node-version: 24
-                  cache: 'pnpm'
-                  cache-dependency-path: pnpm-lock.yaml
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
 
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-            - name: Linting (ESLint)
-              run: pnpm frontend:lint
+      - name: Linting (ESLint)
+        run: pnpm frontend:lint
 
-            - name: Run unit tests (Vitest)
-              run: pnpm frontend:test
+      - name: Run unit tests (Vitest)
+        run: pnpm frontend:test
 
-            - name: Build application (Next.js)
-              run: pnpm frontend:build
+      - name: Build application (Next.js)
+        run: pnpm frontend:build

@@ -1,6 +1,7 @@
 import { TLP } from '@/shared/types/enums';
 import type { Incident } from './types';
 
+// This file contains mock data used for incidents testing purposes (incident-catalog.test.ts)
 export const MOCK_INCIDENTS: Incident[] = [
     {
         id: 'incident--a1b2c3d4-e5f6-7890-abcd-ef1234567890',

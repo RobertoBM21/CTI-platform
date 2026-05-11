@@ -1,13 +1,13 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import type { BaseCatalogFilters } from '@/shared/types/entity';
 import { TLP } from '@/shared/types/enums';
 import { X } from 'lucide-react';
-import type { IncidentFilters } from '../types';
 
-interface IncidentFiltersPanelProps {
-    filters: IncidentFilters;
-    onFiltersChange: (filters: IncidentFilters) => void;
+interface CatalogFiltersPanelProps {
+    filters: BaseCatalogFilters;
+    onFiltersChange: (filters: BaseCatalogFilters) => void;
     onClose: () => void;
     className?: string;
 }
@@ -61,12 +61,12 @@ const sortOrderOptions = [
     { value: 'asc', label: 'Oldest first' },
 ] as const;
 
-export function IncidentFiltersPanel({
+export function CatalogFiltersPanel({
     filters,
     onFiltersChange,
     onClose,
     className,
-}: IncidentFiltersPanelProps) {
+}: CatalogFiltersPanelProps) {
     return (
         <div
             className={cn(
@@ -87,7 +87,7 @@ export function IncidentFiltersPanel({
                     <p className="text-foreground mb-3 text-sm font-bold">
                         Traffic Light Protocol
                     </p>
-                    <div className="flex flex-wrap gap-2.5">
+                    <div className="grid grid-cols-3 gap-2.5">
                         {tlpOptions.map((tlp) => {
                             const isActive = filters.tlp === tlp;
                             const config = tlpStyles[tlp];
@@ -101,7 +101,7 @@ export function IncidentFiltersPanel({
                                         })
                                     }
                                     className={cn(
-                                        'border-border text-foreground/78 flex h-10 min-w-42 items-center gap-2.5 rounded-xl border px-3.5 text-left text-[0.72rem] font-bold tracking-[0.02em] transition-colors',
+                                        'border-border text-foreground/78 flex h-10 w-full items-center gap-2.5 rounded-xl border px-3.5 text-left text-[0.72rem] font-bold tracking-[0.02em] transition-colors',
                                         isActive
                                             ? config.activeClassName
                                             : 'bg-background hover:border-foreground/15 hover:bg-secondary dark:hover:border-white/10 dark:hover:bg-white/5',

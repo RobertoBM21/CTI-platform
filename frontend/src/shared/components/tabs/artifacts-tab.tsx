@@ -14,47 +14,6 @@ interface ArtifactsTabProps<TEntity extends EntityBase = EntityBase> {
     detail: EntityDetail<TEntity>;
 }
 
-/** Demo indicators shown when no real IoCs are linked */
-const DEMO_INDICATORS: Array<{ obj: StixObject; relType: string }> = [
-    {
-        obj: {
-            id: 'indicator--demo-1',
-            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 14).toISOString(),
-            name: '[DEMO] Suspicious IP — 185.220.101.47',
-            pattern: "[ipv4-addr:value = '185.220.101.47']",
-            description:
-                'C2 server used by Cobalt Strike beacon. Observed active on port 443.',
-            confidence: 82,
-        } as unknown as StixObject,
-        relType: 'indicates',
-    },
-    {
-        obj: {
-            id: 'indicator--demo-2',
-            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 30).toISOString(),
-            name: '[DEMO] Phishing domain — secure-login-verify.net',
-            pattern: "[domain-name:value = 'secure-login-verify.net']",
-            description:
-                'Domain registered 48h before incident. Associated with credential harvesting campaign.',
-            confidence: 71,
-        } as unknown as StixObject,
-        relType: 'indicates',
-    },
-    {
-        obj: {
-            id: 'indicator--demo-3',
-            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 46).toISOString(),
-            name: '[DEMO] Malware hash — SHA256:3d9e…a4c1',
-            pattern:
-                "[file:hashes.SHA-256 = '3d9e3d4b2f9a1c8e7d6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5a4c1']",
-            description:
-                'Cobalt Strike stager DLL dropped in %TEMP%. Persistence via scheduled task.',
-            confidence: 90,
-        } as unknown as StixObject,
-        relType: 'indicates',
-    },
-];
-
 function getIndicators<TEntity extends EntityBase>(
     detail: EntityDetail<TEntity>,
 ): Array<{ obj: StixObject; relType: string }> {
@@ -108,9 +67,7 @@ export function ArtifactsTab<TEntity extends EntityBase = EntityBase>({
     detail,
 }: ArtifactsTabProps<TEntity>) {
     const [selected, setSelected] = useState<StixObject | null>(null);
-    const realIndicators = getIndicators(detail);
-    const isDemo = realIndicators.length === 0;
-    const indicators = isDemo ? DEMO_INDICATORS : realIndicators;
+    const indicators = getIndicators(detail);
 
     return (
         <div className="flex gap-6">
@@ -123,90 +80,91 @@ export function ArtifactsTab<TEntity extends EntityBase = EntityBase>({
                         </h3>
                     </CardHeader>
                     <CardContent className="p-0">
-                        {isDemo && (
-                            <div className="border-b px-6 py-3">
-                                <p className="text-[0.6rem] font-bold tracking-widest text-amber-500 uppercase">
-                                    Demo data — no real IoCs linked to this
-                                    entity
+                        {indicators.length === 0 ? (
+                            <div className="px-6 py-10 text-center">
+                                <p className="text-foreground/40 text-sm">
+                                    No indicators linked to this entity.
                                 </p>
                             </div>
-                        )}
-                        <ul className="divide-y">
-                            {indicators.map(({ obj, relType }) => {
-                                const iocType = inferIocType(obj);
-                                const Icon =
-                                    IOC_TYPE_ICONS[iocType] ?? FileText;
-                                const isSelected = selected?.id === obj.id;
-                                return (
-                                    <li key={obj.id}>
-                                        <div
-                                            role="button"
-                                            tabIndex={0}
-                                            onClick={() =>
-                                                setSelected(
-                                                    isSelected ? null : obj,
-                                                )
-                                            }
-                                            onKeyDown={(e) => {
-                                                if (
-                                                    e.key === 'Enter' ||
-                                                    e.key === ' '
-                                                )
+                        ) : (
+                            <ul className="divide-y">
+                                {indicators.map(({ obj, relType }) => {
+                                    const iocType = inferIocType(obj);
+                                    const Icon =
+                                        IOC_TYPE_ICONS[iocType] ?? FileText;
+                                    const isSelected = selected?.id === obj.id;
+                                    return (
+                                        <li key={obj.id}>
+                                            <div
+                                                role="button"
+                                                tabIndex={0}
+                                                onClick={() =>
                                                     setSelected(
                                                         isSelected ? null : obj,
-                                                    );
-                                            }}
-                                            className={`hover:bg-muted/40 flex w-full cursor-pointer items-center gap-4 px-6 py-4 text-left transition-colors ${
-                                                isSelected ? 'bg-muted/50' : ''
-                                            }`}
-                                        >
-                                            <div className="bg-muted/50 flex size-11 shrink-0 items-center justify-center rounded-xl">
-                                                <Icon className="text-foreground/50 size-5" />
-                                            </div>
-                                            <div className="min-w-0 flex-1">
-                                                <div className="flex items-center gap-2">
-                                                    <p className="truncate font-semibold">
-                                                        {obj.name ??
-                                                            (obj.pattern as
-                                                                | string
-                                                                | undefined) ??
-                                                            obj.id}
+                                                    )
+                                                }
+                                                onKeyDown={(e) => {
+                                                    if (
+                                                        e.key === 'Enter' ||
+                                                        e.key === ' '
+                                                    )
+                                                        setSelected(
+                                                            isSelected
+                                                                ? null
+                                                                : obj,
+                                                        );
+                                                }}
+                                                className={`hover:bg-muted/40 flex w-full cursor-pointer items-center gap-4 px-6 py-4 text-left transition-colors ${
+                                                    isSelected
+                                                        ? 'bg-muted/50'
+                                                        : ''
+                                                }`}
+                                            >
+                                                <div className="bg-muted/50 flex size-11 shrink-0 items-center justify-center rounded-xl">
+                                                    <Icon className="text-foreground/50 size-5" />
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="truncate font-semibold">
+                                                            {obj.name ??
+                                                                (obj.pattern as
+                                                                    | string
+                                                                    | undefined) ??
+                                                                obj.id}
+                                                        </p>
+                                                    </div>
+                                                    <p className="text-foreground/50 mt-1 text-sm">
+                                                        {iocType.toUpperCase()}{' '}
+                                                        · {relType}
+                                                        {obj.createdAt &&
+                                                            ` · ${formatDate(obj.createdAt)}`}
                                                     </p>
-                                                    {isDemo && (
-                                                        <span className="shrink-0 rounded border border-dashed border-amber-400/50 bg-amber-50 px-1.5 py-0.5 text-[0.5rem] font-bold tracking-widest text-amber-600 uppercase dark:bg-amber-950/30 dark:text-amber-400">
-                                                            demo
-                                                        </span>
+                                                    {obj.description && (
+                                                        <p className="text-foreground/40 mt-1.5 line-clamp-2 text-xs leading-relaxed">
+                                                            {obj.description}
+                                                        </p>
                                                     )}
                                                 </div>
-                                                <p className="text-foreground/50 mt-1 text-sm">
-                                                    {iocType.toUpperCase()} ·{' '}
-                                                    {relType}
-                                                    {obj.createdAt &&
-                                                        ` · ${formatDate(obj.createdAt)}`}
-                                                </p>
-                                                {obj.description && (
-                                                    <p className="text-foreground/40 mt-1.5 line-clamp-2 text-xs leading-relaxed">
-                                                        {obj.description}
-                                                    </p>
-                                                )}
+                                                <div className="flex shrink-0 items-center gap-3">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            downloadIndicator(
+                                                                obj,
+                                                            );
+                                                        }}
+                                                        className="text-foreground/30 hover:text-primary transition-colors"
+                                                        aria-label="Download"
+                                                    >
+                                                        <Download className="size-5" />
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <div className="flex shrink-0 items-center gap-3">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        downloadIndicator(obj);
-                                                    }}
-                                                    className="text-foreground/30 hover:text-primary transition-colors"
-                                                    aria-label="Download"
-                                                >
-                                                    <Download className="size-5" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </li>
-                                );
-                            })}
-                        </ul>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        )}
                     </CardContent>
                 </Card>
             </div>

@@ -1,4 +1,5 @@
 import type {
+    BaseCatalogFilters,
     CatalogEntity,
     EntityDetail,
     RelatedObjectItem,
@@ -7,7 +8,6 @@ import type {
     StixObject,
     ViewMode,
 } from '@/shared/types/entity';
-import type { TLP } from '@/shared/types/enums';
 
 // Re-export shared types so existing imports keep working
 export type {
@@ -21,13 +21,7 @@ export type {
 /** Incident catalog item — extends the generic CatalogEntity */
 export type Incident = CatalogEntity;
 
-export interface IncidentFilters {
-    name?: string;
-    tlp?: TLP;
-    sortOrder?: 'asc' | 'desc';
-    page?: number;
-    limit?: number;
-}
+export type IncidentFilters = BaseCatalogFilters;
 
 // ── Detail view types ──────────────────────────────────────────────────
 

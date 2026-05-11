@@ -13,42 +13,6 @@ import Map, { Marker, NavigationControl } from 'react-map-gl/maplibre';
 const CARTO_LIGHT =
     'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 
-// ── Demo fallback data ────────────────────────────────────────────────
-
-const DEMO_LOCATIONS: StixObject[] = [
-    {
-        id: 'location--demo-1',
-        name: '[DEMO] Ukraine',
-        country: 'UA',
-        region: 'Eastern Europe',
-        latitude: 48.3794,
-        longitude: 31.1656,
-    } as unknown as StixObject,
-    {
-        id: 'location--demo-2',
-        name: '[DEMO] Russia',
-        country: 'RU',
-        region: 'Eastern Europe',
-        latitude: 61.524,
-        longitude: 105.3188,
-    } as unknown as StixObject,
-];
-
-const DEMO_TARGETS: StixObject[] = [
-    {
-        id: 'identity--demo-1',
-        name: '[DEMO] Ukrainian Government',
-        identityClass: 'organization',
-        sectors: ['government-regional'],
-    } as unknown as StixObject,
-    {
-        id: 'identity--demo-2',
-        name: '[DEMO] European Media Outlets',
-        identityClass: 'organization',
-        sectors: ['media'],
-    } as unknown as StixObject,
-];
-
 interface LocationMarkerProps {
     obj: StixObject;
 }
@@ -92,7 +56,7 @@ function LocationRow({ obj }: { obj: StixObject }) {
     const label = name ?? region ?? country ?? getStixType(obj.id);
 
     return (
-        <div className="flex items-center gap-3 py-3">
+        <div className="hover:bg-muted/40 flex items-center gap-3 px-6 py-3 transition-colors">
             <div className="bg-muted/50 flex size-9 shrink-0 items-center justify-center rounded-xl">
                 <Globe className="text-foreground/50 size-4" />
             </div>
@@ -117,7 +81,7 @@ function TargetRow({ obj }: { obj: StixObject }) {
     const Icon = identityClass === 'organization' ? Building2 : Users;
 
     return (
-        <div className="flex items-center gap-3 py-3">
+        <div className="hover:bg-muted/40 flex items-center gap-3 px-6 py-3 transition-colors">
             <div className="bg-muted/50 flex size-9 shrink-0 items-center justify-center rounded-xl">
                 <Icon className="text-foreground/50 size-4" />
             </div>
@@ -138,12 +102,8 @@ function TargetRow({ obj }: { obj: StixObject }) {
 export function MapTab<TEntity extends EntityBase = EntityBase>({
     detail,
 }: MapTabProps<TEntity>) {
-    const realLocations = getRelatedByTypes(detail, ['location']);
-    const realTargets = getRelatedByTypes(detail, ['identity']);
-    const isDemoLocations = realLocations.length === 0;
-    const isDemoTargets = realTargets.length === 0;
-    const locations = isDemoLocations ? DEMO_LOCATIONS : realLocations;
-    const targets = isDemoTargets ? DEMO_TARGETS : realTargets;
+    const locations = getRelatedByTypes(detail, ['location']);
+    const targets = getRelatedByTypes(detail, ['identity']);
 
     const locationsWithCoords = locations.filter(
         (obj) =>
@@ -171,7 +131,7 @@ export function MapTab<TEntity extends EntityBase = EntityBase>({
     return (
         <div className="space-y-6">
             {/* ── MapLibre map ─────────────────────────────── */}
-            <div className="border-border/50 h-72 overflow-hidden rounded-2xl border shadow-sm">
+            <div className="border-border/50 isolate h-72 overflow-hidden rounded-2xl border shadow-sm">
                 <Map
                     initialViewState={initialViewState}
                     mapStyle={CARTO_LIGHT}
@@ -200,23 +160,22 @@ export function MapTab<TEntity extends EntityBase = EntityBase>({
                         <div className="bg-primary/10 flex size-8 items-center justify-center rounded-lg">
                             <MapPin className="text-primary size-4" />
                         </div>
-                        <h3 className="text-base font-bold">
+                        <h3 className="text-primary text-base font-bold">
                             Localización de campaña
                         </h3>
                     </CardHeader>
-                    <CardContent className="p-0 px-6">
-                        {isDemoLocations && (
-                            <div className="border-b px-0 py-2">
-                                <p className="text-[0.6rem] font-bold tracking-widest text-amber-500 uppercase">
-                                    Demo data
-                                </p>
+                    <CardContent className="p-0">
+                        {locations.length === 0 ? (
+                            <p className="text-foreground/40 py-6 text-center text-sm">
+                                No locations linked.
+                            </p>
+                        ) : (
+                            <div className="divide-y">
+                                {locations.map((obj) => (
+                                    <LocationRow key={obj.id} obj={obj} />
+                                ))}
                             </div>
                         )}
-                        <div className="divide-y">
-                            {locations.map((obj) => (
-                                <LocationRow key={obj.id} obj={obj} />
-                            ))}
-                        </div>
                     </CardContent>
                 </Card>
 
@@ -226,21 +185,22 @@ export function MapTab<TEntity extends EntityBase = EntityBase>({
                         <div className="bg-primary/10 flex size-8 items-center justify-center rounded-lg">
                             <Target className="text-primary size-4" />
                         </div>
-                        <h3 className="text-base font-bold">Targeting</h3>
+                        <h3 className="text-primary text-base font-bold">
+                            Targeting
+                        </h3>
                     </CardHeader>
-                    <CardContent className="p-0 px-6">
-                        {isDemoTargets && (
-                            <div className="border-b px-0 py-2">
-                                <p className="text-[0.6rem] font-bold tracking-widest text-amber-500 uppercase">
-                                    Demo data
-                                </p>
+                    <CardContent className="p-0">
+                        {targets.length === 0 ? (
+                            <p className="text-foreground/40 py-6 text-center text-sm">
+                                No targets linked.
+                            </p>
+                        ) : (
+                            <div className="divide-y">
+                                {targets.map((obj) => (
+                                    <TargetRow key={obj.id} obj={obj} />
+                                ))}
                             </div>
                         )}
-                        <div className="divide-y">
-                            {targets.map((obj) => (
-                                <TargetRow key={obj.id} obj={obj} />
-                            ))}
-                        </div>
                     </CardContent>
                 </Card>
             </div>

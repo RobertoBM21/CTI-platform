@@ -33,78 +33,7 @@ interface TimelineEvent {
     correlationLabel?: string;
     /** Shows as a gray entity chip */
     entityLabel?: string;
-    isDemo?: boolean;
 }
-
-// ── Demo fallback events ───────────────────────────────────────────────
-
-const DEMO_BASE_TS = Date.now();
-const DEMO_EVENTS: TimelineEvent[] = [
-    {
-        id: 'demo--1',
-        timestamp: DEMO_BASE_TS - 1000 * 60 * 60 * 2,
-        domain: 'cognitive',
-        title: 'Report updated and marked as Verified by SOC',
-        entityType: 'incident',
-        color: '#CF4931',
-        confidence: 90,
-        isDemo: true,
-    },
-    {
-        id: 'demo--2',
-        timestamp: DEMO_BASE_TS - 1000 * 60 * 60 * 6,
-        domain: 'cyber',
-        title: 'Automatic correlation detected with Incident INT-8922024',
-        entityType: 'sighting',
-        color: '#0284c7',
-        correlationLabel: 'Same Threat Actor',
-        isDemo: true,
-    },
-    {
-        id: 'demo--3',
-        timestamp: DEMO_BASE_TS - 1000 * 60 * 60 * 14,
-        domain: 'cyber',
-        title: 'Anomalous activity detected: Massive port scanning',
-        entityType: 'indicator',
-        color: '#dc2626',
-        entityLabel: 'IP 192.168.45.2',
-        description:
-            'Port scan targeting TCP 22, 80, 443, 3389 from external IP.',
-        isDemo: true,
-    },
-    {
-        id: 'demo--4',
-        timestamp: DEMO_BASE_TS - 1000 * 60 * 60 * 23,
-        domain: 'cognitive',
-        title: 'New network artifacts attached (logs_server.json)',
-        entityType: 'note',
-        color: '#b45309',
-        isDemo: true,
-    },
-    {
-        id: 'demo--5',
-        timestamp: DEMO_BASE_TS - 1000 * 60 * 60 * 36,
-        domain: 'cyber',
-        title: 'Malware sample identified: Cobalt Strike beacon',
-        entityType: 'malware',
-        color: '#9333ea',
-        entityLabel: 'CobaltStrike-v4',
-        description: 'Beacon configuration extracted. C2: 185.220.101.47:443',
-        confidence: 78,
-        isDemo: true,
-    },
-    {
-        id: 'demo--6',
-        timestamp: DEMO_BASE_TS - 1000 * 60 * 60 * 48,
-        domain: 'cognitive',
-        title: 'Threat actor profile linked: APT28',
-        entityType: 'threat-actor',
-        color: '#7c3aed',
-        entityLabel: 'APT28',
-        confidence: 65,
-        isDemo: true,
-    },
-];
 
 // ── Event builder ──────────────────────────────────────────────────────
 
@@ -192,13 +121,6 @@ function buildEvents<TEntity extends EntityBase>(
     }
 
     const sorted = events.sort((a, b) => b.timestamp - a.timestamp);
-
-    // Inject demo events when only the base "entity registered" event exists
-    if (sorted.length <= 1) {
-        return [...DEMO_EVENTS, ...sorted].sort(
-            (a, b) => b.timestamp - a.timestamp,
-        );
-    }
 
     return sorted;
 }
@@ -312,16 +234,11 @@ function EventRow({
                 }}
                 className="min-w-0 flex-1 cursor-pointer pt-0 pb-7"
             >
-                {/* Time + demo badge */}
+                {/* Time */}
                 <div className="mb-0.5 flex items-center gap-2">
                     <p className="text-foreground/40 text-xs font-medium tracking-wide uppercase">
                         {relativeLabel(event.timestamp)}
                     </p>
-                    {event.isDemo && (
-                        <span className="rounded border border-dashed border-amber-400/50 bg-amber-50 px-1.5 py-0.5 text-[0.5rem] font-bold tracking-widest text-amber-600 uppercase dark:bg-amber-950/30 dark:text-amber-400">
-                            demo
-                        </span>
-                    )}
                 </div>
 
                 {/* Title */}
@@ -562,62 +479,110 @@ export function TimelineTab<TEntity extends EntityBase = EntityBase>({
     detail,
 }: TimelineTabProps<TEntity>) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [showCyber, setShowCyber] = useState(true);
+    const [showCognitive, setShowCognitive] = useState(true);
     const events = useMemo(() => buildEvents(detail), [detail]);
 
     const hasCyber = events.some((e) => e.domain === 'cyber');
     const hasCognitive = events.some((e) => e.domain === 'cognitive');
     const isHybrid = hasCyber && hasCognitive;
-    const hasDemo = events.some((e) => e.isDemo);
+
+    const visibleEvents = useMemo(
+        () =>
+            events.filter(
+                (e) =>
+                    (e.domain === 'cyber' && showCyber) ||
+                    (e.domain === 'cognitive' && showCognitive),
+            ),
+        [events, showCyber, showCognitive],
+    );
+
+    const visibleHasCyber = visibleEvents.some((e) => e.domain === 'cyber');
+    const visibleHasCognitive = visibleEvents.some(
+        (e) => e.domain === 'cognitive',
+    );
+    const visibleIsDual = visibleHasCyber && visibleHasCognitive;
+
+    let timelineTitle = 'Global Timeline';
+    if (visibleHasCyber && visibleHasCognitive)
+        timelineTitle = 'Dual-Domain Timeline';
+    else if (visibleHasCyber) timelineTitle = 'Cyber Timeline';
+    else if (visibleHasCognitive) timelineTitle = 'Cognitive Timeline';
 
     const toggle = (id: string) =>
         setSelectedId((prev) => (prev === id ? null : id));
 
     return (
-        <Card className="gap-0 rounded-2xl py-0 shadow-sm">
+        <Card className="isolate gap-0 rounded-2xl py-0 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between border-b px-6 py-5">
                 <div className="flex items-center gap-2">
                     <History className="text-primary size-4" />
                     <h2 className="text-foreground/40 text-xs font-bold tracking-widest uppercase">
-                        {isHybrid ? 'Dual-Domain Timeline' : 'Global Timeline'}
+                        {timelineTitle}
                     </h2>
                 </div>
                 <div className="flex items-center gap-4">
-                    {hasDemo && (
-                        <span className="text-foreground/30 text-[0.6rem] font-semibold tracking-wide uppercase">
-                            Demo data — connect real events via backend
-                        </span>
-                    )}
                     {isHybrid && (
-                        <div className="flex items-center gap-3">
-                            <span className="flex items-center gap-1.5 text-[0.6rem] font-bold tracking-widest text-red-500 uppercase">
-                                <span className="inline-block size-1.5 rounded-full bg-red-500" />
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setShowCyber((v) => !v)}
+                                className={cn(
+                                    'flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6rem] font-bold tracking-widest uppercase transition-all',
+                                    showCyber
+                                        ? 'border-red-200 bg-red-50 text-red-500 dark:border-red-900 dark:bg-red-950/30'
+                                        : 'border-border text-foreground/30 hover:text-foreground/50',
+                                )}
+                            >
+                                <span
+                                    className={cn(
+                                        'inline-block size-1.5 rounded-full',
+                                        showCyber
+                                            ? 'bg-red-500'
+                                            : 'bg-foreground/20',
+                                    )}
+                                />
                                 Cyber
-                            </span>
-                            <span className="flex items-center gap-1.5 text-[0.6rem] font-bold tracking-widest text-violet-500 uppercase">
-                                <span className="inline-block size-1.5 rounded-full bg-violet-500" />
+                            </button>
+                            <button
+                                onClick={() => setShowCognitive((v) => !v)}
+                                className={cn(
+                                    'flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6rem] font-bold tracking-widest uppercase transition-all',
+                                    showCognitive
+                                        ? 'border-violet-200 bg-violet-50 text-violet-500 dark:border-violet-900 dark:bg-violet-950/30'
+                                        : 'border-border text-foreground/30 hover:text-foreground/50',
+                                )}
+                            >
+                                <span
+                                    className={cn(
+                                        'inline-block size-1.5 rounded-full',
+                                        showCognitive
+                                            ? 'bg-violet-500'
+                                            : 'bg-foreground/20',
+                                    )}
+                                />
                                 Cognitive
-                            </span>
+                            </button>
                         </div>
                     )}
                 </div>
             </CardHeader>
 
             <CardContent className="px-6 py-6">
-                {events.length === 0 ? (
+                {visibleEvents.length === 0 ? (
                     <div className="py-16 text-center">
                         <p className="text-foreground/40 text-sm">
                             No timeline events available.
                         </p>
                     </div>
-                ) : isHybrid ? (
+                ) : visibleIsDual ? (
                     <DualTrackTimeline
-                        events={events}
+                        events={visibleEvents}
                         selectedId={selectedId}
                         toggle={toggle}
                     />
                 ) : (
                     <TimelineList
-                        events={events}
+                        events={visibleEvents}
                         selectedId={selectedId}
                         toggle={toggle}
                     />

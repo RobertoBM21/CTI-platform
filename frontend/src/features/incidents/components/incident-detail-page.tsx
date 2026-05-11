@@ -8,15 +8,16 @@ import {
     DetailLoadingState,
 } from '@/shared/components/error-state';
 import { ArtifactsTab } from '@/shared/components/tabs/artifacts-tab';
+import { ExecutiveSummaryTab } from '@/shared/components/tabs/executive-summary-tab';
 import { MapTab } from '@/shared/components/tabs/map-tab';
 import { NetworkGraphTab } from '@/shared/components/tabs/network-graph-tab';
 import { TimelineTab } from '@/shared/components/tabs/timeline-tab';
 import { TLP } from '@/shared/types/enums';
 import { Activity, Clock, FileText, Link2, MapPin } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 import { useIncidentDetail } from '../hooks/use-incident-detail';
 import { getStixType } from '../utils';
-import { ExecutiveSummaryTab } from './tabs/executive-summary-tab';
 
 const TABS = [
     { id: 'summary', label: 'Executive Summary', icon: FileText },
@@ -33,7 +34,19 @@ interface IncidentDetailPageProps {
 }
 
 export function IncidentDetailPage({ id }: IncidentDetailPageProps) {
-    const [activeTab, setActiveTab] = useState<TabId>('summary');
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const rawTab = searchParams.get('tab');
+    const activeTab: TabId = TABS.some((t) => t.id === rawTab)
+        ? (rawTab as TabId)
+        : 'summary';
+
+    function setActiveTab(tab: TabId) {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('tab', tab);
+        router.replace(`?${params.toString()}`, { scroll: false });
+    }
+
     const { data, isLoading, isError } = useIncidentDetail(id);
     const { setPageTitle } = usePageTitle();
 

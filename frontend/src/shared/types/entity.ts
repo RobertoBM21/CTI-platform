@@ -91,3 +91,11 @@ export interface EntityDetail<TEntity extends EntityBase = EntityBase> {
 }
 
 export type ViewMode = 'list' | 'grid';
+
+export interface BaseCatalogFilters {
+    name?: string;
+    tlp?: TLP;
+    sortOrder?: 'asc' | 'desc';
+    page?: number;
+    limit?: number;
+}
