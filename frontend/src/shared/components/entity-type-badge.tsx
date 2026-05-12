@@ -16,7 +16,6 @@ import {
     Server,
     Shield,
     ShieldAlert,
-    Target,
     User,
     Users,
     Wrench,
@@ -38,7 +37,7 @@ export const entityConfig: Record<
     },
     'threat-actor': {
         label: 'THREAT ACTOR',
-        icon: Target,
+        icon: User,
         className:
             'border-violet-300 text-violet-700 bg-violet-50 hover:bg-violet-50 dark:border-violet-700 dark:text-violet-300 dark:bg-violet-950',
     },

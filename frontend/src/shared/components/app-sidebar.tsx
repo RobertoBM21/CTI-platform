@@ -24,6 +24,11 @@ const navItems: NavItem[] = [
         href: '/campaigns',
         icon: entityConfig.campaign.icon,
     },
+    {
+        label: 'Threat Actors',
+        href: '/threat-actors',
+        icon: entityConfig['threat-actor'].icon,
+    },
 ];
 
 const bottomItems: NavItem[] = [

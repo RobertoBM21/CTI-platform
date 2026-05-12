@@ -289,11 +289,15 @@ export function ExecutiveSummaryTab<
                                 label={getStixConfig(obj.id).label}
                             >
                                 <p className="text-sm font-semibold">
-                                    {obj.name ?? getStixType(obj.id)}
+                                    {(obj.abstract as string | undefined) ??
+                                        obj.name ??
+                                        getStixType(obj.id)}
                                 </p>
-                                {obj.description && (
+                                {((obj.content as string | undefined) ??
+                                    obj.description) && (
                                     <p className="text-foreground/60 mt-1.5 text-xs leading-snug">
-                                        {obj.description}
+                                        {(obj.content as string | undefined) ??
+                                            obj.description}
                                     </p>
                                 )}
                             </SectionCard>
