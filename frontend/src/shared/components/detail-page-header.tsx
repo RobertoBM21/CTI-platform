@@ -40,15 +40,14 @@ export function DetailPageHeader({
                 {/* Left: back + meta + title */}
                 <Link
                     href={backPath}
-                    className="text-foreground/50 hover:text-foreground shrink-0 rounded-lg p-1 transition-colors"
+                    className="text-foreground/50 hover:text-foreground flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1 transition-colors"
                     aria-label={`Back to ${entityTypeLabel.toLowerCase()}s`}
                 >
                     <ArrowLeft className="size-4" />
+                    <span className="text-sm font-medium">
+                        {entityTypeLabel}
+                    </span>
                 </Link>
-
-                <div className="text-foreground/40 shrink-0 text-sm font-medium select-none">
-                    {entityTypeLabel}
-                </div>
 
                 <span className="text-foreground/80 min-w-0 flex-1 truncate text-sm font-semibold">
                     {name}

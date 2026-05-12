@@ -1,6 +1,28 @@
 # CTI Platform MVP
 
-Repositorio del TFM orientado a ciberinteligencia (CTI), preparado como workspace con `pnpm` para convivir con varias aplicaciones. Contiene el backend (API REST NestJS) y el frontend (Next.js).
+Repositorio del TFM orientado a ciberinteligencia (CTI), preparado como workspace con `pnpm`. Contiene el backend (API REST NestJS) y el frontend (Next.js).
+
+---
+
+## Índice
+
+1. [Objetivo](#objetivo)
+2. [Stack tecnológico](#stack-tecnológico)
+3. [Arquitectura backend](#arquitectura-backend)
+4. [Estado actual](#estado-actual)
+5. [Modelo de dominio](#modelo-de-dominio)
+6. [Estructura de carpetas](#estructura-de-carpetas)
+7. [Configuración de entorno](#configuración-de-entorno)
+8. [Ejecución local](#ejecución-local)
+9. [Ejecución con Docker](#ejecución-con-docker)
+10. [Primeros pasos: ingestar datos y probar la aplicación](#primeros-pasos-ingestar-datos-y-probar-la-aplicación)
+11. [API — Swagger](#api--swagger)
+12. [Health check](#health-check)
+13. [Ingesta de bundles STIX 2.1](#ingesta-de-bundles-stix-21)
+14. [Tests](#tests)
+15. [CI](#ci)
+
+---
 
 ## Objetivo
 
@@ -12,6 +34,8 @@ En esta fase:
 - El foco funcional está en los contextos `Threat` y `Cyber` (SDOs técnicos STIX 2.1).
 - Se prioriza una arquitectura clara y desacoplada entre dominio y adaptadores.
 - Backend y frontend operan como aplicaciones separadas en un monorepo pnpm.
+
+---
 
 ## Stack tecnológico
 
@@ -31,10 +55,12 @@ En esta fase:
 - Next.js 16 + React 19 + TypeScript
 - App Router + Turbopack (dev) + React Compiler
 - Tailwind CSS v4 + shadcn/ui (base-nova)
-- TanStack Query (data fetching con cache)
+- TanStack Query (data fetching con caché)
 - ESLint (next/core-web-vitals + next/typescript) + Prettier
-- Vitest + React Testing Library + jsdom
-- Playwright (E2E local, no en CI)
+- Vitest + React Testing Library
+- Playwright (E2E)
+
+---
 
 ## Arquitectura backend
 
@@ -43,6 +69,10 @@ Se aplica arquitectura hexagonal pragmática por contextos:
 - **Domain**: modelo y reglas de negocio puras.
 - **Application**: servicios por entidad y orquestación.
 - **Infrastructure**: controladores HTTP, repositorios y persistencia.
+
+La separación entre dominio y persistencia es **intencional**: el dominio no depende de Nest ni de Mongoose, y la persistencia se modela en documentos específicos.
+
+Esto evita acoplamiento tecnológico y facilita la evolución del sistema.
 
 ```mermaid
 flowchart LR
@@ -53,271 +83,280 @@ flowchart LR
     Repo --> DB[(MongoDB)]
 ```
 
-La separación entre dominio y persistencia es **intencional**: el dominio no depende de Nest ni de Mongoose, y la persistencia se modela en documentos específicos. Esto evita acoplamiento tecnológico y facilita evolución del sistema.
+---
 
 ## Estado actual
 
-Implementado:
+### Backend
 
-- Bootstrap Nest + Swagger (`/api`).
-- Endpoint `GET /health` en contexto `shared` con estado de DB.
-- Capa de dominio compartida (`shared`) con SROs (Relationship, Sighting) y VOs transversales STIX.
-- Modelo de dominio `Threat` con propiedades comunes STIX 2.1 (entidades, value objects y puertos).
-- Schemas Mongoose espejo del dominio `Threat`.
-  - Servicios de lectura de `Threat` (catálogo, detalle, listado de Indicators).
-- Repositorios concretos Mongoose de `Threat` y wiring completo de `ThreatModule`.
-- Controladores REST de `Threat` para catálogo por entidad, detalle e Indicators.
-- Detalle enriquecido (`EnrichedDetail<T>`) con objetos relacionados resueltos y sightings.
-- Contrato HTTP validado para filtrado, ordenación y paginación en catálogo Threat e Indicators.
-- IDs de dominio en formato STIX `type--uuid` en las 17 entidades.
-- Modelo de dominio `Cyber` con 10 SDOs técnicos STIX 2.1, 6 VOs nuevos, persistencia completa, 10 servicios read-only y `CyberModule` wired (sin controllers).
-- Servicios de resolución cross-context: `StixRefResolver` (despacho por prefijo STIX) y `DetailEnricher` (orquestación de enriquecimiento).
-- Servicios SRO en Shared: `RelationshipService` y `SightingService`.
-- Ingesta manual de bundles STIX 2.1 mediante `POST /ingestion/bundles`, con mapeo de 17 tipos soportados y respuesta de resumen (`total`, `processed`, `skipped`, `failed`).
-- Persistencia idempotente por `domainId` mediante `save()` en servicios y repositorios, usando upsert atómico y preservando `createdAt` cuando viene informado en el STIX original.
-- Suite de tests unitarios de dominio + application + integración de repositorios + e2e en verde.
+- Endpoints + Swagger (`/api`).
+- `GET /health` con estado de DB en contexto `shared`.
+- Capa de dominio `shared` con SROs (`Relationship`, `Sighting`) y VOs transversales STIX.
+- Contexto `Threat` completo: 5 entidades (`ThreatActor`, `Campaign`, `Incident`, `AttackPattern`, `Indicator`), servicios de lectura, repositorios Mongoose, controladores REST con paginación, filtrado y ordenación.
+- Contexto `Cyber` completo: 12 SDOs técnicos STIX 2.1 (`Malware`, `Tool`, `Vulnerability`, `InfrastructureEntity`, `IntrusionSet`, `Identity`, `Location`, `CourseOfAction`, `Note`, `Opinion`, `MalwareAnalysis`, `ObservedData`), persistencia completa, servicios read-only, registrados en `StixRefResolver` y `BundleIngestionService`.
+- Detalle enriquecido (`EnrichedDetail<T>`): objetos relacionados resueltos cross-context + sightings. `DetailEnricher` incluye una segunda pasada para devolver también las relaciones entre nodos periféricos (no solo las del centro).
+- `POST /ingestion/bundles`: ingesta manual de bundles STIX 2.1 con soporte de 21 tipos, idempotente por `domainId`.
+- Suite de tests unitarios de dominio + application + repositorios + e2e en verde.
 
-Frontend:
+### Frontend
 
-- Bootstrap Next.js 16 con App Router, Tailwind CSS v4, shadcn/ui, React Compiler, Turbopack.
-- Identidad visual UMU aplicada: IBM Plex Sans/Mono + paleta corporativa mapeada a tokens shadcn/ui.
-- TanStack Query provider + API client base con tipado de respuestas paginadas.
-- ESLint + Prettier configurados en consistencia con el backend.
-- Vitest + React Testing Library con test de humo.
-- Playwright configurado para E2E local con smoke test.
+- Identidad visual: IBM Plex Sans/Mono + paleta corporativa (`#CF4931` primary, `#EDE9E3` bg, `#092028` sidebar) mapeada a tokens shadcn/ui. Tema claro/oscuro.
+- TanStack Query + API client base con tipado de respuestas paginadas.
+- Feature `incidents/`: catálogo paginado + vista detalle completa con 5 tabs (Executive Summary, Network Analysis, Artifacts & IOCs, Map, Audit & Timeline). Conectado al backend real.
+- Feature `campaigns/`: catálogo paginado + vista detalle con las mismas 5 tabs. Conectado al backend real.
+- Capa `shared/` con componentes, tabs, utilidades y tipos reutilizables por todos los features: `EntityCatalog`, `EntityCard`, `EntityListRow`, `DetailPageHeader`, `EntityInfoCard`, `NetworkGraphTab` (d3-force + ReactFlow), `ExecutiveSummaryTab`, `ArtifactsTab`, `MapTab` (MapLibre + react-map-gl), `TimelineTab`, `DetailSidePanel`, `SectionTitle`, `SectionCard`, `ObservationWindow`, `SightingCount`, `EmptyState`, `TlpBadge`, `ConfidenceBadge`, `CatalogFiltersPanel`, estados de carga/error, etc.
+- `NetworkGraphTab`: layout de fuerzas d3-force, aristas con estilos por `relationshipType`, deduplicación de nodos, card unificada lista + grafo con separador vertical, panel lateral `DetailSidePanel`.
+- Tests E2E Playwright para incidentes y campañas (catálogo + detalle completo sobre datos reales de BD).
 - Dockerfile multi-stage (development + production con standalone output).
 
-Estructura de workspace:
+---
 
-- Backend activo en `backend/`.
-- Frontend activo en `frontend/`.
-- Raíz con aliases para operar el backend y frontend sin cambiar de directorio.
-- CI única en raíz con jobs paralelos para backend y frontend.
-
-Pendiente (siguiente fase):
-
-- Implementación del frontend: páginas funcionales que consuman la API REST del backend.
-- Controladores REST para el contexto Cyber (cuando la UI lo requiera).
-- Ingesta automatizada (feeds STIX, TAXII).
-
-## API expuesta actualmente
-
-### Threat
-
-- `GET /threat-actors`
-- `GET /threat-actors/:id`
-- `GET /campaigns`
-- `GET /campaigns/:id`
-- `GET /incidents`
-- `GET /incidents/:id`
-- `GET /attack-patterns`
-- `GET /attack-patterns/:id`
-- `GET /indicators`
-
-### Health
-
-- `GET /health`
-
-### Ingestion
-
-- `POST /ingestion/bundles`
-
-## Contrato de consulta del MVP
-
-### Catálogo Threat
-
-- Paginación: `page`, `limit`
-- Filtros: `name`, `tlp`
-- Sort: `sortBy`, `sortOrder`
-- Campos de ordenación permitidos: `createdAt`, `updatedAt`, `name`
-
-### Indicators
-
-- Paginación: `page`, `limit`
-- Filtros: `type`, `value`, `name`, `tlp`
-- Sort: `sortBy`, `sortOrder`
-- Campos de ordenación permitidos: `createdAt`, `updatedAt`, `value`, `type`
-
-## Health operativo del MVP
-
-`GET /health` devuelve:
-
-- estado general del servicio (`ok` o `degraded`)
-- timestamp de la comprobación
-- estado de la conexión a MongoDB (`up` o `down`)
-
-## Ingesta manual de bundles STIX 2.1
-
-El backend expone `POST /ingestion/bundles` para cargar manualmente un bundle STIX 2.1 completo.
-
-- Acepta un DTO con `type = bundle`, `id` y un array `objects` no vacío.
-- Soporta los 17 tipos del dominio implementado (`Threat`, `Cyber` y SROs de `Shared`).
-- Los tipos desconocidos se ignoran sin abortar la ingesta.
-- Cada objeto se persiste mediante `save()` con semántica de upsert idempotente por `domainId`.
-- Si el objeto ya existe, se actualizan los campos mutables y se preserva el `createdAt` original de STIX cuando venía en el payload inicial.
-- La respuesta devuelve un resumen con `total`, `processed`, `skipped` y `failed`.
-
-## Modelo de dominio (implementado)
+## Modelo de dominio
 
 ### Shared (transversal)
 
 - **Entidades SRO**: `Relationship`, `Sighting`.
-- **Value Objects / enums compartidos**: `TLP`, `AttackMotivation`, `ResourceLevel`, `RelationshipType`.
-- **Value Objects / interfaces compartidos**: `KillChainPhase`, `ExternalReference`.
-- **Puertos de repositorio**: `RelationshipRepository`, `SightingRepository`.
-- **Persistencia (Mongoose)**: `RelationshipDocument`, `SightingDocument`.
+- **Value Objects**: `TLP`, `AttackMotivation`, `ResourceLevel`, `RelationshipType`, `KillChainPhase`, `ExternalReference`.
+- **Puertos**: `RelationshipRepository`, `SightingRepository`.
+- **Persistencia**: `RelationshipDocument`, `SightingDocument`.
 
 ### Threat
 
 - **Entidades**: `ThreatActor`, `Campaign`, `Incident`, `AttackPattern`, `Indicator`.
-- **Value Objects / enums propios**: `IocType`, `IndicatorType`, `PatternType`, `ThreatActorType`, `ThreatActorRole`, `ThreatActorSophistication`.
-- **Puertos de repositorio**: `ThreatActorRepository`, `CampaignRepository`, `IncidentRepository`, `AttackPatternRepository`, `IndicatorRepository`.
-- **Persistencia (Mongoose)**: `ThreatActorDocument`, `CampaignDocument`, `IncidentDocument`, `AttackPatternDocument`, `IndicatorDocument`.
+- **Value Objects**: `IocType`, `IndicatorType`, `PatternType`, `ThreatActorType`, `ThreatActorRole`, `ThreatActorSophistication`.
+- **Puertos**: repositorio por entidad.
+- **Persistencia**: documento Mongoose por entidad.
 
 ### Cyber
 
-- **Entidades**: `Malware`, `Tool`, `Vulnerability`, `InfrastructureEntity`, `IntrusionSet`, `Identity`, `Location`, `CourseOfAction`, `Note`, `Opinion`.
-- **Value Objects / enums propios**: `MalwareType`, `ToolType`, `InfrastructureType`, `IdentityClass`, `OpinionValue`, `Region`.
-- **Puertos de repositorio**: `MalwareRepository`, `ToolRepository`, `VulnerabilityRepository`, `InfrastructureEntityRepository`, `IntrusionSetRepository`, `IdentityRepository`, `LocationRepository`, `CourseOfActionRepository`, `NoteRepository`, `OpinionRepository`.
-- **Persistencia (Mongoose)**: documentos Mongoose espejo por cada entidad.
+- **Entidades**: `Malware`, `Tool`, `Vulnerability`, `InfrastructureEntity`, `IntrusionSet`, `Identity`, `Location`, `CourseOfAction`, `Note`, `Opinion`, `MalwareAnalysis`, `ObservedData`.
+- **Value Objects**: `MalwareType`, `ToolType`, `InfrastructureType`, `IdentityClass`, `OpinionValue`, `Region`, `MalwareAnalysisResult`.
+- **Puertos**: repositorio por entidad.
+- **Persistencia**: documento Mongoose por entidad.
 
-## Estructura de carpetas backend
+---
+
+## Estructura de carpetas
+
+### Backend
 
 ```text
 backend/src/
-	main.ts                                      # Bootstrap (pipes globales, swagger, CORS, puerto)
-	app.module.ts                                # Módulo raíz (configuración, DB, módulos de contexto)
-	config/                                      # Configuración tipada de aplicación y base de datos
+    main.ts                                      # Bootstrap (pipes globales, swagger, CORS, puerto)
+    app.module.ts                                # Módulo raíz (configuración, DB, módulos de contexto)
+    config/                                      # Configuración tipada de aplicación y base de datos
 
-	contexts/
-		shared/
-			application/dtos/                        # DTOs reutilizables (p. ej. paginación, StixBundleDto)
-			application/services/                    # RelationshipService, SightingService, StixMapper, BundleIngestionService
-			domain/entities/                         # Entidades SRO (Relationship, Sighting)
-			domain/value-objects/                    # VOs transversales STIX (TLP, RelationshipType...)
-			domain/ports/                            # Puertos de repositorio SRO
-			infrastructure/controllers/              # Endpoints transversales (p. ej. health, ingestion)
-			infrastructure/persistence/schemas/      # Schemas Mongoose SRO
-			infrastructure/persistence/repositories/ # Repositorios Mongoose SRO
+    contexts/
+        shared/
+            application/dtos/                    # DTOs reutilizables (paginación, StixBundleDto)
+            application/services/                # RelationshipService, SightingService, StixMapper, BundleIngestionService, StixRefResolver, DetailEnricher
+            domain/entities/                     # Entidades SRO (Relationship, Sighting)
+            domain/value-objects/                # VOs transversales STIX
+            domain/ports/                        # Puertos de repositorio SRO
+            infrastructure/controllers/          # Endpoints transversales (health, ingestion)
+            infrastructure/persistence/          # Schemas Mongoose + repositorios SRO
 
-		threat/
-			domain/entities/                         # Entidades del dominio Threat
-			domain/value-objects/                    # Enums y tipos de valor del dominio
-			domain/ports/                            # Contratos (puertos) de repositorio
+        threat/
+            domain/                              # Entidades, VOs y puertos del dominio Threat
+            application/                         # DTOs, servicios, StixRefResolver, DetailEnricher
+            infrastructure/                      # Controladores REST + persistencia Mongoose
 
-			application/dtos/                        # DTOs de entrada/salida + EnrichedDetail
-			application/services/                    # Servicios + StixRefResolver + DetailEnricher
-
-			infrastructure/controllers/              # Controladores REST de Threat
-			infrastructure/persistence/schemas/      # Schemas Mongoose (documentos)
-			infrastructure/persistence/repositories/ # Implementaciones concretas de puertos
-
-		cyber/
-			domain/entities/                         # SDOs técnicos STIX 2.1
-			domain/value-objects/                    # Enums STIX del dominio Cyber
-			domain/ports/                            # Contratos (puertos) de repositorio
-
-			application/services/                    # servicios read-only (findById)
-
-			infrastructure/persistence/schemas/      # Schemas Mongoose (documentos)
-			infrastructure/persistence/repositories/ # Implementaciones concretas de puertos
+        cyber/
+            domain/                              # SDOs técnicos STIX 2.1, VOs y puertos
+            application/services/                # Servicios read-only (findById por entidad)
+            infrastructure/persistence/          # Schemas Mongoose + repositorios
 ```
 
-## Estructura de carpetas frontend
+### Frontend
 
 ```text
 frontend/src/
-	app/
-		layout.tsx                               # Layout raíz con providers, fuentes UMU, metadata
-		page.tsx                                 # Página principal (placeholder)
-		globals.css                              # Tema UMU + tokens shadcn/ui (OKLCH)
-	components/
-		ui/                                      # Componentes shadcn/ui (autogenerados)
-	lib/
-		utils.ts                                 # Utilidad cn() de shadcn
-		api-client.ts                            # Cliente API base (fetch + tipado)
-	providers/
-		query-provider.tsx                       # TanStack Query provider
+    app/
+        layout.tsx                               # Layout raíz con providers, fuentes, metadata
+        globals.css                              # Tema + tokens shadcn/ui (OKLCH)
+        incidents/                               # Catálogo y detalle de incidentes
+        campaigns/                               # Catálogo y detalle de campañas
+    components/ui/                               # Componentes shadcn/ui (autogenerados)
+    features/
+        incidents/                               # API hooks, tipos y componentes de incidentes
+        campaigns/                               # API hooks, tipos y componentes de campañas
+    shared/
+        components/                              # Componentes reutilizables (EntityCatalog, tabs, DetailPageHeader, badges, estados…)
+        components/tabs/                         # Tabs compartidas (ExecutiveSummary, NetworkGraph, Artifacts, Map, Timeline)
+        hooks/                                   # Hooks transversales (useTheme…)
+        lib/                                     # stix.ts (getStixType, getStixConfig, formatDate…)
+        types/                                   # entity.ts (EntityBase, EntityDetail<T>, SightingItem…)
+    providers/
+        query-provider.tsx                       # TanStack Query provider
+        page-title-context.tsx                   # Contexto de título de página
 ```
+
+---
 
 ## Configuración de entorno
 
-Usa `.env` en la raíz del repositorio para ejecución local y toma como base `.env.example`.
+Usa `.env` en la raíz del repositorio como fuente única de configuración. Toma como base `.env.example`.
 
-### Decisión técnica sobre configuración
+Las variables se consumen mediante configuración tipada con espacios de nombres (`app.*`, `database.*`) — evita acceder a variables sueltas del entorno y facilita escalar la configuración.
 
-Se usa configuración tipada con espacios de nombres (`app.*` y `database.*`) en lugar de acceder directamente a variables sueltas del entorno. Por eso en el código aparecen claves como `app.port` y `database.uri`: mejora la coherencia interna, reduce errores por nombres inconsistentes y facilita escalar la configuración del proyecto con trazabilidad.
+| Variable             | Descripción                                        | Default |
+| -------------------- | -------------------------------------------------- | ------- |
+| `PORT`               | Puerto del backend                                 | `3000`  |
+| `NODE_ENV`           | Entorno de ejecución                               | —       |
+| `CORS_ORIGIN`        | Origen permitido para CORS                         | —       |
+| `MONGODB_URI`        | URI de MongoDB para ejecución local                | —       |
+| `API_URL`            | URL del backend para el proxy del frontend (local) | —       |
+| `MONGODB_URI_DOCKER` | URI de MongoDB con hostname Docker (`mongo`)       | —       |
+| `API_URL_DOCKER`     | URL del backend con hostname Docker (`backend`)    | —       |
 
-Variables actuales:
-
-- `PORT` — Puerto del backend (default: 3000)
-- `NODE_ENV` — Entorno de ejecución
-- `CORS_ORIGIN` — Origen permitido para CORS
-- `MONGODB_URI` — URI de conexión a MongoDB (local)
-- `API_URL` — URL interna del backend para el proxy del frontend (local)
-- `MONGODB_URI_DOCKER` — URI de MongoDB con hostname Docker (`mongo`)
-- `API_URL_DOCKER` — URL del backend con hostname Docker (`app`)
+---
 
 ## Ejecución local
 
-```bash
-pnpm install
-```
-
-La instalación se realiza desde la raíz del workspace.
-
-### Desde la raíz
-
-- Scripts genéricos del workspace: `pnpm build`, `pnpm lint`, `pnpm test`, `pnpm start:dev`
-- Scripts específicos del backend: `pnpm backend:build`, `pnpm backend:lint`, `pnpm backend:test`, `pnpm backend:test:e2e`, `pnpm backend:start:dev`
-- Scripts específicos del frontend: `pnpm frontend:build`, `pnpm frontend:lint`, `pnpm frontend:test`, `pnpm frontend:dev`
-
-Los scripts genéricos orquestan todas las apps del workspace; los `backend:*` y `frontend:*` operan solo su aplicación respectiva.
-
-### Desde `backend/`
+Necesita levantar Docker en modo Desarrollo.
 
 ```bash
-cd backend
-pnpm start:dev
-pnpm build
-pnpm lint
-pnpm test
-pnpm test:e2e
+pnpm install          # desde la raíz del workspace
 ```
 
-### Desde `frontend/`
+### Scripts desde la raíz
+
+| Scope     | Comando                                                   | Acción                              |
+| --------- | --------------------------------------------------------- | ----------------------------------- |
+| Workspace | `pnpm build` / `pnpm lint` / `pnpm test`                  | Todas las apps en paralelo          |
+| Backend   | `pnpm backend:start:dev`                                  | Backend con hot reload              |
+| Backend   | `pnpm backend:build` / `backend:lint` / `backend:test`    | Build, lint, tests unitarios        |
+| Backend   | `pnpm backend:test:e2e`                                   | Tests e2e backend (mongodb-memory)  |
+| Frontend  | `pnpm frontend:dev`                                       | Frontend con Turbopack              |
+| Frontend  | `pnpm frontend:build` / `frontend:lint` / `frontend:test` | Build, lint, tests unitarios Vitest |
+| Frontend  | `pnpm frontend:test:e2e`                                  | Tests Playwright E2E                |
+
+### Scripts desde cada carpeta
 
 ```bash
-cd frontend
-pnpm dev
-pnpm build
-pnpm lint
-pnpm test
-pnpm test:e2e
+# Backend
+cd backend && pnpm start:dev
+
+# Frontend
+cd frontend && pnpm dev
 ```
 
-## Docker
+---
 
-El proyecto mantiene dos opciones:
+## Ejecución con Docker
 
-- `docker-compose.dev.yml`: entorno de desarrollo (hot reload y volúmenes).
-- `docker-compose.yml`: entorno de ejecución para producción.
+El proyecto mantiene dos ficheros Docker Compose según el entorno:
 
-### Desarrollo con Docker
+### Desarrollo (`docker-compose.dev.yml`)
+
+Solo levanta **MongoDB**. Backend y frontend se arrancan localmente con hot reload:
 
 ```bash
-docker compose -f docker-compose.dev.yml up --build
+# 1. Levantar MongoDB
+docker compose -f docker-compose.dev.yml up -d
+
+# 2. En terminales separadas (o en paralelo):
+pnpm backend:start:dev
+pnpm frontend:dev
 ```
 
-### Ejecución tipo producción con Docker
+> El `.env` local ya apunta a `MONGODB_URI=mongodb://localhost:27017/...` y a `API_URL=http://localhost:3000`.
+
+### Producción (`docker-compose.yml`)
+
+Levanta los tres servicios (backend, frontend y MongoDB) en contenedores. Requiere un `.env` con las variables `*_DOCKER`:
 
 ```bash
 docker compose -f docker-compose.yml up --build
 ```
 
-Servicios:
+Servicios una vez activos:
 
-- Backend API: `http://localhost:3000`
-- Swagger: `http://localhost:3000/api`
+| Servicio | URL                         |
+| -------- | --------------------------- |
+| Frontend | `http://localhost:3001`     |
+| Backend  | `http://localhost:3000`     |
+| Swagger  | `http://localhost:3000/api` |
+| MongoDB  | `localhost:27017`           |
+
+---
+
+## Primeros pasos: ingestar datos y probar la aplicación
+
+La base de datos arranca vacía. Para ver datos en la UI es necesario ingestar el bundle de prueba incluido en el repositorio.
+
+### 1. Arrancar el entorno
+
+```bash
+# Opción A — desarrollo local
+docker compose -f docker-compose.dev.yml up -d   # MongoDB
+pnpm backend:start:dev                             # Backend en :3000
+pnpm frontend:dev                                  # Frontend en :3001
+
+# Opción B — producción Docker
+docker compose -f docker-compose.yml up --build
+```
+
+### 2. Ingestar un bundle de datos de prueba
+
+```bash
+curl -X POST http://localhost:3000/ingestion/bundles \
+  -H "Content-Type: application/json" \
+  -d data.json
+```
+
+La respuesta incluye un resumen `{ total, processed, skipped, failed }`. Los objetos `marking-definition` y `report` se cuentan como `skipped` (no implementados en backend todavía); el resto se procesa.
+
+### 3. Navegar la aplicación
+
 - Frontend: `http://localhost:3001`
-- MongoDB: `localhost:27017`
+- Swagger (explorar la API): `http://localhost:3000/api`
+
+La ingesta es **idempotente**: ejecutarla varias veces no crea duplicados.
+
+---
+
+## API — Swagger
+
+La documentación interactiva completa de todos los endpoints está disponible en:
+
+```
+http://localhost:3000/api
+```
+
+Incluye esquemas de request/response, parámetros de paginación, filtros y ejemplos.
+
+---
+
+## Health check
+
+`GET /health` devuelve el estado del servicio:
+
+```json
+{
+  "status": "ok",
+  "timestamp": "2026-05-12T10:00:00.000Z",
+  "database": "up"
+}
+```
+
+---
+
+## Ingesta de bundles STIX 2.1
+
+**Endpoint:** `POST /ingestion/bundles`
+
+Carga manualmente un bundle STIX 2.1 completo.
+
+- Acepta un body con `type = "bundle"`, `id` y un array `objects` no vacío.
+- Soporta **21 tipos** de los dominios implementados:
+
+  | Dominio | Tipos soportados                                                                                                                                                          |
+  | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | Threat  | `threat-actor`, `campaign`, `incident`, `attack-pattern`, `indicator`                                                                                                     |
+  | Cyber   | `malware`, `tool`, `vulnerability`, `infrastructure`, `intrusion-set`, `identity`, `location`, `course-of-action`, `note`, `opinion`, `malware-analysis`, `observed-data` |
+  | Shared  | `relationship`, `sighting`                                                                                                                                                |
+
+- Los tipos no soportados (`marking-definition`, `report`, …) se ignoran sin abortar la ingesta (`skipped`).
+- Cada objeto se persiste con semántica de **upsert idempotente** por `domainId`: si ya existe, se actualizan los campos mutables y se preserva el `createdAt` original del bundle STIX.
+- La respuesta devuelve `{ total, processed, skipped, failed }`.
