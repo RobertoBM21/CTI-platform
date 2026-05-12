@@ -60,11 +60,17 @@ function getRelatedByTypes<TEntity extends SummaryEntityBase>(
     detail: EntityDetail<TEntity>,
     types: string[],
 ): StixObject[] {
+    const seen = new Set<string>();
     return detail.relatedObjects
         .filter(
             ({ object }) => object && types.includes(getStixType(object.id)),
         )
-        .map(({ object }) => object!);
+        .map(({ object }) => object!)
+        .filter((obj) => {
+            if (seen.has(obj.id)) return false;
+            seen.add(obj.id);
+            return true;
+        });
 }
 
 // ── Component ─────────────────────────────────────────────────────────
@@ -189,130 +195,137 @@ export function ExecutiveSummaryTab<
                 </div>
             </section>
 
-            <section className="space-y-4">
-                <SectionTitle icon={Cpu} title="TTPs &amp; Planning Phases" />
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <Card className="gap-0 rounded-xl py-0 shadow-sm">
-                        <CardHeader className="px-4 py-3">
-                            <div className="flex items-center gap-1.5">
-                                <Cpu className="text-primary size-3.5" />
-                                <span className="text-primary text-[0.65rem] font-bold tracking-widest uppercase">
-                                    Cyber
-                                </span>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="px-4 pt-0 pb-4">
-                            {cyberTTPs.length === 0 ? (
-                                <span className="text-foreground/30 text-sm italic">
-                                    —
-                                </span>
-                            ) : (
-                                <div className="flex flex-wrap gap-2">
-                                    {cyberTTPs.map((obj) => {
-                                        const phases =
-                                            (obj.kill_chain_phases as
-                                                | KillChainPhase[]
-                                                | undefined) ?? [];
-                                        return (
-                                            <div
-                                                key={obj.id}
-                                                className="flex flex-col items-start gap-0.5"
-                                            >
-                                                <EntityChip obj={obj} />
-                                                {phases.map((p, i) => (
-                                                    <span
-                                                        key={i}
-                                                        className="text-foreground/40 pl-1 text-[0.6rem]"
-                                                    >
-                                                        {p.phase_name}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    <Card className="gap-0 rounded-xl py-0 shadow-sm">
-                        <CardHeader className="px-4 py-3">
-                            <div className="flex items-center gap-1.5">
-                                <Brain className="size-3.5 text-violet-600" />
-                                <span className="text-[0.65rem] font-bold tracking-widest text-violet-600 uppercase">
-                                    Info
-                                </span>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="px-4 pt-0 pb-4">
-                            {infoTTPs.length === 0 ? (
-                                <span className="text-foreground/30 text-sm italic">
-                                    —
-                                </span>
-                            ) : (
-                                <div className="flex flex-wrap gap-2">
-                                    {infoTTPs.map((obj) => {
-                                        const phases =
-                                            (obj.kill_chain_phases as
-                                                | KillChainPhase[]
-                                                | undefined) ?? [];
-                                        return (
-                                            <div
-                                                key={obj.id}
-                                                className="flex flex-col items-start gap-0.5"
-                                            >
-                                                <EntityChip obj={obj} />
-                                                {phases.map((p, i) => (
-                                                    <span
-                                                        key={i}
-                                                        className="text-foreground/40 pl-1 text-[0.6rem]"
-                                                    >
-                                                        {p.phase_name}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                </div>
-            </section>
-
-            <section className="space-y-4">
-                <SectionTitle
-                    icon={MessageSquare}
-                    title="Narratives &amp; Cognitive Assets"
-                />
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {narratives.map((obj) => (
-                        <Card
-                            key={obj.id}
-                            className="gap-0 rounded-xl py-0 shadow-sm"
-                        >
-                            <CardHeader className="px-5 py-3">
+            {attackPatterns.length > 0 && (
+                <section className="space-y-4">
+                    <SectionTitle
+                        icon={Cpu}
+                        title="TTPs &amp; Planning Phases"
+                    />
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <Card className="gap-0 rounded-xl py-0 shadow-sm">
+                            <CardHeader className="px-4 py-3">
                                 <div className="flex items-center gap-1.5">
-                                    <MessageSquare className="text-foreground/40 size-3.5" />
-                                    <span className="text-foreground/40 text-[0.65rem] font-bold tracking-widest uppercase">
-                                        {getStixConfig(obj.id).label}
+                                    <Cpu className="text-primary size-3.5" />
+                                    <span className="text-primary text-[0.65rem] font-bold tracking-widest uppercase">
+                                        Cyber
                                     </span>
                                 </div>
                             </CardHeader>
-                            <CardContent className="px-5 pt-0 pb-5">
-                                <p className="text-sm font-semibold">
-                                    {obj.name ?? getStixType(obj.id)}
-                                </p>
-                                {obj.description && (
-                                    <p className="text-foreground/60 mt-1.5 text-xs leading-snug">
-                                        {obj.description}
-                                    </p>
+                            <CardContent className="px-4 pt-0 pb-4">
+                                {cyberTTPs.length === 0 ? (
+                                    <span className="text-foreground/30 text-sm italic">
+                                        —
+                                    </span>
+                                ) : (
+                                    <div className="flex flex-wrap gap-2">
+                                        {cyberTTPs.map((obj) => {
+                                            const phases =
+                                                (obj.kill_chain_phases as
+                                                    | KillChainPhase[]
+                                                    | undefined) ?? [];
+                                            return (
+                                                <div
+                                                    key={obj.id}
+                                                    className="flex flex-col items-start gap-0.5"
+                                                >
+                                                    <EntityChip obj={obj} />
+                                                    {phases.map((p, i) => (
+                                                        <span
+                                                            key={i}
+                                                            className="text-foreground/40 pl-1 text-[0.6rem]"
+                                                        >
+                                                            {p.phase_name}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 )}
                             </CardContent>
                         </Card>
-                    ))}
-                </div>
-            </section>
+
+                        <Card className="gap-0 rounded-xl py-0 shadow-sm">
+                            <CardHeader className="px-4 py-3">
+                                <div className="flex items-center gap-1.5">
+                                    <Brain className="size-3.5 text-violet-600" />
+                                    <span className="text-[0.65rem] font-bold tracking-widest text-violet-600 uppercase">
+                                        Info
+                                    </span>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="px-4 pt-0 pb-4">
+                                {infoTTPs.length === 0 ? (
+                                    <span className="text-foreground/30 text-sm italic">
+                                        —
+                                    </span>
+                                ) : (
+                                    <div className="flex flex-wrap gap-2">
+                                        {infoTTPs.map((obj) => {
+                                            const phases =
+                                                (obj.kill_chain_phases as
+                                                    | KillChainPhase[]
+                                                    | undefined) ?? [];
+                                            return (
+                                                <div
+                                                    key={obj.id}
+                                                    className="flex flex-col items-start gap-0.5"
+                                                >
+                                                    <EntityChip obj={obj} />
+                                                    {phases.map((p, i) => (
+                                                        <span
+                                                            key={i}
+                                                            className="text-foreground/40 pl-1 text-[0.6rem]"
+                                                        >
+                                                            {p.phase_name}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
+                </section>
+            )}
+
+            {narratives.length > 0 && (
+                <section className="space-y-4">
+                    <SectionTitle
+                        icon={MessageSquare}
+                        title="Narratives &amp; Cognitive Assets"
+                    />
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {narratives.map((obj) => (
+                            <Card
+                                key={obj.id}
+                                className="gap-0 rounded-xl py-0 shadow-sm"
+                            >
+                                <CardHeader className="px-5 py-3">
+                                    <div className="flex items-center gap-1.5">
+                                        <MessageSquare className="text-foreground/40 size-3.5" />
+                                        <span className="text-foreground/40 text-[0.65rem] font-bold tracking-widest uppercase">
+                                            {getStixConfig(obj.id).label}
+                                        </span>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="px-5 pt-0 pb-5">
+                                    <p className="text-sm font-semibold">
+                                        {obj.name ?? getStixType(obj.id)}
+                                    </p>
+                                    {obj.description && (
+                                        <p className="text-foreground/60 mt-1.5 text-xs leading-snug">
+                                            {obj.description}
+                                        </p>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </section>
+            )}
 
             {(entity.firstSeen ?? entity.lastSeen) && (
                 <section className="space-y-3">

@@ -9,9 +9,9 @@ import { usePathname } from 'next/navigation';
 /** Map URL path segment → display label */
 const SECTION_LABELS: Record<string, string> = {
     incidents: 'Incidents',
+    campaigns: 'Campaigns',
     dashboard: 'Dashboard',
     settings: 'Settings',
-    analytics: 'Analytics',
 };
 
 export function AppHeader() {

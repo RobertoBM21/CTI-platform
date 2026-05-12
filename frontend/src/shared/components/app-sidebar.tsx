@@ -87,7 +87,7 @@ export function AppSidebar() {
                 {/* Nav section */}
                 <nav className="space-y-1 p-3">
                     {!collapsed && (
-                        <p className="mb-1 px-3 pb-1 text-[0.7rem] font-bold tracking-widest text-white/25 uppercase">
+                        <p className="mb-1 px-3 pb-1 text-[0.85rem] font-bold tracking-widest text-white/25 uppercase">
                             General
                         </p>
                     )}

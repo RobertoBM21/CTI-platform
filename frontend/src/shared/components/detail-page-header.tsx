@@ -57,10 +57,10 @@ export function DetailPageHeader({
                 {/* Right: actions */}
                 <div className="flex shrink-0 items-center gap-2">
                     <Button
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
                         onClick={onExportPdf}
-                        className="text-foreground/70 hover:text-foreground"
+                        className="text-foreground/80 hover:text-foreground"
                     >
                         <Download className="size-4" />
                         <span className="ml-1.5 hidden sm:inline">

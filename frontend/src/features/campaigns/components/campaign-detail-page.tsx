@@ -74,15 +74,29 @@ export function CampaignDetailPage({ id }: CampaignDetailPageProps) {
     const { entity } = data;
     const primaryRef = entity.externalReferences[0];
 
-    const attackPatterns = data.relatedObjects
-        .filter(
-            ({ object }) =>
-                object && getStixType(object.id) === 'attack-pattern',
-        )
-        .map(({ object }) => object!);
-    const incidents = data.relatedObjects
-        .filter(({ object }) => object && getStixType(object.id) === 'incident')
-        .map(({ object }) => object!);
+    const seen = new Set<string>();
+    const dedup = (objs: (typeof data.relatedObjects)[0]['object'][]) =>
+        objs.filter((o): o is NonNullable<typeof o> => {
+            if (!o || seen.has(o.id)) return false;
+            seen.add(o.id);
+            return true;
+        });
+
+    const attackPatterns = dedup(
+        data.relatedObjects
+            .filter(
+                ({ object }) =>
+                    object && getStixType(object.id) === 'attack-pattern',
+            )
+            .map(({ object }) => object),
+    );
+    const incidents = dedup(
+        data.relatedObjects
+            .filter(
+                ({ object }) => object && getStixType(object.id) === 'incident',
+            )
+            .map(({ object }) => object),
+    );
     const tags = [...attackPatterns, ...incidents];
 
     return (

@@ -118,4 +118,71 @@ describe('DetailEnricher', () => {
 
         expect(result.relatedObjects[0]?.object).toBeNull();
     });
+
+    it('should include relationships between peripheral nodes', async () => {
+        const centerToMalware = new Relationship({
+            id: 'relationship--cm',
+            relationshipType: RelationshipType.USES,
+            sourceRef: 'campaign--c1',
+            targetRef: 'malware--m1',
+        });
+        const centerToActor = new Relationship({
+            id: 'relationship--ca',
+            relationshipType: RelationshipType.ATTRIBUTED_TO,
+            sourceRef: 'campaign--c1',
+            targetRef: 'threat-actor--ta1',
+        });
+        const actorUsesMalware = new Relationship({
+            id: 'relationship--am',
+            relationshipType: RelationshipType.USES,
+            sourceRef: 'threat-actor--ta1',
+            targetRef: 'malware--m1',
+        });
+
+        const malware = { id: 'malware--m1', name: 'SomeRAT' };
+        const actor = { id: 'threat-actor--ta1', name: 'APT1' };
+
+        const relationshipService: Pick<
+            RelationshipService,
+            'findBySourceRef' | 'findByTargetRef'
+        > = {
+            findBySourceRef: jest.fn().mockImplementation((id: string) => {
+                if (id === 'campaign--c1')
+                    return Promise.resolve([centerToMalware, centerToActor]);
+                if (id === 'threat-actor--ta1')
+                    return Promise.resolve([actorUsesMalware]);
+                return Promise.resolve([]);
+            }),
+            findByTargetRef: jest.fn().mockResolvedValue([]),
+        };
+        const sightingService: Pick<SightingService, 'findBySightingOfRef'> = {
+            findBySightingOfRef: jest.fn().mockResolvedValue([]),
+        };
+        const stixRefResolver: Pick<StixRefResolver, 'resolve'> = {
+            resolve: jest.fn().mockImplementation((id: string) => {
+                if (id === 'malware--m1') return Promise.resolve(malware);
+                if (id === 'threat-actor--ta1') return Promise.resolve(actor);
+                return Promise.resolve(null);
+            }),
+        };
+
+        const enricher = new DetailEnricher(
+            relationshipService as RelationshipService,
+            sightingService as SightingService,
+            stixRefResolver as StixRefResolver,
+        );
+        const entity = { id: 'campaign--c1', name: 'Neptuno' };
+
+        const result = await enricher.enrich(entity);
+
+        expect(result.relatedObjects).toHaveLength(3);
+        const relIds = result.relatedObjects.map((r) => r.relationship.id);
+        expect(relIds).toContain('relationship--cm');
+        expect(relIds).toContain('relationship--ca');
+        expect(relIds).toContain('relationship--am');
+        const peripheralRel = result.relatedObjects.find(
+            (r) => r.relationship.id === 'relationship--am',
+        );
+        expect(peripheralRel?.object).toEqual(malware);
+    });
 });

@@ -26,10 +26,11 @@ export class DetailEnricher {
             this.sightingService.findBySightingOfRef(entity.id),
         ]);
 
-        const allRelationships = [...sourceRels, ...targetRels];
+        const allCenterRelationships = [...sourceRels, ...targetRels];
+        const seenRelIds = new Set(allCenterRelationships.map((r) => r.id));
 
-        const relatedObjects: RelatedObject[] = await Promise.all(
-            allRelationships.map(async (rel) => {
+        const centerRelatedObjects: RelatedObject[] = await Promise.all(
+            allCenterRelationships.map(async (rel) => {
                 const otherRef =
                     rel.sourceRef === entity.id ? rel.targetRef : rel.sourceRef;
                 const object = await this.stixRefResolver.resolve(otherRef);
@@ -37,6 +38,47 @@ export class DetailEnricher {
             }),
         );
 
-        return { entity, relatedObjects, sightings };
+        // Collect IDs of peripheral nodes discovered via center relationships
+        const peripheralIds = new Set<string>(
+            centerRelatedObjects
+                .filter((r) => r.object !== null)
+                .map((r) => (r.object as { id: string }).id),
+        );
+
+        // Fetch outgoing relationships from each peripheral node and include
+        // those where both endpoints are already-known peripheral nodes
+        const pSourceRelsArrays = await Promise.all(
+            [...peripheralIds].map((pid) =>
+                this.relationshipService.findBySourceRef(pid),
+            ),
+        );
+
+        const seenInterRelIds = new Set<string>();
+        const interPeripheralRelatedObjects: RelatedObject[] = [];
+        for (const rels of pSourceRelsArrays) {
+            for (const rel of rels) {
+                if (seenRelIds.has(rel.id) || seenInterRelIds.has(rel.id))
+                    continue;
+                if (peripheralIds.has(rel.targetRef)) {
+                    seenInterRelIds.add(rel.id);
+                    const object = await this.stixRefResolver.resolve(
+                        rel.targetRef,
+                    );
+                    interPeripheralRelatedObjects.push({
+                        relationship: rel,
+                        object: object ?? null,
+                    });
+                }
+            }
+        }
+
+        return {
+            entity,
+            relatedObjects: [
+                ...centerRelatedObjects,
+                ...interPeripheralRelatedObjects,
+            ],
+            sightings,
+        };
     }
 }

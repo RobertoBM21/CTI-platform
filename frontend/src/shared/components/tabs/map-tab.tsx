@@ -153,7 +153,7 @@ export function MapTab<TEntity extends EntityBase = EntityBase>({
             </div>
 
             {/* ── Data cards ──────────────────────────────── */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
                 {/* Campaign Location */}
                 <Card className="gap-0 rounded-2xl py-0 shadow-sm">
                     <CardHeader className="flex flex-row items-center gap-3 border-b px-6 py-5">

@@ -3,7 +3,24 @@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { EntityType } from '@/shared/types/enums';
-import { Crosshair, Globe, Shield, Swords, Target } from 'lucide-react';
+import {
+    Bug,
+    CheckCircle,
+    Crosshair,
+    Eye,
+    FileText,
+    Globe,
+    MapPin,
+    Megaphone,
+    MessageSquare,
+    Server,
+    Shield,
+    ShieldAlert,
+    Target,
+    User,
+    Users,
+    Wrench,
+} from 'lucide-react';
 
 export const entityConfig: Record<
     EntityType,
@@ -27,7 +44,7 @@ export const entityConfig: Record<
     },
     campaign: {
         label: 'CAMPAIGN',
-        icon: Swords,
+        icon: Megaphone,
         className:
             'border-sky-300 text-sky-700 bg-sky-50 hover:bg-sky-50 dark:border-sky-700 dark:text-sky-300 dark:bg-sky-950',
     },
@@ -43,6 +60,31 @@ export const entityConfig: Record<
         className:
             'border-teal-300 text-teal-700 bg-teal-50 hover:bg-teal-50 dark:border-teal-700 dark:text-teal-300 dark:bg-teal-950',
     },
+};
+
+/** Icon map for all STIX 2.1 SDO types — use in graph nodes and entity lists */
+export const stixTypeIconMap: Record<
+    string,
+    React.ComponentType<{ className?: string }>
+> = {
+    // Shared EntityType icons — derived from entityConfig as single source of truth
+    incident: entityConfig['incident'].icon,
+    'threat-actor': entityConfig['threat-actor'].icon,
+    campaign: entityConfig['campaign'].icon,
+    'attack-pattern': entityConfig['attack-pattern'].icon,
+    indicator: entityConfig['indicator'].icon,
+    // STIX-only types
+    malware: Bug,
+    tool: Wrench,
+    vulnerability: ShieldAlert,
+    infrastructure: Server,
+    'intrusion-set': Users,
+    identity: User,
+    location: MapPin,
+    'course-of-action': CheckCircle,
+    note: FileText,
+    opinion: MessageSquare,
+    sighting: Eye,
 };
 
 interface EntityTypeBadgeProps {

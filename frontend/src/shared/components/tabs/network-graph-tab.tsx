@@ -2,23 +2,35 @@
 
 import '@xyflow/react/dist/style.css';
 
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { formatDateTime, getStixConfig, getStixType } from '@/shared/lib/stix';
+import type { DetailSidePanelNode } from '@/shared/components/detail-side-panel';
+import { DetailSidePanel } from '@/shared/components/detail-side-panel';
+import { stixTypeIconMap } from '@/shared/components/entity-type-badge';
+import { useTheme } from '@/shared/hooks/use-theme';
+import { getStixConfig, getStixType } from '@/shared/lib/stix';
 import type { EntityBase, EntityDetail } from '@/shared/types/entity';
 import {
     Background,
     BackgroundVariant,
-    Controls,
     Handle,
-    MiniMap,
+    Panel,
     Position,
     ReactFlow,
+    useReactFlow,
     type Edge,
     type Node,
     type NodeProps,
 } from '@xyflow/react';
+import {
+    forceCenter,
+    forceCollide,
+    forceLink,
+    forceManyBody,
+    forceSimulation,
+    type SimulationLinkDatum,
+    type SimulationNodeDatum,
+} from 'd3-force';
+import { Database, Maximize2, Minus, Plus } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -35,6 +47,7 @@ type StixNodeData = {
     description?: string;
     source?: string;
     relType?: string;
+    relColor?: string;
 } & Record<string, unknown>;
 
 // ── Custom STIX node ───────────────────────────────────────────────────
@@ -42,6 +55,19 @@ type StixNodeData = {
 function StixNode({ data, selected }: NodeProps) {
     const d = data as StixNodeData;
     const size = d.isCenter ? 72 : 52;
+    const Icon = stixTypeIconMap[d.entityType];
+    const iconClass = d.isCenter ? 'size-7' : 'size-5';
+
+    const handleStyle: React.CSSProperties = {
+        opacity: 0,
+        pointerEvents: 'none',
+        width: 1,
+        height: 1,
+        top: size / 2,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        bottom: 'auto',
+    };
 
     return (
         <div
@@ -49,32 +75,40 @@ function StixNode({ data, selected }: NodeProps) {
             style={{ width: size + 48 }}
         >
             <Handle
+                type="source"
+                position={Position.Top}
+                style={handleStyle}
+                isConnectable={false}
+            />
+            <Handle
                 type="target"
                 position={Position.Top}
-                style={{
-                    opacity: 0,
-                    pointerEvents: 'none',
-                    width: 0,
-                    height: 0,
-                }}
+                style={handleStyle}
                 isConnectable={false}
             />
             <div
-                className={cn(
-                    'flex items-center justify-center rounded-full font-bold text-white transition-all duration-200',
-                    selected && 'ring-4 ring-offset-2',
-                )}
+                className="flex items-center justify-center rounded-full text-white transition-all duration-200"
                 style={{
                     width: size,
                     height: size,
                     backgroundColor: d.color,
                     boxShadow: selected
-                        ? `0 0 0 4px ${d.color}40`
-                        : '0 2px 8px rgba(0,0,0,0.12)',
-                    fontSize: d.isCenter ? 12 : 9,
+                        ? `0 0 0 3px ${d.color}, 0 0 0 6px ${d.color}40`
+                        : '0 2px 8px rgba(0,0,0,0.15)',
                 }}
             >
-                {d.abbr}
+                {Icon ? (
+                    <Icon className={iconClass} />
+                ) : (
+                    <span
+                        style={{
+                            fontSize: d.isCenter ? 12 : 9,
+                            fontWeight: 'bold',
+                        }}
+                    >
+                        {d.abbr}
+                    </span>
+                )}
             </div>
             <p
                 className="text-foreground/70 mt-2 max-w-29 truncate text-center font-medium"
@@ -82,17 +116,6 @@ function StixNode({ data, selected }: NodeProps) {
             >
                 {d.name.length > 16 ? d.name.slice(0, 16) + '\u2026' : d.name}
             </p>
-            <Handle
-                type="source"
-                position={Position.Bottom}
-                style={{
-                    opacity: 0,
-                    pointerEvents: 'none',
-                    width: 0,
-                    height: 0,
-                }}
-                isConnectable={false}
-            />
         </div>
     );
 }
@@ -100,32 +123,82 @@ function StixNode({ data, selected }: NodeProps) {
 // Must be defined OUTSIDE the component to avoid re-renders
 const nodeTypes = { stixNode: StixNode };
 
-// ── Radial layout helpers ──────────────────────────────────────────────
+// ── Edge palette ───────────────────────────────────────────────────────
 
-function radialPos(index: number, count: number, r: number) {
-    const angle = (index / Math.max(count, 1)) * 2 * Math.PI - Math.PI / 2;
-    return { x: r * Math.cos(angle), y: r * Math.sin(angle) };
+const EDGE_PALETTE: Record<string, { color: string; dash?: string }> = {
+    uses: { color: '#CF4931' },
+    indicates: { color: '#7c3aed', dash: '6 3' },
+    targets: { color: '#ea580c', dash: '2 4' },
+    'attributed-to': { color: '#0891b2' },
+    'related-to': { color: '#9ca3af' },
+    mitigates: { color: '#16a34a' },
+    compromises: { color: '#dc2626', dash: '4 2' },
+    delivers: { color: '#d97706' },
+    drops: { color: '#b45309', dash: '3 3' },
+    exploits: { color: '#c026d3', dash: '6 3' },
+};
+
+function getEdgePalette(relType: string) {
+    return EDGE_PALETTE[relType] ?? { color: '#9ca3af' };
 }
 
-// ── Graph data builders ────────────────────────────────────────────────
+// ── d3-force layout ────────────────────────────────────────────────────
+
+type SimNode = SimulationNodeDatum & { id: string };
+
+function computeLayout(
+    nodeIds: string[],
+    links: { source: string; target: string }[],
+    centerNodeId: string,
+): Map<string, { x: number; y: number }> {
+    const simNodes: SimNode[] = nodeIds.map((id) => ({
+        id,
+        x: id === centerNodeId ? 0 : (Math.random() - 0.5) * 300,
+        y: id === centerNodeId ? 0 : (Math.random() - 0.5) * 300,
+        fx: id === centerNodeId ? 0 : undefined,
+        fy: id === centerNodeId ? 0 : undefined,
+    }));
+
+    const sim = forceSimulation<SimNode>(simNodes)
+        .force(
+            'link',
+            forceLink<SimNode, SimulationLinkDatum<SimNode>>(
+                links.map((l) => ({ source: l.source, target: l.target })),
+            )
+                .id((d) => d.id)
+                .distance(170)
+                .strength(0.5),
+        )
+        .force('charge', forceManyBody<SimNode>().strength(-500))
+        .force('center', forceCenter(0, 0))
+        .force('collide', forceCollide<SimNode>(72))
+        .stop();
+
+    sim.tick(300);
+
+    return new Map(simNodes.map((n) => [n.id, { x: n.x ?? 0, y: n.y ?? 0 }]));
+}
+
+// ── Graph data builder ─────────────────────────────────────────────────
 
 type NodeMeta = StixNodeData & { id: string };
 
+const MAX_VISIBLE_NODES = 20;
+
 function buildGraph<TEntity extends EntityBase>(
     detail: EntityDetail<TEntity>,
+    showAll: boolean,
 ): {
     nodes: Node[];
     edges: Edge[];
     meta: NodeMeta[];
+    hiddenCount: number;
 } {
-    const nodes: Node[] = [];
-    const edges: Edge[] = [];
-    const meta: NodeMeta[] = [];
-
     const { entity, relatedObjects } = detail;
     const entityStixType = getStixType(entity.id);
     const cfg = getStixConfig(entityStixType);
 
+    // Center node meta
     const centerMeta: NodeMeta = {
         id: entity.id,
         name: entity.name,
@@ -138,25 +211,19 @@ function buildGraph<TEntity extends EntityBase>(
         description: entity.description ?? undefined,
         source: entity.createdBy ?? undefined,
     };
-    nodes.push({
-        id: entity.id,
-        type: 'stixNode',
-        position: { x: 0, y: 0 },
-        data: centerMeta,
-        selectable: true,
-    });
-    meta.push(centerMeta);
+
+    // Deduplicate peripheral nodes by object id
+    const nodeMetaMap = new Map<string, NodeMeta>();
+    nodeMetaMap.set(entity.id, centerMeta);
 
     const valid = relatedObjects.filter((r) => r.object !== null);
-    const radius = valid.length <= 4 ? 160 : valid.length <= 9 ? 200 : 240;
 
-    valid.forEach(({ object, relationship }, idx) => {
+    for (const { object, relationship } of valid) {
         const obj = object!;
+        if (nodeMetaMap.has(obj.id)) continue;
         const type = getStixType(obj.id);
         const config = getStixConfig(type);
-        const pos = radialPos(idx, valid.length, radius);
-
-        const nodeMeta: NodeMeta = {
+        nodeMetaMap.set(obj.id, {
             id: obj.id,
             name: (obj.name as string | undefined) ?? type,
             abbr: config.abbr,
@@ -170,30 +237,171 @@ function buildGraph<TEntity extends EntityBase>(
                 obj.externalReferences as { sourceName: string }[] | undefined
             )?.[0]?.sourceName,
             relType: relationship.relationshipType,
+            relColor: getEdgePalette(relationship.relationshipType).color,
+        });
+    }
+
+    // Apply node cap (center is always visible)
+    const allPeripheral = [...nodeMetaMap.values()].filter((m) => !m.isCenter);
+    const hiddenCount = showAll
+        ? 0
+        : Math.max(0, allPeripheral.length - MAX_VISIBLE_NODES);
+    const visiblePeripheral = showAll
+        ? allPeripheral
+        : allPeripheral.slice(0, MAX_VISIBLE_NODES);
+    const visibleIds = new Set([
+        entity.id,
+        ...visiblePeripheral.map((m) => m.id),
+    ]);
+
+    // Collect edges: correct direction via sourceRef/targetRef, deduplicated
+    // Supports both center↔peripheral and peripheral↔peripheral edges
+    const edgeSpecs: {
+        id: string;
+        source: string;
+        target: string;
+        relType: string;
+    }[] = [];
+    const seenEdgeIds = new Set<string>();
+
+    for (const { relationship } of valid) {
+        if (seenEdgeIds.has(relationship.id)) continue;
+        seenEdgeIds.add(relationship.id);
+        // Only draw edge if both endpoints are in the visible set
+        if (
+            visibleIds.has(relationship.sourceRef) &&
+            visibleIds.has(relationship.targetRef)
+        ) {
+            edgeSpecs.push({
+                id: relationship.id,
+                source: relationship.sourceRef,
+                target: relationship.targetRef,
+                relType: relationship.relationshipType,
+            });
+        }
+    }
+
+    // d3-force layout
+    const positions = computeLayout(
+        [...visibleIds],
+        edgeSpecs.map((e) => ({ source: e.source, target: e.target })),
+        entity.id,
+    );
+
+    // Build ReactFlow nodes (center first)
+    const meta: NodeMeta[] = [centerMeta, ...visiblePeripheral];
+    const nodes: Node[] = meta.map((m) => ({
+        id: m.id,
+        type: 'stixNode',
+        position: positions.get(m.id) ?? { x: 0, y: 0 },
+        data: m,
+        selectable: true,
+        draggable: false,
+    }));
+
+    // Straight edges: center-to-center; opaque circles hide the line inside.
+    const edges: Edge[] = edgeSpecs.map(({ id, source, target, relType }) => {
+        const palette = getEdgePalette(relType);
+        return {
+            id,
+            source,
+            target,
+            type: 'straight',
+            style: {
+                strokeWidth: 1.5,
+                stroke: palette.color,
+                strokeDasharray: palette.dash,
+            },
         };
-
-        nodes.push({
-            id: obj.id,
-            type: 'stixNode',
-            position: pos,
-            data: nodeMeta,
-            selectable: true,
-        });
-        meta.push(nodeMeta);
-
-        edges.push({
-            id: `e-${obj.id}`,
-            source: entity.id,
-            target: obj.id,
-            label: relationship.relationshipType,
-            type: 'smoothstep',
-            style: { strokeWidth: 1.5, stroke: '#d1d5db' },
-            labelStyle: { fontSize: 9, fill: '#9ca3af' },
-            labelBgStyle: { fill: 'transparent' },
-        });
     });
 
-    return { nodes, edges, meta };
+    return { nodes, edges, meta, hiddenCount };
+}
+
+// ── Edge legend ────────────────────────────────────────────────────────
+
+function EdgeLegend({ activeTypes }: { activeTypes: string[] }) {
+    const items = activeTypes
+        .slice(0, 8)
+        .map((t) => ({ type: t, ...getEdgePalette(t) }));
+
+    if (items.length === 0) return null;
+
+    return (
+        <div className="bg-background/95 overflow-hidden rounded-xl border shadow-sm backdrop-blur-sm">
+            <div className="border-b px-3 py-2">
+                <p className="text-foreground/50 text-[0.6rem] font-bold tracking-widest uppercase">
+                    Relationships
+                </p>
+            </div>
+            <div className="flex flex-col divide-y">
+                {items.map(({ type, color, dash }) => (
+                    <div
+                        key={type}
+                        className="flex items-center gap-2.5 py-1.5 pr-3 pl-2.5"
+                        style={{ borderLeft: `3px solid ${color}` }}
+                    >
+                        <svg
+                            width="20"
+                            height="8"
+                            className="shrink-0"
+                            aria-hidden="true"
+                        >
+                            <line
+                                x1="1"
+                                y1="4"
+                                x2="19"
+                                y2="4"
+                                stroke={color}
+                                strokeWidth={2}
+                                strokeDasharray={dash}
+                            />
+                        </svg>
+                        <span
+                            className="text-[0.65rem] font-semibold"
+                            style={{ color }}
+                        >
+                            {type}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+// ── Custom controls (pill-shaped) ─────────────────────────────────────
+
+function GraphControls() {
+    const { zoomIn, zoomOut, fitView } = useReactFlow();
+    return (
+        <Panel position="top-right">
+            <div className="bg-background/95 flex items-center gap-0.5 rounded-full border px-2 py-1.5 shadow-md backdrop-blur-sm">
+                <button
+                    onClick={() => zoomIn({ duration: 200 })}
+                    className="text-foreground/60 hover:text-foreground hover:bg-muted flex size-7 items-center justify-center rounded-full transition-colors"
+                    title="Zoom in"
+                >
+                    <Plus className="size-3.5" />
+                </button>
+                <button
+                    onClick={() => zoomOut({ duration: 200 })}
+                    className="text-foreground/60 hover:text-foreground hover:bg-muted flex size-7 items-center justify-center rounded-full transition-colors"
+                    title="Zoom out"
+                >
+                    <Minus className="size-3.5" />
+                </button>
+                <div className="bg-border mx-0.5 h-3.5 w-px" />
+                <button
+                    onClick={() => fitView({ duration: 200, padding: 0.25 })}
+                    className="text-foreground/60 hover:text-foreground hover:bg-muted flex size-7 items-center justify-center rounded-full transition-colors"
+                    title="Fit view"
+                >
+                    <Maximize2 className="size-3.5" />
+                </button>
+            </div>
+        </Panel>
+    );
 }
 
 // ── Component ──────────────────────────────────────────────────────────
@@ -206,31 +414,37 @@ export function NetworkGraphTab<TEntity extends EntityBase = EntityBase>({
     detail,
 }: NetworkGraphTabProps<TEntity>) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
-    const { nodes, edges, meta } = useMemo(() => buildGraph(detail), [detail]);
+    const [showAll, setShowAll] = useState(false);
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+
+    const {
+        nodes: baseNodes,
+        edges,
+        meta,
+        hiddenCount,
+    } = useMemo(() => buildGraph(detail, showAll), [detail, showAll]);
 
     // Highlight edges connected to the selected node
     const styledEdges = useMemo<Edge[]>(() => {
         if (!selectedId) return edges;
-        const metaMap = new Map(meta.map((m) => [m.id, m]));
         return edges.map((e) => {
             const connected =
                 e.source === selectedId || e.target === selectedId;
-            const otherId = e.source === selectedId ? e.target : e.source;
-            const otherColor = metaMap.get(otherId)?.color ?? '#CF4931';
             return {
                 ...e,
                 animated: connected,
                 style: connected
-                    ? { strokeWidth: 2.5, stroke: otherColor }
-                    : { strokeWidth: 1, stroke: '#e5e7eb', opacity: 0.5 },
+                    ? { ...(e.style as object), strokeWidth: 2.5 }
+                    : { ...(e.style as object), opacity: 0.3 },
             };
         });
-    }, [edges, selectedId, meta]);
+    }, [edges, selectedId]);
 
-    // Sync external selection into React Flow's `selected` prop
+    // Overlay selection state
     const styledNodes = useMemo<Node[]>(
-        () => nodes.map((n) => ({ ...n, selected: n.id === selectedId })),
-        [nodes, selectedId],
+        () => baseNodes.map((n) => ({ ...n, selected: n.id === selectedId })),
+        [baseNodes, selectedId],
     );
 
     const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
@@ -239,187 +453,153 @@ export function NetworkGraphTab<TEntity extends EntityBase = EntityBase>({
 
     const onPaneClick = useCallback(() => setSelectedId(null), []);
 
-    const selectedMeta = meta.find((m) => m.id === selectedId) ?? null;
+    const selectedMeta: DetailSidePanelNode | null =
+        meta.find((m) => m.id === selectedId) ?? null;
+
+    // Derive active relationship types for legend
+    const activeTypes = useMemo(() => {
+        const types = new Set<string>();
+        const visibleIds = new Set(baseNodes.map((n) => n.id));
+        for (const { relationship } of detail.relatedObjects) {
+            if (
+                visibleIds.has(relationship.sourceRef) &&
+                visibleIds.has(relationship.targetRef)
+            ) {
+                types.add(relationship.relationshipType);
+            }
+        }
+        return [...types];
+    }, [detail, baseNodes]);
 
     return (
-        <div className="flex gap-6">
+        <div className="bg-card ring-foreground/10 flex h-140 overflow-hidden rounded-2xl shadow-sm ring-1">
             {/* ── Left entity list ─────────────────────────── */}
-            <div className="w-64 shrink-0">
-                <Card className="overflow-hidden rounded-2xl">
-                    <CardHeader className="border-b px-4 py-3">
-                        <p className="text-foreground/60 text-[0.65rem] font-bold tracking-widest uppercase">
-                            Entities ({meta.length})
+            <div className="flex w-68 shrink-0 flex-col border-r">
+                <div className="flex flex-1 flex-col overflow-hidden">
+                    <div className="flex items-center gap-2 border-b px-5 py-4">
+                        <Database className="text-primary size-4 shrink-0" />
+                        <p className="text-foreground/60 text-xs font-bold tracking-widest uppercase">
+                            Entities ({meta.length}
+                            {hiddenCount > 0 ? `+${hiddenCount}` : ''})
                         </p>
-                    </CardHeader>
-                    <ul className="max-h-130 divide-y overflow-y-auto">
-                        {meta.map((item) => (
-                            <li key={item.id}>
-                                <button
-                                    onClick={() =>
-                                        setSelectedId((prev) =>
-                                            prev === item.id ? null : item.id,
-                                        )
-                                    }
-                                    className={cn(
-                                        'hover:bg-muted/50 flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
-                                        selectedId === item.id && 'bg-muted/60',
-                                    )}
-                                >
-                                    <span
-                                        className="flex size-7 shrink-0 items-center justify-center rounded-full text-[0.55rem] font-bold text-white"
-                                        style={{ backgroundColor: item.color }}
-                                    >
-                                        {item.abbr}
-                                    </span>
-                                    <div className="min-w-0">
-                                        <p className="truncate text-xs font-semibold">
-                                            {item.name.length > 28
-                                                ? item.name.slice(0, 28) +
-                                                  '\u2026'
-                                                : item.name}
-                                        </p>
-                                        <p className="text-foreground/50 mt-0.5 text-[0.6rem] font-medium tracking-wider uppercase">
-                                            {
-                                                getStixConfig(item.entityType)
-                                                    .label
-                                            }
-                                        </p>
-                                    </div>
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                </Card>
-            </div>
-
-            {/* ── Right: graph + detail panel ──────────────── */}
-            <div className="flex min-w-0 flex-1 flex-col gap-4">
-                {/* React Flow graph */}
-                <Card className="overflow-hidden rounded-2xl p-0">
-                    <div className="h-120">
-                        <ReactFlow
-                            nodes={styledNodes}
-                            edges={styledEdges}
-                            nodeTypes={nodeTypes}
-                            onNodeClick={onNodeClick}
-                            onPaneClick={onPaneClick}
-                            nodesDraggable={false}
-                            nodesConnectable={false}
-                            nodeOrigin={[0.5, 0.5]}
-                            fitView
-                            fitViewOptions={{ padding: 0.3 }}
-                            minZoom={0.3}
-                            maxZoom={2}
-                        >
-                            <Background
-                                variant={BackgroundVariant.Dots}
-                                gap={24}
-                                size={1}
-                                color="#d1d5db"
-                            />
-                            <Controls showInteractive={false} />
-                            <MiniMap
-                                nodeColor={(n) =>
-                                    ((n.data as StixNodeData)
-                                        .color as string) ?? '#888'
-                                }
-                                maskColor="rgba(255,255,255,0.7)"
-                                style={{ borderRadius: 8 }}
-                            />
-                        </ReactFlow>
                     </div>
-                </Card>
-
-                {/* Selected node detail panel */}
-                {selectedMeta && (
-                    <Card className="rounded-2xl">
-                        <CardHeader className="pb-2">
-                            <div className="flex items-center gap-3">
-                                <span
-                                    className="flex size-9 shrink-0 items-center justify-center rounded-full text-[0.6rem] font-bold text-white"
-                                    style={{
-                                        backgroundColor: selectedMeta.color,
-                                    }}
-                                >
-                                    {selectedMeta.abbr}
-                                </span>
-                                <div>
-                                    <p className="font-bold">
-                                        {selectedMeta.name}
-                                    </p>
-                                    <p
-                                        className="mt-0.5 text-[0.6rem] font-bold tracking-widest uppercase"
-                                        style={{ color: selectedMeta.color }}
-                                    >
-                                        {
-                                            getStixConfig(
-                                                selectedMeta.entityType,
-                                            ).label
+                    {/* Entity list */}
+                    <ul className="bg-muted/20 flex-1 overflow-y-auto px-3.5 pt-2 pb-4">
+                        {meta.map((item) => {
+                            const ItemIcon = stixTypeIconMap[item.entityType];
+                            return (
+                                <li key={item.id} className="mb-1.5 last:mb-0">
+                                    <button
+                                        onClick={() =>
+                                            setSelectedId((prev) =>
+                                                prev === item.id
+                                                    ? null
+                                                    : item.id,
+                                            )
                                         }
-                                    </p>
-                                </div>
-                                {selectedMeta.relType && (
-                                    <Badge
-                                        variant="outline"
-                                        className="ml-auto text-[0.65rem]"
-                                    >
-                                        {selectedMeta.relType}
-                                    </Badge>
-                                )}
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
-                                {selectedMeta.createdAt && (
-                                    <DetailRow
-                                        label="Timestamp"
-                                        value={formatDateTime(
-                                            selectedMeta.createdAt,
+                                        className={cn(
+                                            'group bg-card flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left shadow-sm transition-all hover:shadow-md',
+                                            selectedId === item.id
+                                                ? 'ring-primary ring-2 ring-offset-1'
+                                                : 'hover:border-primary/30',
                                         )}
-                                    />
-                                )}
-                                <DetailRow
-                                    label="Domain"
-                                    value={
-                                        getStixConfig(selectedMeta.entityType)
-                                            .domain
-                                    }
-                                />
-                                {selectedMeta.source && (
-                                    <DetailRow
-                                        label="Source"
-                                        value={selectedMeta.source}
-                                    />
-                                )}
-                                {selectedMeta.confidence !== undefined && (
-                                    <DetailRow
-                                        label="Confidence"
-                                        value={`${selectedMeta.confidence}%`}
-                                    />
-                                )}
-                            </div>
-                            {selectedMeta.description && (
-                                <p className="text-foreground/60 mt-3 border-t pt-3 text-xs leading-relaxed">
-                                    {selectedMeta.description}
-                                </p>
-                            )}
-                        </CardContent>
-                    </Card>
-                )}
+                                    >
+                                        <span
+                                            className="flex size-8 shrink-0 items-center justify-center rounded-lg"
+                                            style={{
+                                                backgroundColor: `${item.color}22`,
+                                                color: item.color,
+                                            }}
+                                        >
+                                            {ItemIcon ? (
+                                                <ItemIcon className="size-3.5" />
+                                            ) : (
+                                                <span className="text-[0.55rem] font-bold">
+                                                    {item.abbr}
+                                                </span>
+                                            )}
+                                        </span>
+                                        <div className="min-w-0">
+                                            <p
+                                                className={cn(
+                                                    'truncate text-xs leading-tight font-semibold transition-colors',
+                                                    selectedId === item.id
+                                                        ? 'text-primary'
+                                                        : 'group-hover:text-primary',
+                                                )}
+                                            >
+                                                {item.name.length > 26
+                                                    ? item.name.slice(0, 26) +
+                                                      '\u2026'
+                                                    : item.name}
+                                            </p>
+                                            <p className="text-foreground/50 mt-0.5 text-[0.6rem] font-semibold tracking-wider uppercase">
+                                                {
+                                                    getStixConfig(
+                                                        item.entityType,
+                                                    ).label
+                                                }
+                                            </p>
+                                        </div>
+                                    </button>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                    {hiddenCount > 0 && (
+                        <div className="border-t px-4 py-2.5">
+                            <button
+                                onClick={() => setShowAll(true)}
+                                className="text-primary hover:text-primary/80 w-full text-center text-xs font-medium transition-colors"
+                            >
+                                +{hiddenCount} more — Show all
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
-    );
-}
 
-// ── Sub-components ─────────────────────────────────────────────────────
-
-function DetailRow({ label, value }: { label: string; value: string }) {
-    return (
-        <div>
-            <p className="text-foreground/50 text-[0.6rem] font-bold tracking-widest uppercase">
-                {label}
-            </p>
-            <p className="mt-0.5 text-sm font-medium">{value}</p>
+            {/* ── Right: graph ─────────────────────────────── */}
+            <div className="min-w-0 flex-1">
+                <div className="h-full">
+                    <ReactFlow
+                        nodes={styledNodes}
+                        edges={styledEdges}
+                        nodeTypes={nodeTypes}
+                        onNodeClick={onNodeClick}
+                        onPaneClick={onPaneClick}
+                        nodesDraggable={false}
+                        nodesConnectable={false}
+                        nodeOrigin={[0.5, 0.5]}
+                        proOptions={{ hideAttribution: true }}
+                        fitView
+                        fitViewOptions={{ padding: 0.25 }}
+                        minZoom={0.3}
+                        maxZoom={2.5}
+                    >
+                        <Background
+                            variant={BackgroundVariant.Dots}
+                            gap={24}
+                            size={1}
+                            color={isDark ? '#1e3a47' : '#d1d5db'}
+                        />
+                        <GraphControls />
+                        {/* Edge type legend */}
+                        <Panel position="bottom-right">
+                            <EdgeLegend activeTypes={activeTypes} />
+                        </Panel>
+                        {/* Selected node detail overlay */}
+                        {selectedMeta && (
+                            <Panel position="top-left">
+                                <DetailSidePanel
+                                    node={selectedMeta}
+                                    onClose={() => setSelectedId(null)}
+                                />
+                            </Panel>
+                        )}
+                    </ReactFlow>
+                </div>
+            </div>
         </div>
     );
 }
