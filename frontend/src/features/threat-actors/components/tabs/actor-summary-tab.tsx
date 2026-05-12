@@ -512,7 +512,7 @@ export function ActorSummaryTab({ detail }: ActorSummaryTabProps) {
                                                     href={ref.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="text-primary max-w-[200px] truncate text-xs underline-offset-2 hover:underline"
+                                                    className="text-primary max-w-50 truncate text-xs underline-offset-2 hover:underline"
                                                 >
                                                     {ref.url}
                                                 </a>
