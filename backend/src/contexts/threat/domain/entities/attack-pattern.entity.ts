@@ -1,4 +1,5 @@
 import { ExternalReference } from '../../../shared/domain/value-objects/external-reference.vo';
+import { KillChainPhase } from '../../../shared/domain/value-objects/kill-chain-phase.vo';
 import { TLP } from '../value-objects';
 
 export interface AttackPatternProps {
@@ -7,7 +8,7 @@ export interface AttackPatternProps {
     description?: string;
     aliases?: string[];
     externalReference?: string;
-    killChainPhase?: string;
+    killChainPhases?: KillChainPhase[];
     confidence?: number;
     revoked?: boolean;
     externalReferences?: ExternalReference[];
@@ -22,7 +23,7 @@ export class AttackPattern {
     readonly description?: string;
     readonly aliases: string[];
     readonly externalReference?: string;
-    readonly killChainPhase?: string;
+    readonly killChainPhases: KillChainPhase[];
     readonly confidence?: number;
     readonly revoked: boolean;
     readonly externalReferences: ExternalReference[];
@@ -36,7 +37,7 @@ export class AttackPattern {
         this.description = props.description;
         this.aliases = props.aliases ?? [];
         this.externalReference = props.externalReference;
-        this.killChainPhase = props.killChainPhase;
+        this.killChainPhases = props.killChainPhases ?? [];
         this.confidence = props.confidence;
         this.revoked = props.revoked ?? false;
         this.externalReferences = props.externalReferences ?? [];

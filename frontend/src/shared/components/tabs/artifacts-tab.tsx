@@ -17,14 +17,15 @@ interface ArtifactsTabProps<TEntity extends EntityBase = EntityBase> {
 function getIndicators<TEntity extends EntityBase>(
     detail: EntityDetail<TEntity>,
 ): Array<{ obj: StixObject; relType: string }> {
-    return detail.relatedObjects
-        .filter(
-            ({ object }) => object && getStixType(object.id) === 'indicator',
-        )
-        .map(({ object, relationship }) => ({
-            obj: object!,
-            relType: relationship.relationshipType,
-        }));
+    const seen = new Set<string>();
+    const result: Array<{ obj: StixObject; relType: string }> = [];
+    for (const { object, relationship } of detail.relatedObjects) {
+        if (!object || getStixType(object.id) !== 'indicator') continue;
+        if (seen.has(object.id)) continue;
+        seen.add(object.id);
+        result.push({ obj: object, relType: relationship.relationshipType });
+    }
+    return result;
 }
 
 const IOC_TYPE_ICONS: Record<

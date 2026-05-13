@@ -11,13 +11,12 @@ import type { ThreatActorDetail, ThreatActorDetailEntity } from '../../types';
 // ── Kill-chain domain helper ───────────────────────────────────────────
 
 interface KillChainPhase {
-    kill_chain_name: string;
-    phase_name: string;
+    killChainName: string;
+    phaseName: string;
 }
 
 function isCyberTTP(obj: StixObject): boolean {
-    const phases =
-        (obj.kill_chain_phases as KillChainPhase[] | undefined) ?? [];
+    const phases = (obj.killChainPhases as KillChainPhase[] | undefined) ?? [];
     if (phases.length === 0) return true;
     const infoKeywords = [
         'cognitive',
@@ -27,7 +26,7 @@ function isCyberTTP(obj: StixObject): boolean {
         'disinformation',
     ];
     return !phases.some((p) =>
-        infoKeywords.some((k) => p.kill_chain_name.toLowerCase().includes(k)),
+        infoKeywords.some((k) => p.killChainName.toLowerCase().includes(k)),
     );
 }
 
@@ -128,7 +127,7 @@ export function ActorCyberTab({ detail }: ActorCyberTabProps) {
                     <div className="flex flex-wrap gap-2">
                         {cyberTTPs.map((obj) => {
                             const phases =
-                                (obj.kill_chain_phases as
+                                (obj.killChainPhases as
                                     | KillChainPhase[]
                                     | undefined) ?? [];
                             return (
@@ -142,7 +141,7 @@ export function ActorCyberTab({ detail }: ActorCyberTabProps) {
                                             key={i}
                                             className="text-foreground/40 pl-1 text-[0.6rem]"
                                         >
-                                            {p.phase_name}
+                                            {p.phaseName}
                                         </span>
                                     ))}
                                 </div>

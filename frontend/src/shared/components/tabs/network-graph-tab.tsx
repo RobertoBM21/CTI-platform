@@ -183,7 +183,7 @@ function computeLayout(
 
 type NodeMeta = StixNodeData & { id: string };
 
-const MAX_VISIBLE_NODES = 20;
+const MAX_VISIBLE_NODES = 50;
 
 function buildGraph<TEntity extends EntityBase>(
     detail: EntityDetail<TEntity>,

@@ -264,10 +264,16 @@ export class StixMapper {
     }
 
     private mapAttackPattern(o: Record<string, unknown>) {
+        const refs = o.external_references as
+            | Record<string, unknown>[]
+            | undefined;
+        const primaryExternalId = refs?.[0]?.external_id as string | undefined;
         return new AttackPattern({
             ...this.commonProps(o),
             name: o.name as string,
             aliases: o.aliases as string[] | undefined,
+            externalReference: primaryExternalId,
+            killChainPhases: this.mapKillChainPhases(o),
         });
     }
 
@@ -389,10 +395,12 @@ export class StixMapper {
             name: o.name as string,
             latitude: o.latitude as number | undefined,
             longitude: o.longitude as number | undefined,
+            precision: o.precision as number | undefined,
             country: o.country as string | undefined,
             region: this.asEnumValue(o.region, Region),
             administrativeArea: o.administrative_area as string | undefined,
             city: o.city as string | undefined,
+            streetAddress: o.street_address as string | undefined,
             postalCode: o.postal_code as string | undefined,
         });
     }

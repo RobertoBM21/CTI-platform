@@ -26,4 +26,6 @@ export enum Region {
     ANTARCTICA = 'antarctica',
     AUSTRALIA_NEW_ZEALAND = 'australia-new-zealand',
     MELANESIA = 'melanesia',
+    MICRONESIA = 'micronesia',
+    POLYNESIA = 'polynesia',
 }

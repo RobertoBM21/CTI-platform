@@ -104,6 +104,7 @@ flowchart LR
 - TanStack Query + API client base con tipado de respuestas paginadas.
 - Feature `incidents/`: catálogo paginado + vista detalle completa con 5 tabs (Executive Summary, Network Analysis, Artifacts & IOCs, Map, Audit & Timeline). Conectado al backend real.
 - Feature `campaigns/`: catálogo paginado + vista detalle con las mismas 5 tabs. Conectado al backend real.
+- Feature `threat-actors/`: catálogo paginado + vista detalle con 4 tabs (Actor Overview, Cyber, Info-Ops, Hybrid Graph). Conectado al backend real. Grafo híbrido con 3 clusters por dominio (Cyber, Threat, Info) usando d3-force `forceX`/`forceY`.
 - Capa `shared/` con componentes, tabs, utilidades y tipos reutilizables por todos los features: `EntityCatalog`, `EntityCard`, `EntityListRow`, `DetailPageHeader`, `EntityInfoCard`, `NetworkGraphTab` (d3-force + ReactFlow), `ExecutiveSummaryTab`, `ArtifactsTab`, `MapTab` (MapLibre + react-map-gl), `TimelineTab`, `DetailSidePanel`, `SectionTitle`, `SectionCard`, `ObservationWindow`, `SightingCount`, `EmptyState`, `TlpBadge`, `ConfidenceBadge`, `CatalogFiltersPanel`, estados de carga/error, etc.
 - `NetworkGraphTab`: layout de fuerzas d3-force, aristas con estilos por `relationshipType`, deduplicación de nodos, card unificada lista + grafo con separador vertical, panel lateral `DetailSidePanel`.
 - Tests E2E Playwright para incidentes y campañas (catálogo + detalle completo sobre datos reales de BD).
@@ -176,10 +177,12 @@ frontend/src/
         globals.css                              # Tema + tokens shadcn/ui (OKLCH)
         incidents/                               # Catálogo y detalle de incidentes
         campaigns/                               # Catálogo y detalle de campañas
+        threat-actors/                           # Catálogo y detalle de actores de amenaza
     components/ui/                               # Componentes shadcn/ui (autogenerados)
     features/
         incidents/                               # API hooks, tipos y componentes de incidentes
         campaigns/                               # API hooks, tipos y componentes de campañas
+        threat-actors/                           # API hooks, tipos y componentes de actores
     shared/
         components/                              # Componentes reutilizables (EntityCatalog, tabs, DetailPageHeader, badges, estados…)
         components/tabs/                         # Tabs compartidas (ExecutiveSummary, NetworkGraph, Artifacts, Map, Timeline)

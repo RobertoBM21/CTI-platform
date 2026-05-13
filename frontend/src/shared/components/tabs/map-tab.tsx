@@ -42,11 +42,15 @@ function getRelatedByTypes<TEntity extends EntityBase>(
     detail: EntityDetail<TEntity>,
     types: string[],
 ): StixObject[] {
-    return detail.relatedObjects
-        .filter(
-            ({ object }) => object && types.includes(getStixType(object.id)),
-        )
-        .map(({ object }) => object!);
+    const seen = new Set<string>();
+    const result: StixObject[] = [];
+    for (const { object } of detail.relatedObjects) {
+        if (!object || !types.includes(getStixType(object.id))) continue;
+        if (seen.has(object.id)) continue;
+        seen.add(object.id);
+        result.push(object);
+    }
+    return result;
 }
 
 function LocationRow({ obj }: { obj: StixObject }) {

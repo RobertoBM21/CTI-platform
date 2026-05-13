@@ -3,8 +3,8 @@ import { Region } from '../../../../../../src/contexts/cyber/domain/value-object
 describe('Region', () => {
     const values = Object.values(Region);
 
-    it('should have exactly 27 values', () => {
-        expect(values).toHaveLength(27);
+    it('should have exactly 29 values', () => {
+        expect(values).toHaveLength(29);
     });
 
     it('should include top-level regions', () => {

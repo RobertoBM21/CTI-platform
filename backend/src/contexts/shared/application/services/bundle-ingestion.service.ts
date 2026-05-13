@@ -16,6 +16,7 @@ import { CampaignService } from '../../../threat/application/services/campaign.s
 import { IncidentService } from '../../../threat/application/services/incident.service';
 import { IndicatorService } from '../../../threat/application/services/indicator.service';
 import { ThreatActorService } from '../../../threat/application/services/threat-actor.service';
+import { validateRelationship } from '../../domain/constraints/relationship-constraints';
 import { TLP } from '../../domain/value-objects';
 import { type IngestionSummary } from '../dtos/stix-bundle.dto';
 import { RelationshipService } from './relationship.service';
@@ -106,6 +107,23 @@ export class BundleIngestionService {
             }
 
             try {
+                if (mapped.type === 'relationship') {
+                    const rel = mapped.entity as {
+                        sourceRef: string;
+                        relationshipType: string;
+                        targetRef: string;
+                    };
+                    const check = validateRelationship(
+                        rel.sourceRef,
+                        rel.relationshipType,
+                        rel.targetRef,
+                    );
+                    if (!check.valid) {
+                        this.logger.warn(
+                            `[Ontology] ${check.reason ?? 'constraint violated'}`,
+                        );
+                    }
+                }
                 await saver.save(mapped.entity);
                 summary.processed++;
             } catch (error) {

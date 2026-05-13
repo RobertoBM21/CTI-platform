@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { EntityType } from '@/shared/types/enums';
 import {
+    Activity,
     Bug,
     CheckCircle,
     Crosshair,
@@ -13,6 +14,7 @@ import {
     MapPin,
     Megaphone,
     MessageSquare,
+    Microscope,
     Server,
     Shield,
     ShieldAlert,
@@ -59,6 +61,78 @@ export const entityConfig: Record<
         className:
             'border-teal-300 text-teal-700 bg-teal-50 hover:bg-teal-50 dark:border-teal-700 dark:text-teal-300 dark:bg-teal-950',
     },
+    malware: {
+        label: 'MALWARE',
+        icon: Bug,
+        className:
+            'border-red-300 text-red-700 bg-red-50 hover:bg-red-50 dark:border-red-700 dark:text-red-300 dark:bg-red-950',
+    },
+    tool: {
+        label: 'TOOL',
+        icon: Wrench,
+        className:
+            'border-orange-300 text-orange-700 bg-orange-50 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-300 dark:bg-orange-950',
+    },
+    vulnerability: {
+        label: 'VULNERABILITY',
+        icon: ShieldAlert,
+        className:
+            'border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-300 dark:bg-amber-950',
+    },
+    infrastructure: {
+        label: 'INFRASTRUCTURE',
+        icon: Server,
+        className:
+            'border-slate-300 text-slate-700 bg-slate-50 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:bg-slate-950',
+    },
+    'intrusion-set': {
+        label: 'INTRUSION SET',
+        icon: Users,
+        className:
+            'border-purple-300 text-purple-700 bg-purple-50 hover:bg-purple-50 dark:border-purple-700 dark:text-purple-300 dark:bg-purple-950',
+    },
+    identity: {
+        label: 'IDENTITY',
+        icon: User,
+        className:
+            'border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 dark:bg-blue-950',
+    },
+    location: {
+        label: 'LOCATION',
+        icon: MapPin,
+        className:
+            'border-green-300 text-green-700 bg-green-50 hover:bg-green-50 dark:border-green-700 dark:text-green-300 dark:bg-green-950',
+    },
+    'course-of-action': {
+        label: 'COURSE OF ACTION',
+        icon: CheckCircle,
+        className:
+            'border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-300 dark:bg-emerald-950',
+    },
+    note: {
+        label: 'NOTE',
+        icon: FileText,
+        className:
+            'border-zinc-300 text-zinc-700 bg-zinc-50 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:bg-zinc-950',
+    },
+    opinion: {
+        label: 'OPINION',
+        icon: MessageSquare,
+        className:
+            'border-indigo-300 text-indigo-700 bg-indigo-50 hover:bg-indigo-50 dark:border-indigo-700 dark:text-indigo-300 dark:bg-indigo-950',
+    },
+    'malware-analysis': {
+        label: 'MALWARE ANALYSIS',
+        icon: Eye,
+        className:
+            'border-fuchsia-300 text-fuchsia-700 bg-fuchsia-50 hover:bg-fuchsia-50 dark:border-fuchsia-700 dark:text-fuchsia-300 dark:bg-fuchsia-950',
+    },
+    'observed-data': {
+        label: 'OBSERVED DATA',
+        icon: Eye,
+        className:
+            'border-cyan-300 text-cyan-700 bg-cyan-50 hover:bg-cyan-50 dark:border-cyan-700 dark:text-cyan-300 dark:bg-cyan-950',
+    },
 };
 
 /** Icon map for all STIX 2.1 SDO types — use in graph nodes and entity lists */
@@ -84,6 +158,8 @@ export const stixTypeIconMap: Record<
     note: FileText,
     opinion: MessageSquare,
     sighting: Eye,
+    'malware-analysis': Microscope,
+    'observed-data': Activity,
 };
 
 interface EntityTypeBadgeProps {

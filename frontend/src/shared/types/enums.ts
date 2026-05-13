@@ -23,4 +23,16 @@ export type EntityType =
     | 'threat-actor'
     | 'campaign'
     | 'attack-pattern'
-    | 'indicator';
+    | 'indicator'
+    | 'malware'
+    | 'tool'
+    | 'vulnerability'
+    | 'infrastructure'
+    | 'intrusion-set'
+    | 'identity'
+    | 'location'
+    | 'course-of-action'
+    | 'note'
+    | 'opinion'
+    | 'malware-analysis'
+    | 'observed-data';

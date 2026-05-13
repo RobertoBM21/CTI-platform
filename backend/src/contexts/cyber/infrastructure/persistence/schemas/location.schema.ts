@@ -20,6 +20,9 @@ export class LocationDocument {
     @Prop({ type: Number })
     longitude?: number;
 
+    @Prop({ type: Number })
+    precision?: number;
+
     @Prop()
     country?: string;
 
@@ -31,6 +34,9 @@ export class LocationDocument {
 
     @Prop()
     city?: string;
+
+    @Prop()
+    streetAddress?: string;
 
     @Prop()
     postalCode?: string;

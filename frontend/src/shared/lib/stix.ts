@@ -4,7 +4,7 @@ export function getStixType(id: string): string {
     return idx >= 0 ? id.substring(0, idx) : 'unknown';
 }
 
-export type StixDomain = 'cyber' | 'cognitive';
+export type StixDomain = 'cyber' | 'info';
 
 interface StixTypeConfig {
     label: string;
@@ -18,19 +18,19 @@ const STIX_CONFIG: Record<string, StixTypeConfig> = {
         label: 'Incident',
         abbr: 'INC',
         color: '#CF4931',
-        domain: 'cognitive',
+        domain: 'info',
     },
     'threat-actor': {
         label: 'Threat Actor',
         abbr: 'TA',
         color: '#7c3aed',
-        domain: 'cognitive',
+        domain: 'info',
     },
     campaign: {
         label: 'Campaign',
         abbr: 'C',
         color: '#0284c7',
-        domain: 'cognitive',
+        domain: 'info',
     },
     'attack-pattern': {
         label: 'Attack Pattern',
@@ -73,31 +73,43 @@ const STIX_CONFIG: Record<string, StixTypeConfig> = {
         label: 'Identity',
         abbr: 'ID',
         color: '#6b7280',
-        domain: 'cognitive',
+        domain: 'info',
     },
     location: {
         label: 'Location',
         abbr: 'LO',
         color: '#6b7280',
-        domain: 'cognitive',
+        domain: 'info',
     },
     'course-of-action': {
         label: 'Course of Action',
         abbr: 'CA',
         color: '#059669',
-        domain: 'cognitive',
+        domain: 'info',
     },
-    note: { label: 'Note', abbr: 'NT', color: '#b45309', domain: 'cognitive' },
+    note: { label: 'Note', abbr: 'NT', color: '#b45309', domain: 'info' },
     opinion: {
         label: 'Opinion',
         abbr: 'OP',
         color: '#b45309',
-        domain: 'cognitive',
+        domain: 'info',
     },
     sighting: {
         label: 'Sighting',
         abbr: 'SG',
         color: '#0284c7',
+        domain: 'cyber',
+    },
+    'malware-analysis': {
+        label: 'Malware Analysis',
+        abbr: 'MA',
+        color: '#7c2d12',
+        domain: 'cyber',
+    },
+    'observed-data': {
+        label: 'Observed Data',
+        abbr: 'OD',
+        color: '#0f766e',
         domain: 'cyber',
     },
 };
@@ -106,7 +118,7 @@ const FALLBACK: StixTypeConfig = {
     label: 'Unknown',
     abbr: '?',
     color: '#6b7280',
-    domain: 'cognitive',
+    domain: 'info',
 };
 
 export function getStixConfig(typeOrId: string): StixTypeConfig {
@@ -123,4 +135,15 @@ export function formatDateTime(iso: string): string {
         dateStyle: 'medium',
         timeStyle: 'short',
     });
+}
+
+/**
+ * Converts a kebab-case vocabulary value to a readable label.
+ * e.g. 'nation-state' → 'Nation State', 'trigger' → 'Trigger'
+ */
+export function formatVocabLabel(value: string): string {
+    return value
+        .split('-')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
 }

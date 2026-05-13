@@ -51,7 +51,7 @@ function buildEvents<TEntity extends EntityBase>(
     events.push({
         id: `${entity.id}--created`,
         timestamp: new Date(entity.createdAt).getTime(),
-        domain: 'cognitive',
+        domain: 'info',
         title: `${entityLabel} registered`,
         description: entity.description ?? undefined,
         source: entity.createdBy ?? undefined,
@@ -91,7 +91,7 @@ function buildEvents<TEntity extends EntityBase>(
         events.push({
             id: `${relationship.id}--rel`,
             timestamp: new Date(ts).getTime(),
-            domain: cfg.domain === 'cyber' ? 'cyber' : 'cognitive',
+            domain: cfg.domain === 'cyber' ? 'cyber' : 'info',
             title: `${cfg.label} linked: ${objectName}`,
             description: relationship.description,
             source: (
@@ -370,8 +370,8 @@ function DualTrackTimeline({
         () => events.filter((e) => e.domain === 'cyber'),
         [events],
     );
-    const cognitiveEvents = useMemo(
-        () => events.filter((e) => e.domain === 'cognitive'),
+    const infoEvents = useMemo(
+        () => events.filter((e) => e.domain === 'info'),
         [events],
     );
     const containerRef = useRef<HTMLDivElement>(null);
@@ -391,7 +391,7 @@ function DualTrackTimeline({
 
         for (const ce of cyberEvents) {
             if (count >= 6) break;
-            for (const cog of cognitiveEvents) {
+            for (const cog of infoEvents) {
                 if (Math.abs(ce.timestamp - cog.timestamp) > WINDOW_MS)
                     continue;
                 const ceEl = cardRefs.current[ce.id];
@@ -421,7 +421,7 @@ function DualTrackTimeline({
                 break;
             }
         }
-    }, [events, selectedId, cyberEvents, cognitiveEvents]);
+    }, [events, selectedId, cyberEvents, infoEvents]);
 
     return (
         <div ref={containerRef} className="relative">
@@ -452,11 +452,11 @@ function DualTrackTimeline({
                     <div className="mb-4 flex items-center gap-2">
                         <span className="size-2 shrink-0 rounded-full bg-violet-500" />
                         <h3 className="text-xs font-bold tracking-widest text-violet-600 uppercase">
-                            Cognitive Domain
+                            Info Domain
                         </h3>
                     </div>
                     <TimelineList
-                        events={cognitiveEvents}
+                        events={infoEvents}
                         selectedId={selectedId}
                         toggle={toggle}
                         itemRef={(id, el) => {
@@ -480,34 +480,32 @@ export function TimelineTab<TEntity extends EntityBase = EntityBase>({
 }: TimelineTabProps<TEntity>) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [showCyber, setShowCyber] = useState(true);
-    const [showCognitive, setShowCognitive] = useState(true);
+    const [showInfo, setShowInfo] = useState(true);
     const events = useMemo(() => buildEvents(detail), [detail]);
 
     const hasCyber = events.some((e) => e.domain === 'cyber');
-    const hasCognitive = events.some((e) => e.domain === 'cognitive');
-    const isHybrid = hasCyber && hasCognitive;
+    const hasInfo = events.some((e) => e.domain === 'info');
+    const isHybrid = hasCyber && hasInfo;
 
     const visibleEvents = useMemo(
         () =>
             events.filter(
                 (e) =>
                     (e.domain === 'cyber' && showCyber) ||
-                    (e.domain === 'cognitive' && showCognitive),
+                    (e.domain === 'info' && showInfo),
             ),
-        [events, showCyber, showCognitive],
+        [events, showCyber, showInfo],
     );
 
     const visibleHasCyber = visibleEvents.some((e) => e.domain === 'cyber');
-    const visibleHasCognitive = visibleEvents.some(
-        (e) => e.domain === 'cognitive',
-    );
-    const visibleIsDual = visibleHasCyber && visibleHasCognitive;
+    const visibleHasInfo = visibleEvents.some((e) => e.domain === 'info');
+    const visibleIsDual = visibleHasCyber && visibleHasInfo;
 
     let timelineTitle = 'Global Timeline';
-    if (visibleHasCyber && visibleHasCognitive)
+    if (visibleHasCyber && visibleHasInfo)
         timelineTitle = 'Dual-Domain Timeline';
     else if (visibleHasCyber) timelineTitle = 'Cyber Timeline';
-    else if (visibleHasCognitive) timelineTitle = 'Cognitive Timeline';
+    else if (visibleHasInfo) timelineTitle = 'Info Timeline';
 
     const toggle = (id: string) =>
         setSelectedId((prev) => (prev === id ? null : id));
@@ -544,10 +542,10 @@ export function TimelineTab<TEntity extends EntityBase = EntityBase>({
                                 Cyber
                             </button>
                             <button
-                                onClick={() => setShowCognitive((v) => !v)}
+                                onClick={() => setShowInfo((v) => !v)}
                                 className={cn(
                                     'flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6rem] font-bold tracking-widest uppercase transition-all',
-                                    showCognitive
+                                    showInfo
                                         ? 'border-violet-200 bg-violet-50 text-violet-500 dark:border-violet-900 dark:bg-violet-950/30'
                                         : 'border-border text-foreground/30 hover:text-foreground/50',
                                 )}
@@ -555,12 +553,12 @@ export function TimelineTab<TEntity extends EntityBase = EntityBase>({
                                 <span
                                     className={cn(
                                         'inline-block size-1.5 rounded-full',
-                                        showCognitive
+                                        showInfo
                                             ? 'bg-violet-500'
                                             : 'bg-foreground/20',
                                     )}
                                 />
-                                Cognitive
+                                Info
                             </button>
                         </div>
                     )}

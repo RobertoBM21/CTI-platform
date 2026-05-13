@@ -19,8 +19,17 @@ export class AttackPatternDocument {
     @Prop({ index: true, sparse: true })
     externalReference?: string;
 
-    @Prop()
-    killChainPhase?: string;
+    @Prop({
+        type: [
+            {
+                killChainName: { type: String, required: true },
+                phaseName: { type: String, required: true },
+            },
+        ],
+        default: [],
+        _id: false,
+    })
+    killChainPhases!: { killChainName: string; phaseName: string }[];
 
     @Prop({ type: Number, min: 0, max: 100 })
     confidence?: number;

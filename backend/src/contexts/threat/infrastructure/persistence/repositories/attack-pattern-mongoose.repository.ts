@@ -32,7 +32,10 @@ export class AttackPatternMongooseRepository
             description: doc.description,
             aliases: doc.aliases as unknown as string[],
             externalReference: doc.externalReference,
-            killChainPhase: doc.killChainPhase,
+            killChainPhases: doc.killChainPhases.map((p) => ({
+                killChainName: p.killChainName,
+                phaseName: p.phaseName,
+            })),
             confidence: doc.confidence,
             revoked: doc.revoked,
             externalReferences: doc.externalReferences.map((r) => ({
@@ -58,7 +61,7 @@ export class AttackPatternMongooseRepository
             description: entity.description,
             aliases: entity.aliases,
             externalReference: entity.externalReference,
-            killChainPhase: entity.killChainPhase,
+            killChainPhases: entity.killChainPhases,
             confidence: entity.confidence,
             revoked: entity.revoked,
             externalReferences: entity.externalReferences,

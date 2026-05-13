@@ -1,3 +1,4 @@
+import { KillChainPhase } from '../../../../../../src/contexts/shared/domain/value-objects/kill-chain-phase.vo';
 import { TLP } from '../../../../../../src/contexts/shared/domain/value-objects/tlp.vo';
 import { AttackPattern } from '../../../../../../src/contexts/threat/domain/entities/attack-pattern.entity';
 
@@ -36,7 +37,7 @@ describe('AttackPattern', () => {
             const pattern = new AttackPattern({ name: 'Test Pattern' });
             expect(pattern.description).toBeUndefined();
             expect(pattern.externalReference).toBeUndefined();
-            expect(pattern.killChainPhase).toBeUndefined();
+            expect(pattern.killChainPhases).toEqual([]);
         });
     });
 
@@ -50,7 +51,9 @@ describe('AttackPattern', () => {
                 description: 'Creating false evidence to support a narrative',
                 aliases: ['Evidence Fabrication', 'Fake Proof'],
                 externalReference: 'T0097.206',
-                killChainPhase: 'TA16',
+                killChainPhases: [
+                    { killChainName: 'DISARM', phaseName: 'TA16' },
+                ],
                 tlp: TLP.GREEN,
                 confidence: 75,
                 revoked: true,
@@ -71,7 +74,9 @@ describe('AttackPattern', () => {
                 'Fake Proof',
             ]);
             expect(pattern.externalReference).toBe('T0097.206');
-            expect(pattern.killChainPhase).toBe('TA16');
+            expect(pattern.killChainPhases).toEqual<KillChainPhase[]>([
+                { killChainName: 'DISARM', phaseName: 'TA16' },
+            ]);
             expect(pattern.tlp).toBe(TLP.GREEN);
             expect(pattern.confidence).toBe(75);
             expect(pattern.revoked).toBe(true);
@@ -95,9 +100,13 @@ describe('AttackPattern', () => {
         it('should accept DISARM tactic ID as killChainPhase', () => {
             const pattern = new AttackPattern({
                 name: 'Test Pattern',
-                killChainPhase: 'TA16',
+                killChainPhases: [
+                    { killChainName: 'DISARM', phaseName: 'TA16' },
+                ],
             });
-            expect(pattern.killChainPhase).toBe('TA16');
+            expect(pattern.killChainPhases).toEqual<KillChainPhase[]>([
+                { killChainName: 'DISARM', phaseName: 'TA16' },
+            ]);
         });
     });
 

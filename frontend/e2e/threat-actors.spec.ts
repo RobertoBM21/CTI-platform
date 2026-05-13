@@ -192,7 +192,7 @@ test.describe('Threat Actor detail page — PHOSPHOR Unit', () => {
         ).toBeVisible({ timeout: 8_000 });
     });
 
-    test('Actor Overview tab shows Narratives section with PHOSPHOR cognitive note abstract', async ({
+    test('Actor Overview tab shows Narratives section with PHOSPHOR info note abstract', async ({
         page,
     }) => {
         // The note abstract becomes the card title after the fix
@@ -200,7 +200,7 @@ test.describe('Threat Actor detail page — PHOSPHOR Unit', () => {
             page
                 .getByText(/perfil cognitivo/i, { exact: false })
                 .or(
-                    page.getByText(/narratives.*cognitive assets/i, {
+                    page.getByText(/narratives.*info assets/i, {
                         exact: false,
                     }),
                 )
@@ -245,7 +245,7 @@ test.describe('Threat Actor detail page — PHOSPHOR Unit', () => {
         await expect(page.getByRole('main')).toBeVisible();
     });
 
-    test('Info-Ops tab shows cognitive note with abstract as title', async ({
+    test('Info-Ops tab shows info note with abstract as title', async ({
         page,
     }) => {
         await page.getByRole('button', { name: /info-ops/i }).click();
@@ -256,7 +256,7 @@ test.describe('Threat Actor detail page — PHOSPHOR Unit', () => {
         ).toBeVisible({ timeout: 10_000 });
     });
 
-    test('Info-Ops tab shows Narratives & Cognitive Assets section', async ({
+    test('Info-Ops tab shows Narratives & Info Assets section', async ({
         page,
     }) => {
         await page.getByRole('button', { name: /info-ops/i }).click();
@@ -347,7 +347,7 @@ test.describe('Threat Actor detail page — Bear Whisperer', () => {
         );
     });
 
-    test('Info-Ops tab shows new Bear Whisperer cognitive note', async ({
+    test('Info-Ops tab shows new Bear Whisperer info note', async ({
         page,
     }) => {
         await page.getByRole('button', { name: /info-ops/i }).click();

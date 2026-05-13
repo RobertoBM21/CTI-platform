@@ -65,13 +65,12 @@ const THREAT_TYPES = new Set([
 ]);
 
 interface KillChainPhase {
-    kill_chain_name: string;
-    phase_name: string;
+    killChainName: string;
+    phaseName: string;
 }
 
 function isCyberTTP(obj: StixObject): boolean {
-    const phases =
-        (obj.kill_chain_phases as KillChainPhase[] | undefined) ?? [];
+    const phases = (obj.killChainPhases as KillChainPhase[] | undefined) ?? [];
     if (phases.length === 0) return true;
     const infoKeywords = [
         'cognitive',
@@ -81,7 +80,7 @@ function isCyberTTP(obj: StixObject): boolean {
         'disinformation',
     ];
     return !phases.some((p) =>
-        infoKeywords.some((k) => p.kill_chain_name.toLowerCase().includes(k)),
+        infoKeywords.some((k) => p.killChainName.toLowerCase().includes(k)),
     );
 }
 
