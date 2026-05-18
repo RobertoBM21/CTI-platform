@@ -11,6 +11,7 @@ import { ObservedDataService } from '../../../cyber/application/services/observe
 import { OpinionService } from '../../../cyber/application/services/opinion.service';
 import { ToolService } from '../../../cyber/application/services/tool.service';
 import { VulnerabilityService } from '../../../cyber/application/services/vulnerability.service';
+import { ReportService } from '../../../reporting/application/services/report.service';
 import { AttackPatternService } from '../../../threat/application/services/attack-pattern.service';
 import { CampaignService } from '../../../threat/application/services/campaign.service';
 import { IncidentService } from '../../../threat/application/services/incident.service';
@@ -53,6 +54,7 @@ export class BundleIngestionService {
         observedDataService: ObservedDataService,
         relationshipService: RelationshipService,
         sightingService: SightingService,
+        reportService: ReportService,
     ) {
         this.savers = new Map<
             string,
@@ -77,6 +79,7 @@ export class BundleIngestionService {
             ['observed-data', observedDataService],
             ['relationship', relationshipService],
             ['sighting', sightingService],
+            ['report', reportService],
         ]);
     }
 

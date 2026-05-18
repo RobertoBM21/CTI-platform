@@ -29,6 +29,11 @@ const navItems: NavItem[] = [
         href: '/threat-actors',
         icon: entityConfig['threat-actor'].icon,
     },
+    {
+        label: 'Reports',
+        href: '/reports',
+        icon: entityConfig['report'].icon,
+    },
 ];
 
 const bottomItems: NavItem[] = [

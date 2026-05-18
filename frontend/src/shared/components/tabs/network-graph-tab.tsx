@@ -136,6 +136,7 @@ const EDGE_PALETTE: Record<string, { color: string; dash?: string }> = {
     delivers: { color: '#d97706' },
     drops: { color: '#b45309', dash: '3 3' },
     exploits: { color: '#c026d3', dash: '6 3' },
+    references: { color: '#64748b', dash: '4 4' },
 };
 
 function getEdgePalette(relType: string) {

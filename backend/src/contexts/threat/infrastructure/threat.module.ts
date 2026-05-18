@@ -102,6 +102,8 @@ import {
         IncidentService,
         AttackPatternService,
         IndicatorService,
+        StixRefResolver,
+        DetailEnricher,
     ],
 })
 export class ThreatModule {}

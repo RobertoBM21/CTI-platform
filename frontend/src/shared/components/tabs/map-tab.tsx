@@ -165,7 +165,7 @@ export function MapTab<TEntity extends EntityBase = EntityBase>({
                             <MapPin className="text-primary size-4" />
                         </div>
                         <h3 className="text-primary text-base font-bold">
-                            Localización de campaña
+                            Campaign Location
                         </h3>
                     </CardHeader>
                     <CardContent className="p-0">

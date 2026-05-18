@@ -133,6 +133,12 @@ export const entityConfig: Record<
         className:
             'border-cyan-300 text-cyan-700 bg-cyan-50 hover:bg-cyan-50 dark:border-cyan-700 dark:text-cyan-300 dark:bg-cyan-950',
     },
+    report: {
+        label: 'REPORT',
+        icon: FileText,
+        className:
+            'border-indigo-300 text-indigo-700 bg-indigo-50 hover:bg-indigo-50 dark:border-indigo-700 dark:text-indigo-300 dark:bg-indigo-950',
+    },
 };
 
 /** Icon map for all STIX 2.1 SDO types — use in graph nodes and entity lists */
@@ -160,6 +166,7 @@ export const stixTypeIconMap: Record<
     sighting: Eye,
     'malware-analysis': Microscope,
     'observed-data': Activity,
+    report: FileText,
 };
 
 interface EntityTypeBadgeProps {

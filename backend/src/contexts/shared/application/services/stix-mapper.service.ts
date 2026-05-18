@@ -20,6 +20,8 @@ import {
     Region,
     ToolType,
 } from '../../../cyber/domain/value-objects';
+import { Report } from '../../../reporting/domain/entities/report.entity';
+import { ReportType } from '../../../reporting/domain/value-objects/report-type.vo';
 import { AttackPattern } from '../../../threat/domain/entities/attack-pattern.entity';
 import { Campaign } from '../../../threat/domain/entities/campaign.entity';
 import { Incident } from '../../../threat/domain/entities/incident.entity';
@@ -72,6 +74,7 @@ export class StixMapper {
         ['observed-data', (o) => this.mapObservedData(o)],
         ['relationship', (o) => this.mapRelationship(o)],
         ['sighting', (o) => this.mapSighting(o)],
+        ['report', (o) => this.mapReport(o)],
     ]);
 
     private _markingContext?: ReadonlyMap<string, TLP>;
@@ -504,6 +507,18 @@ export class StixMapper {
             sightingOfRef: o.sighting_of_ref as string,
             observedDataRefs: o.observed_data_refs as string[] | undefined,
             whereSightedRefs: o.where_sighted_refs as string[] | undefined,
+        });
+    }
+
+    private mapReport(o: Record<string, unknown>) {
+        return new Report({
+            ...this.commonProps(o),
+            name: o.name as string,
+            reportTypes: this.asEnumArray(o.report_types, ReportType),
+            published: o.published
+                ? new Date(o.published as string)
+                : new Date(),
+            objectRefs: (o.object_refs as string[] | undefined) ?? [],
         });
     }
 

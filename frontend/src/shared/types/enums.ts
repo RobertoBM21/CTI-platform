@@ -35,4 +35,5 @@ export type EntityType =
     | 'note'
     | 'opinion'
     | 'malware-analysis'
-    | 'observed-data';
+    | 'observed-data'
+    | 'report';

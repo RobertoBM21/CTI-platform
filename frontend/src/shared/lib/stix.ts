@@ -112,6 +112,12 @@ const STIX_CONFIG: Record<string, StixTypeConfig> = {
         color: '#0f766e',
         domain: 'cyber',
     },
+    report: {
+        label: 'Report',
+        abbr: 'RP',
+        color: '#4f46e5',
+        domain: 'info',
+    },
 };
 
 const FALLBACK: StixTypeConfig = {

@@ -1,8 +1,19 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import { ArrowLeft, Download } from 'lucide-react';
+import {
+    ArrowLeft,
+    ChevronDown,
+    Download,
+    FileDown,
+    FileJson,
+} from 'lucide-react';
 import Link from 'next/link';
 import type { TLP } from '../types/enums';
 import { ConfidenceBadge } from './confidence-badge';
@@ -17,6 +28,7 @@ interface DetailPageHeaderProps {
     tlp: TLP;
     confidence?: number | null;
     onExportPdf?: () => void;
+    onExportJson?: () => void;
     className?: string;
 }
 
@@ -27,6 +39,7 @@ export function DetailPageHeader({
     tlp,
     confidence,
     onExportPdf,
+    onExportJson,
     className,
 }: DetailPageHeaderProps) {
     return (
@@ -55,17 +68,33 @@ export function DetailPageHeader({
 
                 {/* Right: actions */}
                 <div className="flex shrink-0 items-center gap-2">
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={onExportPdf}
-                        className="text-foreground/80 hover:text-foreground"
-                    >
-                        <Download className="size-4" />
-                        <span className="ml-1.5 hidden sm:inline">
-                            Export PDF
-                        </span>
-                    </Button>
+                    {(onExportJson || onExportPdf) && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger
+                                className={cn(
+                                    'text-foreground/80 hover:text-foreground bg-secondary hover:bg-secondary/80 inline-flex h-8 items-center gap-1.5 rounded-md border border-transparent px-3 text-sm font-medium transition-colors',
+                                )}
+                            >
+                                <Download className="size-4" />
+                                <span className="hidden sm:inline">Export</span>
+                                <ChevronDown className="size-3" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="center">
+                                {onExportJson && (
+                                    <DropdownMenuItem onClick={onExportJson}>
+                                        <FileJson className="mr-1 size-4" />
+                                        JSON
+                                    </DropdownMenuItem>
+                                )}
+                                {onExportPdf && (
+                                    <DropdownMenuItem onClick={onExportPdf}>
+                                        <FileDown className="mr-1 size-4" />
+                                        PDF
+                                    </DropdownMenuItem>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
                     <ConfidenceBadge
                         confidence={confidence ?? null}
                         className="h-7 px-3 text-xs"
