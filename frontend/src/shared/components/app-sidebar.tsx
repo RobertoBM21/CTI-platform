@@ -2,7 +2,8 @@
 
 import { cn } from '@/lib/utils';
 import { entityConfig } from '@/shared/components/entity-type-badge';
-import { ChevronLeft, ChevronRight, Settings } from 'lucide-react';
+import { IngestionPanel } from '@/shared/components/ingestion-panel';
+import { ChevronLeft, ChevronRight, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -34,10 +35,6 @@ const navItems: NavItem[] = [
         href: '/reports',
         icon: entityConfig['report'].icon,
     },
-];
-
-const bottomItems: NavItem[] = [
-    { label: 'Settings', href: '/settings', icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -135,34 +132,23 @@ export function AppSidebar() {
             </div>
 
             {/* Bottom section */}
-            <div className="border-t border-white/10 p-3">
-                {bottomItems.map((item) => {
-                    const isActive = pathname.startsWith(item.href);
-                    return (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            title={collapsed ? item.label : undefined}
+            <div className="space-y-1 border-t border-white/10 p-3">
+                <IngestionPanel
+                    trigger={
+                        <button
+                            title={collapsed ? 'Ingest STIX bundle' : undefined}
                             className={cn(
-                                'group flex items-center gap-3 rounded-xl p-3 text-sm font-medium transition-all duration-200',
-                                isActive
-                                    ? 'bg-primary/10 text-primary'
-                                    : 'text-sidebar-foreground/50 hover:bg-white/5 hover:text-white',
+                                'group flex w-full items-center gap-3 rounded-xl p-3 text-sm font-medium transition-all duration-200',
+                                'text-sidebar-foreground/50 hover:bg-white/5 hover:text-white',
                                 collapsed && 'justify-center',
                             )}
+                            aria-label="Ingest STIX bundle"
                         >
-                            <item.icon
-                                className={cn(
-                                    'size-5 shrink-0',
-                                    isActive
-                                        ? 'text-primary'
-                                        : 'text-sidebar-foreground/50 group-hover:text-white',
-                                )}
-                            />
-                            {!collapsed && <span>{item.label}</span>}
-                        </Link>
-                    );
-                })}
+                            <Upload className="text-sidebar-foreground/50 size-5 shrink-0 group-hover:text-white" />
+                            {!collapsed && <span>Ingest Bundle</span>}
+                        </button>
+                    }
+                />
             </div>
         </aside>
     );
