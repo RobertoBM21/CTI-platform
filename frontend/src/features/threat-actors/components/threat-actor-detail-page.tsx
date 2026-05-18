@@ -1,22 +1,32 @@
 'use client';
 
-import { usePageTitle } from '@/providers/page-title-context';
 import { DetailPageHeader } from '@/shared/components/detail-page-header';
+import { DetailTabNav } from '@/shared/components/detail-tab-nav';
 import { EntityInfoCard } from '@/shared/components/entity-info-card';
 import {
     DetailErrorState,
     DetailLoadingState,
 } from '@/shared/components/error-state';
+import { useDetailTab } from '@/shared/hooks/use-detail-tab';
+import { useEntityPageTitle } from '@/shared/hooks/use-entity-page-title';
+import {
+    buildRelatedSdos,
+    buildSightingObjects,
+    buildSroObjects,
+    buildStixBundle,
+    downloadJson,
+    downloadPdf,
+    toFilename,
+} from '@/shared/lib/export-utils';
 import { getStixType } from '@/shared/lib/stix';
 import { TLP } from '@/shared/types/enums';
 import { Activity, Brain, Cpu, Globe2 } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
 import { useThreatActorDetail } from '../hooks/use-threat-actor-detail';
 import { ActorCyberTab } from './tabs/actor-cyber-tab';
 import { ActorHybridTab } from './tabs/actor-hybrid-tab';
 import { ActorInfoTab } from './tabs/actor-info-tab';
 import { ActorSummaryTab } from './tabs/actor-summary-tab';
+import { ThreatActorPdfDocument } from './threat-actor-pdf-document';
 
 const TABS = [
     { id: 'summary', label: 'Actor Overview', icon: Globe2 },
@@ -25,35 +35,69 @@ const TABS = [
     { id: 'hybrid', label: 'Hybrid Graph', icon: Activity },
 ] as const;
 
-type TabId = (typeof TABS)[number]['id'];
-
 interface ThreatActorDetailPageProps {
     id: string;
 }
 
 export function ThreatActorDetailPage({ id }: ThreatActorDetailPageProps) {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const rawTab = searchParams.get('tab');
-    const activeTab: TabId = TABS.some((t) => t.id === rawTab)
-        ? (rawTab as TabId)
-        : 'summary';
+    const [activeTab, setActiveTab] = useDetailTab(TABS);
+    const { data, isLoading, isError } = useThreatActorDetail(id);
+    useEntityPageTitle(data?.entity?.name);
 
-    function setActiveTab(tab: TabId) {
-        const params = new URLSearchParams(searchParams.toString());
-        params.set('tab', tab);
-        router.replace(`?${params.toString()}`, { scroll: false });
+    async function handleExportPdf() {
+        if (!data) return;
+        await downloadPdf(
+            <ThreatActorPdfDocument detail={data} />,
+            toFilename(data.entity.name, '.pdf'),
+        );
     }
 
-    const { data, isLoading, isError } = useThreatActorDetail(id);
-    const { setPageTitle } = usePageTitle();
-
-    useEffect(() => {
-        if (data?.entity?.name) {
-            setPageTitle(data.entity.name);
-        }
-        return () => setPageTitle('');
-    }, [data?.entity?.name, setPageTitle]);
+    function handleExportJson() {
+        if (!data) return;
+        const { entity, relatedObjects, sightings } = data;
+        const bundle = buildStixBundle([
+            {
+                type: 'threat-actor',
+                spec_version: '2.1',
+                id: entity.id,
+                name: entity.name,
+                description: entity.description ?? undefined,
+                threat_actor_types:
+                    entity.threatActorTypes.length > 0
+                        ? entity.threatActorTypes
+                        : undefined,
+                aliases: entity.aliases.length > 0 ? entity.aliases : undefined,
+                first_seen: entity.firstSeen ?? undefined,
+                last_seen: entity.lastSeen ?? undefined,
+                roles: entity.roles.length > 0 ? entity.roles : undefined,
+                goals: entity.goals ?? undefined,
+                sophistication: entity.sophistication ?? undefined,
+                resource_level: entity.resourceLevel ?? undefined,
+                primary_motivations:
+                    entity.primaryMotivations.length > 0
+                        ? entity.primaryMotivations
+                        : undefined,
+                secondary_motivations:
+                    entity.secondaryMotivations.length > 0
+                        ? entity.secondaryMotivations
+                        : undefined,
+                personal_motivations: entity.personalMotivations ?? undefined,
+                confidence: entity.confidence ?? undefined,
+                revoked: entity.revoked,
+                external_references:
+                    entity.externalReferences.length > 0
+                        ? entity.externalReferences
+                        : undefined,
+                created: entity.createdAt,
+                modified: entity.updatedAt,
+                created_by_ref: entity.createdBy ?? undefined,
+            },
+            ...buildSroObjects(relatedObjects),
+            ...buildRelatedSdos(relatedObjects),
+            ...buildSightingObjects(sightings),
+        ]);
+        downloadJson(bundle, toFilename(entity.name, '.stix.json'));
+    }
 
     if (isLoading) {
         return <DetailLoadingState message="Loading threat actor…" />;
@@ -106,6 +150,8 @@ export function ThreatActorDetailPage({ id }: ThreatActorDetailPageProps) {
                 name={entity.name}
                 tlp={entity.tlp as TLP}
                 confidence={entity.confidence}
+                onExportPdf={handleExportPdf}
+                onExportJson={handleExportJson}
             />
 
             {/* ── Page content ─────────────────────────────────── */}
@@ -121,31 +167,12 @@ export function ThreatActorDetailPage({ id }: ThreatActorDetailPageProps) {
                     tags={tags}
                 />
 
-                {/* ── Tab navigation ──────────────────────────── */}
-                <div className="border-b">
-                    <nav
-                        className="-mb-px flex gap-1 overflow-x-auto"
-                        aria-label="Threat actor detail tabs"
-                    >
-                        {TABS.map(({ id: tabId, label, icon: Icon }) => (
-                            <button
-                                key={tabId}
-                                onClick={() => setActiveTab(tabId)}
-                                className={`flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
-                                    activeTab === tabId
-                                        ? 'border-primary text-primary'
-                                        : 'text-foreground/50 hover:border-foreground/20 hover:text-foreground/80 border-transparent'
-                                }`}
-                                aria-current={
-                                    activeTab === tabId ? 'true' : undefined
-                                }
-                            >
-                                <Icon className="size-4" />
-                                {label}
-                            </button>
-                        ))}
-                    </nav>
-                </div>
+                <DetailTabNav
+                    tabs={TABS}
+                    activeTab={activeTab}
+                    onTabChange={setActiveTab}
+                    ariaLabel="Threat actor detail tabs"
+                />
 
                 {/* ── Tab content ─────────────────────────────── */}
                 <div className="pb-12">

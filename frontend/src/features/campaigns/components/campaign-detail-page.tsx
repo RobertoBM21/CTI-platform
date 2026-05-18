@@ -1,7 +1,7 @@
 'use client';
 
-import { usePageTitle } from '@/providers/page-title-context';
 import { DetailPageHeader } from '@/shared/components/detail-page-header';
+import { DetailTabNav } from '@/shared/components/detail-tab-nav';
 import { EntityInfoCard } from '@/shared/components/entity-info-card';
 import {
     DetailErrorState,
@@ -12,12 +12,22 @@ import { ExecutiveSummaryTab } from '@/shared/components/tabs/executive-summary-
 import { MapTab } from '@/shared/components/tabs/map-tab';
 import { NetworkGraphTab } from '@/shared/components/tabs/network-graph-tab';
 import { TimelineTab } from '@/shared/components/tabs/timeline-tab';
+import { useDetailTab } from '@/shared/hooks/use-detail-tab';
+import { useEntityPageTitle } from '@/shared/hooks/use-entity-page-title';
+import {
+    buildRelatedSdos,
+    buildSightingObjects,
+    buildSroObjects,
+    buildStixBundle,
+    downloadJson,
+    downloadPdf,
+    toFilename,
+} from '@/shared/lib/export-utils';
 import { getStixType } from '@/shared/lib/stix';
 import { TLP } from '@/shared/types/enums';
 import { Activity, Clock, FileText, Link2, MapPin } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
 import { useCampaignDetail } from '../hooks/use-campaign-detail';
+import { CampaignPdfDocument } from './campaign-pdf-document';
 
 const TABS = [
     { id: 'summary', label: 'Executive Summary', icon: FileText },
@@ -27,35 +37,61 @@ const TABS = [
     { id: 'timeline', label: 'Audit & Timeline', icon: Clock },
 ] as const;
 
-type TabId = (typeof TABS)[number]['id'];
-
 interface CampaignDetailPageProps {
     id: string;
 }
 
 export function CampaignDetailPage({ id }: CampaignDetailPageProps) {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const rawTab = searchParams.get('tab');
-    const activeTab: TabId = TABS.some((t) => t.id === rawTab)
-        ? (rawTab as TabId)
-        : 'summary';
+    const [activeTab, setActiveTab] = useDetailTab(TABS);
+    const { data, isLoading, isError } = useCampaignDetail(id);
+    useEntityPageTitle(data?.entity?.name);
 
-    function setActiveTab(tab: TabId) {
-        const params = new URLSearchParams(searchParams.toString());
-        params.set('tab', tab);
-        router.replace(`?${params.toString()}`, { scroll: false });
+    async function handleExportPdf() {
+        if (!data) return;
+        await downloadPdf(
+            <CampaignPdfDocument detail={data} />,
+            toFilename(data.entity.name, '.pdf'),
+        );
     }
 
-    const { data, isLoading, isError } = useCampaignDetail(id);
-    const { setPageTitle } = usePageTitle();
-
-    useEffect(() => {
-        if (data?.entity?.name) {
-            setPageTitle(data.entity.name);
-        }
-        return () => setPageTitle('');
-    }, [data?.entity?.name, setPageTitle]);
+    function handleExportJson() {
+        if (!data) return;
+        const { entity, relatedObjects, sightings } = data;
+        const bundle = buildStixBundle([
+            {
+                type: 'campaign',
+                spec_version: '2.1',
+                id: entity.id,
+                name: entity.name,
+                description: entity.description ?? undefined,
+                first_seen: entity.firstSeen ?? undefined,
+                last_seen: entity.lastSeen ?? undefined,
+                objective: entity.objective ?? undefined,
+                aliases: entity.aliases.length > 0 ? entity.aliases : undefined,
+                primary_motivations:
+                    entity.primaryMotivations.length > 0
+                        ? entity.primaryMotivations
+                        : undefined,
+                secondary_motivations:
+                    entity.secondaryMotivations.length > 0
+                        ? entity.secondaryMotivations
+                        : undefined,
+                confidence: entity.confidence ?? undefined,
+                revoked: entity.revoked,
+                external_references:
+                    entity.externalReferences.length > 0
+                        ? entity.externalReferences
+                        : undefined,
+                created: entity.createdAt,
+                modified: entity.updatedAt,
+                created_by_ref: entity.createdBy ?? undefined,
+            },
+            ...buildSroObjects(relatedObjects),
+            ...buildRelatedSdos(relatedObjects),
+            ...buildSightingObjects(sightings),
+        ]);
+        downloadJson(bundle, toFilename(entity.name, '.stix.json'));
+    }
 
     if (isLoading) {
         return <DetailLoadingState message="Loading campaign…" />;
@@ -108,6 +144,8 @@ export function CampaignDetailPage({ id }: CampaignDetailPageProps) {
                 name={entity.name}
                 tlp={entity.tlp as TLP}
                 confidence={entity.confidence}
+                onExportPdf={handleExportPdf}
+                onExportJson={handleExportJson}
             />
 
             {/* ── Page content ─────────────────────────────────── */}
@@ -123,31 +161,12 @@ export function CampaignDetailPage({ id }: CampaignDetailPageProps) {
                     tags={tags}
                 />
 
-                {/* ── Tab navigation ──────────────────────────── */}
-                <div className="border-b">
-                    <nav
-                        className="-mb-px flex gap-1 overflow-x-auto"
-                        aria-label="Campaign detail tabs"
-                    >
-                        {TABS.map(({ id: tabId, label, icon: Icon }) => (
-                            <button
-                                key={tabId}
-                                onClick={() => setActiveTab(tabId)}
-                                className={`flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
-                                    activeTab === tabId
-                                        ? 'border-primary text-primary'
-                                        : 'text-foreground/50 hover:border-foreground/20 hover:text-foreground/80 border-transparent'
-                                }`}
-                                aria-current={
-                                    activeTab === tabId ? 'true' : undefined
-                                }
-                            >
-                                <Icon className="size-4" />
-                                {label}
-                            </button>
-                        ))}
-                    </nav>
-                </div>
+                <DetailTabNav
+                    tabs={TABS}
+                    activeTab={activeTab}
+                    onTabChange={setActiveTab}
+                    ariaLabel="Campaign detail tabs"
+                />
 
                 {/* ── Tab content ─────────────────────────────── */}
                 <div className="pb-12">
