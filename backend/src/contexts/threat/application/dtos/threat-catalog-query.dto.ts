@@ -17,6 +17,8 @@ export interface ThreatCatalogQuery {
     tlp?: TLP;
     sortBy?: ThreatCatalogSortBy;
     sortOrder?: SortOrder;
+    attackPatternId?: string;
+    intrusionSetId?: string;
 }
 
 export class ThreatCatalogQueryDto
@@ -50,4 +52,18 @@ export class ThreatCatalogQueryDto
     @IsOptional()
     @IsEnum(SortOrder)
     sortOrder: SortOrder = SortOrder.DESC;
+
+    @ApiPropertyOptional({
+        description: 'Filter by related Attack Pattern ID (STIX)',
+    })
+    @IsOptional()
+    @IsString()
+    attackPatternId?: string;
+
+    @ApiPropertyOptional({
+        description: 'Filter by related Intrusion Set ID (STIX)',
+    })
+    @IsOptional()
+    @IsString()
+    intrusionSetId?: string;
 }

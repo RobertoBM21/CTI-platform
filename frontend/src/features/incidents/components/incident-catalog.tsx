@@ -25,7 +25,7 @@ export function IncidentCatalog() {
 
     return (
         <EntityCatalog
-            title="Intelligence Library"
+            title="Incident Library"
             description="Manage and analyze platform incidents."
             search={search}
             onSearchChange={(v) => {

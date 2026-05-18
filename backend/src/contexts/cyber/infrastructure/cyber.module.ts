@@ -28,6 +28,7 @@ import {
     ToolRepository,
     VulnerabilityRepository,
 } from '../domain';
+import { IntrusionSetsController } from './controllers/intrusion-sets.controller';
 import {
     CourseOfActionMongooseRepository,
     IdentityMongooseRepository,
@@ -70,6 +71,7 @@ import {
 } from './persistence/schemas';
 
 @Module({
+    controllers: [IntrusionSetsController],
     imports: [
         MongooseModule.forFeature([
             { name: MalwareDocument.name, schema: MalwareSchema },

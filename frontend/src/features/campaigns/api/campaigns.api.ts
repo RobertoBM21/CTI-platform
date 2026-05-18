@@ -60,7 +60,11 @@ function adaptCampaignDetail(b: BackendCampaign): CampaignDetailEntity {
 }
 
 export async function fetchCampaigns(
-    filters: CampaignFilters & { limit?: number },
+    filters: CampaignFilters & {
+        limit?: number;
+        attackPatternId?: string;
+        intrusionSetId?: string;
+    },
 ): Promise<PaginatedResponse<Campaign>> {
     const params = new URLSearchParams();
     if (filters.name) params.set('name', filters.name);
@@ -68,6 +72,10 @@ export async function fetchCampaigns(
     if (filters.sortOrder) params.set('sortOrder', filters.sortOrder);
     if (filters.page) params.set('page', String(filters.page));
     if (filters.limit) params.set('limit', String(filters.limit));
+    if (filters.attackPatternId)
+        params.set('attackPatternId', filters.attackPatternId);
+    if (filters.intrusionSetId)
+        params.set('intrusionSetId', filters.intrusionSetId);
 
     const qs = params.toString();
     const raw = await apiFetch<PaginatedResponse<BackendCampaign>>(

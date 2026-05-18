@@ -6,7 +6,7 @@ export abstract class CampaignRepository {
     abstract findById(id: string): Promise<Campaign | null>;
 
     abstract findAll(
-        filter: Partial<{ name: string; tlp: string }>,
+        filter: Partial<{ name: string; tlp: string; ids: string[] }>,
         page: number,
         limit: number,
         sort: SortCriteria,

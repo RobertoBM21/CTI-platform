@@ -72,7 +72,11 @@ function adaptThreatActorDetail(
 }
 
 export async function fetchThreatActors(
-    filters: ThreatActorFilters & { limit?: number },
+    filters: ThreatActorFilters & {
+        limit?: number;
+        attackPatternId?: string;
+        intrusionSetId?: string;
+    },
 ): Promise<PaginatedResponse<ThreatActor>> {
     const params = new URLSearchParams();
     if (filters.name) params.set('name', filters.name);
@@ -80,6 +84,10 @@ export async function fetchThreatActors(
     if (filters.sortOrder) params.set('sortOrder', filters.sortOrder);
     if (filters.page) params.set('page', String(filters.page));
     if (filters.limit) params.set('limit', String(filters.limit));
+    if (filters.attackPatternId)
+        params.set('attackPatternId', filters.attackPatternId);
+    if (filters.intrusionSetId)
+        params.set('intrusionSetId', filters.intrusionSetId);
 
     const qs = params.toString();
     const raw = await apiFetch<PaginatedResponse<BackendThreatActor>>(

@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const BACKEND_URL = process.env.API_URL ?? 'http://localhost:3000';
-const DATA_JSON_PATH = path.resolve(__dirname, '../../docs/data.json');
+const DATA_JSON_PATH = path.resolve(__dirname, '../../docs/data-sample.json');
 
 /**
  * Playwright global setup: ingest docs/data.json into the backend before
@@ -15,7 +15,10 @@ async function globalSetup(): Promise<void> {
         const raw = fs.readFileSync(DATA_JSON_PATH, 'utf-8');
         bundle = JSON.parse(raw);
     } catch (err) {
-        console.warn('[global-setup] Could not read docs/data.json:', err);
+        console.warn(
+            '[global-setup] Could not read docs/data-sample.json:',
+            err,
+        );
         return;
     }
 

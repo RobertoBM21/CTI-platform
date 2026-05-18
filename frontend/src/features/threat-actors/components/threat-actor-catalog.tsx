@@ -28,7 +28,7 @@ export function ThreatActorCatalog() {
 
     return (
         <EntityCatalog
-            title="Threat Actor Registry"
+            title="Threat Actor Library"
             description="Track and analyze threat actors across campaigns and incidents."
             search={search}
             onSearchChange={(v) => {

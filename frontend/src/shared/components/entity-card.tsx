@@ -30,8 +30,8 @@ export function EntityCard({ entity, basePath, className }: EntityCardProps) {
                     'group bg-card hover:border-primary/30 relative flex h-full flex-col rounded-2xl border border-transparent p-7 shadow-sm transition-all duration-300 hover:shadow-md',
                 )}
             >
-                {/* Top badges */}
-                <div className="mb-4 flex flex-col items-start gap-2">
+                {/* Top row: entity type badge left, TLP badge right */}
+                <div className="mb-4 flex items-start justify-between gap-2">
                     <EntityTypeBadge entityType={entity.entityType} />
                     <TlpBadge tlp={entity.tlp} />
                 </div>

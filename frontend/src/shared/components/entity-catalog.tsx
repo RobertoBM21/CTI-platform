@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { LayoutGrid, List, Search, SlidersHorizontal } from 'lucide-react';
 import type React from 'react';
+import { Fragment } from 'react';
 import type { ViewMode } from '../types/entity';
 import { CatalogEmptyState, CatalogErrorState } from './error-state';
 import { LoadingState } from './loading-state';
@@ -22,11 +23,13 @@ const VIEW_MODE_OPTIONS = [
 
 // ── Props ──────────────────────────────────────────────────────────────
 
-interface EntityCatalogProps<T> {
-    /** Catalog page heading */
-    title: string;
+interface EntityCatalogProps<T extends { id: string }> {
+    /** Catalog page heading (not shown in compact mode) */
+    title?: string;
     /** Catalog page subheading */
     description?: string;
+    /** When true, hides the heading section and removes full-page padding for use inside tabs/panels */
+    compact?: boolean;
 
     /** Controlled search value */
     search: string;
@@ -66,9 +69,10 @@ interface EntityCatalogProps<T> {
 
 // ── Component ──────────────────────────────────────────────────────────
 
-export function EntityCatalog<T>({
+export function EntityCatalog<T extends { id: string }>({
     title,
     description,
+    compact = false,
     search,
     onSearchChange,
     viewMode,
@@ -93,17 +97,27 @@ export function EntityCatalog<T>({
     const visibleEnd = Math.min(page * limit, totalItems);
 
     return (
-        <div className="animate-in fade-in flex-1 px-6 pb-10 duration-300 lg:px-12">
-            <div className="mx-auto max-w-6xl">
+        <div
+            className={
+                compact
+                    ? 'animate-in fade-in flex-1 duration-300'
+                    : 'animate-in fade-in flex-1 px-6 pb-10 duration-300 lg:px-12'
+            }
+        >
+            <div className={compact ? '' : 'mx-auto max-w-6xl'}>
                 {/* ── Heading ──────────────────────────────────── */}
-                <div className="mt-4 mb-10">
-                    <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
-                        {title}
-                    </h1>
-                    {description && (
-                        <p className="text-foreground/60 mt-2">{description}</p>
-                    )}
-                </div>
+                {!compact && (
+                    <div className="mt-4 mb-10">
+                        <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
+                            {title}
+                        </h1>
+                        {description && (
+                            <p className="text-foreground/60 mt-2">
+                                {description}
+                            </p>
+                        )}
+                    </div>
+                )}
 
                 {/* ── Controls bar ─────────────────────────────── */}
                 <div
@@ -177,11 +191,19 @@ export function EntityCatalog<T>({
 
                         {viewMode === 'list' ? (
                             <div className="flex flex-col gap-5">
-                                {items.map((item, i) => renderRow(item, i))}
+                                {items.map((item, i) => (
+                                    <Fragment key={item.id}>
+                                        {renderRow(item, i)}
+                                    </Fragment>
+                                ))}
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                                {items.map((item, i) => renderCard(item, i))}
+                                {items.map((item, i) => (
+                                    <Fragment key={item.id}>
+                                        {renderCard(item, i)}
+                                    </Fragment>
+                                ))}
                             </div>
                         )}
 

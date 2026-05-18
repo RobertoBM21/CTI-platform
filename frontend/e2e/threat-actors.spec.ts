@@ -24,9 +24,9 @@ test.describe('Threat Actors catalog', () => {
         ).toBeVisible({ timeout: 10_000 });
     });
 
-    test('shows the Threat Actor Registry heading', async ({ page }) => {
+    test('shows the Threat Actor Library heading', async ({ page }) => {
         await expect(
-            page.getByRole('heading', { name: /threat actor registry/i }),
+            page.getByRole('heading', { name: /threat actor library/i }),
         ).toBeVisible();
     });
 

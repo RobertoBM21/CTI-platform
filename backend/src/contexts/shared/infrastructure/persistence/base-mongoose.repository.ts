@@ -115,7 +115,11 @@ export abstract class BaseMongooseRepository<
         const query: Record<string, unknown> = {};
 
         for (const [key, value] of Object.entries(filter)) {
-            if (value) {
+            if (value === undefined || value === null) continue;
+
+            if (key === 'ids' && Array.isArray(value)) {
+                query.domainId = { $in: value };
+            } else {
                 query[key] = this.regexFields.has(key)
                     ? { $regex: value, $options: 'i' }
                     : value;

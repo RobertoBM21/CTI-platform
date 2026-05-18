@@ -10,6 +10,8 @@ interface CatalogFiltersPanelProps {
     onFiltersChange: (filters: BaseCatalogFilters) => void;
     onClose: () => void;
     className?: string;
+    /** Optional extra filter controls rendered below the main TLP / Order grid */
+    children?: React.ReactNode;
 }
 
 const tlpOptions = Object.values(TLP);
@@ -66,6 +68,7 @@ export function CatalogFiltersPanel({
     onFiltersChange,
     onClose,
     className,
+    children,
 }: CatalogFiltersPanelProps) {
     return (
         <div
@@ -151,6 +154,11 @@ export function CatalogFiltersPanel({
                     </div>
                 </section>
             </div>
+            {children && (
+                <div className="border-border/50 mt-5 border-t pt-5">
+                    {children}
+                </div>
+            )}
         </div>
     );
 }

@@ -3,7 +3,7 @@
 import { cn } from '@/lib/utils';
 import { entityConfig } from '@/shared/components/entity-type-badge';
 import { IngestionPanel } from '@/shared/components/ingestion-panel';
-import { ChevronLeft, ChevronRight, Upload } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ShieldAlert, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -14,7 +14,7 @@ interface NavItem {
     icon: React.ComponentType<{ className?: string }>;
 }
 
-const navItems: NavItem[] = [
+const generalNavItems: NavItem[] = [
     {
         label: 'Incidents',
         href: '/incidents',
@@ -34,6 +34,14 @@ const navItems: NavItem[] = [
         label: 'Reports',
         href: '/reports',
         icon: entityConfig['report'].icon,
+    },
+];
+
+const domainNavItems: NavItem[] = [
+    {
+        label: 'Threat Domain',
+        href: '/threat-domain',
+        icon: ShieldAlert,
     },
 ];
 
@@ -98,7 +106,45 @@ export function AppSidebar() {
                             General
                         </p>
                     )}
-                    {navItems.map((item) => {
+                    {generalNavItems.map((item) => {
+                        const isActive = pathname.startsWith(item.href);
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                title={collapsed ? item.label : undefined}
+                                className={cn(
+                                    'group flex items-center gap-3 rounded-xl p-3 text-sm font-medium transition-all duration-200',
+                                    isActive
+                                        ? 'bg-primary/10 text-primary'
+                                        : 'text-sidebar-foreground/50 hover:bg-white/5 hover:text-white',
+                                    collapsed && 'justify-center',
+                                )}
+                            >
+                                <item.icon
+                                    className={cn(
+                                        'size-5 shrink-0',
+                                        isActive
+                                            ? 'text-primary'
+                                            : 'text-sidebar-foreground/50 group-hover:text-white',
+                                    )}
+                                />
+                                {!collapsed && <span>{item.label}</span>}
+                                {isActive && !collapsed && (
+                                    <span className="bg-primary ml-auto size-1.5 rounded-full" />
+                                )}
+                            </Link>
+                        );
+                    })}
+
+                    <div className="my-2 border-t border-white/10" />
+
+                    {!collapsed && (
+                        <p className="mb-1 px-3 pb-1 text-[0.85rem] font-bold tracking-widest text-white/25 uppercase">
+                            Domains
+                        </p>
+                    )}
+                    {domainNavItems.map((item) => {
                         const isActive = pathname.startsWith(item.href);
                         return (
                             <Link

@@ -4,6 +4,7 @@ import {
     type SortCriteria,
     SortOrder,
 } from '../../../shared/application/dtos/sort.dto';
+import { RelationshipService } from '../../../shared/application/services/relationship.service';
 import { ThreatActor, ThreatActorRepository } from '../../domain';
 import { ThreatCatalogQueryDto } from '../dtos/threat-catalog-query.dto';
 
@@ -11,9 +12,10 @@ import { ThreatCatalogQueryDto } from '../dtos/threat-catalog-query.dto';
 export class ThreatActorService {
     constructor(
         private readonly threatActorRepository: ThreatActorRepository,
+        private readonly relationshipService: RelationshipService,
     ) {}
 
-    list(
+    async list(
         query: ThreatCatalogQueryDto,
     ): Promise<PaginatedResponse<ThreatActor>> {
         const sort: SortCriteria = {
@@ -21,15 +23,46 @@ export class ThreatActorService {
             direction: query.sortOrder === SortOrder.ASC ? 1 : -1,
         };
 
+        let ids: string[] | undefined;
+
+        const filterRefId = query.attackPatternId ?? query.intrusionSetId;
+
+        if (filterRefId) {
+            ids = await this.resolveRelatedIds(filterRefId, 'threat-actor--');
+        }
+
         return this.threatActorRepository.findAll(
             {
                 name: query.name,
                 tlp: query.tlp,
+                ids,
             },
             query.page,
             query.limit,
             sort,
         );
+    }
+
+    private async resolveRelatedIds(
+        refId: string,
+        prefix: string,
+    ): Promise<string[]> {
+        const [bySource, byTarget] = await Promise.all([
+            this.relationshipService.findBySourceRef(refId),
+            this.relationshipService.findByTargetRef(refId),
+        ]);
+
+        const ids = new Set<string>();
+
+        for (const rel of bySource) {
+            if (rel.targetRef.startsWith(prefix)) ids.add(rel.targetRef);
+        }
+
+        for (const rel of byTarget) {
+            if (rel.sourceRef.startsWith(prefix)) ids.add(rel.sourceRef);
+        }
+
+        return [...ids];
     }
 
     findById(id: string): Promise<ThreatActor | null> {

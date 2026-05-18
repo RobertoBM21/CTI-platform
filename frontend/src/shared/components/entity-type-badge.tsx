@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import type { EntityType } from '@/shared/types/enums';
 import {
     Activity,
+    AlertTriangle,
     Bug,
     CheckCircle,
     Crosshair,
@@ -16,7 +17,6 @@ import {
     MessageSquare,
     Microscope,
     Server,
-    Shield,
     ShieldAlert,
     User,
     Users,
@@ -33,7 +33,7 @@ export const entityConfig: Record<
 > = {
     incident: {
         label: 'INCIDENT',
-        icon: Shield,
+        icon: AlertTriangle,
         className:
             'border-primary/30 text-primary bg-primary/5 hover:bg-primary/5',
     },

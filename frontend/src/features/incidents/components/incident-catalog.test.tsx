@@ -44,7 +44,7 @@ describe('IncidentCatalog', () => {
     it('renders the page heading', () => {
         render(<IncidentCatalog />);
         expect(
-            screen.getByRole('heading', { name: /intelligence library/i }),
+            screen.getByRole('heading', { name: /incident library/i }),
         ).toBeInTheDocument();
     });
 

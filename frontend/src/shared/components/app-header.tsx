@@ -10,8 +10,9 @@ import { usePathname } from 'next/navigation';
 const SECTION_LABELS: Record<string, string> = {
     incidents: 'Incidents',
     campaigns: 'Campaigns',
-    dashboard: 'Dashboard',
-    settings: 'Settings',
+    'threat-actors': 'Threat Actors',
+    reports: 'Reports',
+    'threat-domain': 'Threat Domain',
 };
 
 export function AppHeader() {
