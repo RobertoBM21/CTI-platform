@@ -1,0 +1,2148 @@
+{
+  "type": "bundle",
+  "id": "bundle--3d8e57de-11a5-485a-8b83-a74fcbb3fdb3",
+  "objects": [
+    {
+      "type": "marking-definition",
+      "spec_version": "2.1",
+      "id": "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9",
+      "created": "2017-01-20T00:00:00Z",
+      "definition_type": "tlp",
+      "definition": {
+        "tlp": "clear"
+      }
+    },
+    {
+      "type": "incident",
+      "spec_version": "2.1",
+      "id": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "Operación Tormenta Híbrida Ibérica",
+      "description": "Incidente de desinformación y ciberespionaje híbrido dirigido a infraestructuras críticas e instituciones en España, con foco en alterar la percepción pública y exfiltrar datos estratégicos.",
+      "objective": "Desestabilizar la confianza en las instituciones españolas y comprometer la seguridad de sistemas de información clave.",
+      "first_seen": "2023-09-01T08:30:00Z",
+      "last_seen": "2023-11-15T23:59:59Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ],
+      "external_references": [
+        {
+          "source_name": "Reporte Ciberseguridad España",
+          "url": "https://cyber-intelligence.es/reportes/incidente-tormenta-hibrida"
+        }
+      ]
+    },
+    {
+      "type": "incident",
+      "spec_version": "2.1",
+      "id": "incident--5d3361e6-3fbd-4601-bd87-3d149022630a",
+      "created": "2023-08-15T09:00:00Z",
+      "modified": "2023-08-15T09:00:00Z",
+      "name": "Campaña de Phishing Gubernamental Previa",
+      "description": "Campaña de phishing temprana utilizada como vector preparatorio para el incidente principal híbrido.",
+      "objective": "Obtener acceso inicial a buzones de correo institucionales.",
+      "first_seen": "2023-08-01T00:00:00Z",
+      "last_seen": "2023-08-31T23:59:59Z",
+      "confidence": 85,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "threat-actor",
+      "spec_version": "2.1",
+      "id": "threat-actor--b21008d6-ea3d-4c8d-8a56-b928f2ca6b91",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "Bear Whisperer",
+      "description": "Actor de amenazas de origen ruso, patrocinado por el estado, especializado en operaciones híbridas combinando CNO (Computer Network Operations) e InfoOps.",
+      "aliases": ["APT-Bear", "Iron Hunter"],
+      "sophistication": "advanced",
+      "resource_level": "government",
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "intrusion-set",
+      "spec_version": "2.1",
+      "id": "intrusion-set--8b4566c7-31bd-4d57-b2fa-c917fb692135",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "Grupo de Intrusión Bear Whisperer",
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "campaign",
+      "spec_version": "2.1",
+      "id": "campaign--1b67f374-2c06-444d-8cf8-0051184ffab7",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "Operación Matrioska Española",
+      "description": "Campaña a gran escala ejecutando despliegues combinados de desinformación y robo de credenciales en España.",
+      "objective": "Sembrar discordia mediática y robar información de servidores gubernamentales.",
+      "first_seen": "2023-09-01T08:30:00Z",
+      "last_seen": "2023-11-15T23:59:59Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "attack-pattern",
+      "spec_version": "2.1",
+      "id": "attack-pattern--c0c800b6-1200-4ea0-bd6f-e3c321ab9d45",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "Spearphishing Link",
+      "description": "Envío de correos electrónicos con enlaces maliciosos dirigidos a funcionarios españoles.",
+      "confidence": 90,
+      "kill_chain_phases": [
+        {
+          "kill_chain_name": "mitre-attack",
+          "phase_name": "initial-access"
+        }
+      ],
+      "external_references": [
+        {
+          "source_name": "mitre-attack",
+          "external_id": "T1566.002"
+        }
+      ]
+    },
+    {
+      "type": "attack-pattern",
+      "spec_version": "2.1",
+      "id": "attack-pattern--d3023e60-4054-47bd-8656-b09e2cf331b2",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "User Execution",
+      "description": "Ejecución de un payload malicioso por parte del usuario objetivo tras hacer clic en un enlace engañoso.",
+      "confidence": 90,
+      "kill_chain_phases": [
+        {
+          "kill_chain_name": "mitre-attack",
+          "phase_name": "execution"
+        }
+      ],
+      "external_references": [
+        {
+          "source_name": "mitre-attack",
+          "external_id": "T1204"
+        }
+      ]
+    },
+    {
+      "type": "attack-pattern",
+      "spec_version": "2.1",
+      "id": "attack-pattern--7c1c1fce-1052-4752-97ba-efb43c68db28",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "OS Credential Dumping",
+      "description": "Extracción de credenciales desde la memoria del sistema operativo para movimiento lateral.",
+      "confidence": 85,
+      "kill_chain_phases": [
+        {
+          "kill_chain_name": "mitre-attack",
+          "phase_name": "credential-access"
+        }
+      ],
+      "external_references": [
+        {
+          "source_name": "mitre-attack",
+          "external_id": "T1003"
+        }
+      ]
+    },
+    {
+      "type": "attack-pattern",
+      "spec_version": "2.1",
+      "id": "attack-pattern--15fb2f76-c4b6-455b-8dc2-487b32d0a42f",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "Manipulación de Narrativa Cognitiva",
+      "description": "Creación e inyección de narrativas falsas en plataformas sociales para influenciar la opinión pública respecto a decisiones políticas en España.",
+      "confidence": 95,
+      "kill_chain_phases": [
+        {
+          "kill_chain_name": "mitre-influence",
+          "phase_name": "influence-operations"
+        }
+      ]
+    },
+    {
+      "type": "attack-pattern",
+      "spec_version": "2.1",
+      "id": "attack-pattern--e8a88132-72cc-4999-ba2a-9e1d88478643",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "Generación de Noticias Falsas (Deepfakes)",
+      "description": "Uso de herramientas de IA para crear activos mediáticos falsos (audio y video) para su posterior distribución.",
+      "confidence": 95,
+      "kill_chain_phases": [
+        {
+          "kill_chain_name": "mitre-influence",
+          "phase_name": "weaponization"
+        }
+      ]
+    },
+    {
+      "type": "location",
+      "spec_version": "2.1",
+      "id": "location--a6f3a76f-31a8-4bb9-bd99-73e04a08fc67",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "Moscú, Rusia (Origen)",
+      "region": "eastern-europe",
+      "country": "RU",
+      "latitude": 55.7558,
+      "longitude": 37.6173,
+      "confidence": 85,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "location",
+      "spec_version": "2.1",
+      "id": "location--7cd675e2-2a21-4ea6-8dd3-cc00a12e2c56",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "Madrid, España (Objetivo)",
+      "region": "southern-europe",
+      "country": "ES",
+      "latitude": 40.4168,
+      "longitude": -3.7038,
+      "confidence": 100,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "identity",
+      "spec_version": "2.1",
+      "id": "identity--10fa3c15-fbf1-4d11-b0e6-ec32be8c5bc1",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "Ministerio de Asuntos Exteriores de España",
+      "identity_class": "organization",
+      "sectors": ["government", "defense"],
+      "confidence": 100,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "identity",
+      "spec_version": "2.1",
+      "id": "identity--99276d1e-2dd2-4b2e-a579-22a8ff246c48",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "Medio de Comunicación Nacional Español",
+      "identity_class": "organization",
+      "sectors": ["communications", "entertainment"],
+      "confidence": 100,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--3ea0b8e6-e910-4cfd-9226-7bcbc8f8c253",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "Dominio de Desinformación Principal",
+      "pattern_type": "stix",
+      "pattern": "[domain-name:value = 'kremlin-disinfo.ru']",
+      "valid_from": "2023-09-01T00:00:00Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ],
+      "external_references": [
+        {
+          "source_name": "Análisis de Dominios Maliciosos",
+          "url": "https://threat-intel.com/domains/kremlin-disinfo.ru"
+        }
+      ]
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--c7a1029c-8f4b-4a30-84a8-6f17cf4875cb",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "URL de Portal de Noticias Falso",
+      "pattern_type": "stix",
+      "pattern": "[url:value = 'https://falso-diario-esp.com/noticia-urgente']",
+      "valid_from": "2023-09-05T00:00:00Z",
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--d54ec4cf-706f-45b6-bfd0-cc9a0df47a17",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "IP de Servidor C2",
+      "pattern_type": "stix",
+      "pattern": "[ipv4-addr:value = '198.51.100.45']",
+      "valid_from": "2023-09-10T00:00:00Z",
+      "confidence": 100,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ],
+      "external_references": [
+        {
+          "source_name": "IP Reputacional",
+          "url": "https://ip-check.com/198.51.100.45"
+        }
+      ]
+    },
+    {
+      "type": "malware",
+      "spec_version": "2.1",
+      "id": "malware--8c9bf7c3-379e-43f1-b844-325cfd7ee608",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "IberianStealer",
+      "description": "Malware de tipo infostealer utilizado para recolectar credenciales y datos de navegación de los objetivos.",
+      "malware_types": ["info-stealer"],
+      "is_family": false,
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "tool",
+      "spec_version": "2.1",
+      "id": "tool--5e305d2c-80ed-4fb1-ac21-a3b0faaa4b0f",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "name": "SocialMedia Botnet Framework v3",
+      "description": "Herramienta automatizada para la creación de perfiles falsos y amplificación de mensajes en redes sociales.",
+      "tool_types": ["information-gathering", "exploitation"],
+      "confidence": 85,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "report",
+      "spec_version": "2.1",
+      "id": "report--31c26b52-fbcc-41bb-b8ad-31b64a2e55cf",
+      "created": "2023-11-20T14:00:00Z",
+      "modified": "2023-11-20T14:00:00Z",
+      "name": "Reporte Analítico: Operación Tormenta Híbrida Ibérica",
+      "description": "Análisis exhaustivo del incidente híbrido de ciberespionaje y operaciones de influencia ejecutado por Bear Whisperer contra infraestructuras críticas e instituciones españolas. El informe documenta la cadena completa de ataque: desde el vector de acceso inicial por spearphishing hasta la exfiltración selectiva de documentación clasificada mediante IberianStealer, en paralelo con una campaña cognitiva de desinformación apoyada en deepfakes y perfiles sintéticos coordinados. Incluye análisis de TTPs, indicadores de compromiso, atribución al grupo de intrusión Bear Whisperer (APT-Bear) y recomendaciones de mitigación para organismos gubernamentales españoles.",
+      "published": "2023-11-20T14:00:00Z",
+      "object_refs": [
+        "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+        "incident--5d3361e6-3fbd-4601-bd87-3d149022630a",
+        "threat-actor--b21008d6-ea3d-4c8d-8a56-b928f2ca6b91",
+        "intrusion-set--8b4566c7-31bd-4d57-b2fa-c917fb692135",
+        "campaign--1b67f374-2c06-444d-8cf8-0051184ffab7",
+        "malware--8c9bf7c3-379e-43f1-b844-325cfd7ee608",
+        "tool--5e305d2c-80ed-4fb1-ac21-a3b0faaa4b0f",
+        "attack-pattern--c0c800b6-1200-4ea0-bd6f-e3c321ab9d45",
+        "attack-pattern--d3023e60-4054-47bd-8656-b09e2cf331b2",
+        "attack-pattern--7c1c1fce-1052-4752-97ba-efb43c68db28",
+        "attack-pattern--15fb2f76-c4b6-455b-8dc2-487b32d0a42f",
+        "attack-pattern--e8a88132-72cc-4999-ba2a-9e1d88478643",
+        "indicator--3ea0b8e6-e910-4cfd-9226-7bcbc8f8c253",
+        "indicator--c7a1029c-8f4b-4a30-84a8-6f17cf4875cb",
+        "vulnerability--c8fe1a2b-3c4d-4e5f-8a9b-0c1d2e3f4a5b",
+        "course-of-action--d9af2b3c-4d5e-4f60-9b0c-1d2e3f4a5b6c",
+        "identity--10fa3c15-fbf1-4d11-b0e6-ec32be8c5bc1",
+        "identity--99276d1e-2dd2-4b2e-a579-22a8ff246c48",
+        "location--a6f3a76f-31a8-4bb9-bd99-73e04a08fc67",
+        "location--7cd675e2-2a21-4ea6-8dd3-cc00a12e2c56",
+        "note--4a3b7890-1234-4abc-8def-abcdef012345",
+        "note--a1b2c3d4-e5f6-4a1b-b2c3-d4e5f6a7b8c9"
+      ],
+      "confidence": 100,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ],
+      "report_types": [
+        "threat-report",
+        "intrusion-set",
+        "malware",
+        "indicator"
+      ],
+      "external_references": [
+        {
+          "source_name": "CTI Platform",
+          "description": "Informe interno de la plataforma de inteligencia de amenazas",
+          "url": "https://cti-platform.internal/reports/tormenta-hibrida"
+        },
+        {
+          "source_name": "CCN-CERT",
+          "description": "Centro Criptológico Nacional — Informe de Ciberamenazas 2023",
+          "url": "https://www.ccn-cert.cni.es/es/informes/informes-ccn-cert-publicos.html",
+          "external_id": "CCN-CERT-IA-14/23"
+        },
+        {
+          "source_name": "ENISA",
+          "description": "ENISA Threat Landscape 2023 — State-sponsored threat actors",
+          "url": "https://www.enisa.europa.eu/publications/enisa-threat-landscape-2023"
+        },
+        {
+          "source_name": "MITRE ATT&CK",
+          "description": "Técnicas documentadas: T1566 (Phishing), T1003 (OS Credential Dumping), T1059 (Command and Scripting Interpreter)",
+          "url": "https://attack.mitre.org/groups/",
+          "external_id": "T1566"
+        }
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--a51c416c-e069-42b3-a9d7-83210ebef8b6",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "attributed-to",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "threat-actor--b21008d6-ea3d-4c8d-8a56-b928f2ca6b91",
+      "start_time": "2023-09-01T08:30:00Z",
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--b84a32a1-cc80-4dbf-8fa2-68e4c7d0d08b",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "part-of",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "campaign--1b67f374-2c06-444d-8cf8-0051184ffab7",
+      "start_time": "2023-09-05T00:00:00Z",
+      "confidence": 100,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--c7d23a10-2b15-4a7b-a199-31cf8a1e2fbc",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "attributed-to",
+      "source_ref": "campaign--1b67f374-2c06-444d-8cf8-0051184ffab7",
+      "target_ref": "threat-actor--b21008d6-ea3d-4c8d-8a56-b928f2ca6b91",
+      "start_time": "2023-09-01T08:30:00Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--d8b1b51e-62fa-4cb5-8d51-aa3b30fc8621",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "attack-pattern--c0c800b6-1200-4ea0-bd6f-e3c321ab9d45",
+      "start_time": "2023-09-10T12:00:00Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--e1f2c41d-76af-42e1-8889-1fc7b1d9c122",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "attack-pattern--d3023e60-4054-47bd-8656-b09e2cf331b2",
+      "start_time": "2023-09-12T09:30:00Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--f9a3e21c-81bc-41f2-899a-2ef8b2d8c133",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "attack-pattern--7c1c1fce-1052-4752-97ba-efb43c68db28",
+      "start_time": "2023-09-20T14:15:00Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--0820d8af-3a5d-41e7-8bdd-e9241c79cff4",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "attack-pattern--15fb2f76-c4b6-455b-8dc2-487b32d0a42f",
+      "start_time": "2023-10-01T08:00:00Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--fce26d31-7f49-40e0-89ff-acb922e563f7",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "attack-pattern--e8a88132-72cc-4999-ba2a-9e1d88478643",
+      "start_time": "2023-10-02T10:00:00Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--101a1e0b-222a-433b-8c88-123e4d5f6a11",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "targets",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "location--7cd675e2-2a21-4ea6-8dd3-cc00a12e2c56",
+      "start_time": "2023-09-01T08:30:00Z",
+      "confidence": 100,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--ad661c60-2314-4012-b6dc-fd8ab9931596",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "originates-from",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "location--a6f3a76f-31a8-4bb9-bd99-73e04a08fc67",
+      "start_time": "2023-09-01T08:30:00Z",
+      "confidence": 85,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--b33cf397-405e-440b-b419-cfd91e4ee658",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "targets",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "identity--10fa3c15-fbf1-4d11-b0e6-ec32be8c5bc1",
+      "start_time": "2023-09-10T12:00:00Z",
+      "confidence": 100,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--db8c0582-38d1-49a7-bf2c-843064d6d4f5",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "targets",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "identity--99276d1e-2dd2-4b2e-a579-22a8ff246c48",
+      "start_time": "2023-10-01T08:00:00Z",
+      "confidence": 100,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--ad796b81-2cfd-4cb5-8201-8d05351cd8a6",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "indicator--3ea0b8e6-e910-4cfd-9226-7bcbc8f8c253",
+      "start_time": "2023-09-01T08:30:00Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--e29e891d-f987-4aeb-9e71-e8587cd74daf",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "indicator--c7a1029c-8f4b-4a30-84a8-6f17cf4875cb",
+      "start_time": "2023-09-05T00:00:00Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--40d7ea61-0a80-4708-9eb7-297a5a664abd",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "indicator--d54ec4cf-706f-45b6-bfd0-cc9a0df47a17",
+      "start_time": "2023-09-10T00:00:00Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--5620cb4c-f39f-49a3-800c-f577dd9c7229",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "malware--8c9bf7c3-379e-43f1-b844-325cfd7ee608",
+      "start_time": "2023-09-15T08:00:00Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--46254252-ac41-4810-8676-c5ee5b68976c",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "indicates",
+      "source_ref": "indicator--d54ec4cf-706f-45b6-bfd0-cc9a0df47a17",
+      "target_ref": "malware--8c9bf7c3-379e-43f1-b844-325cfd7ee608",
+      "start_time": "2023-09-10T00:00:00Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--24cb1c15-d815-4e2d-8dab-10b1e020bad5",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "threat-actor--b21008d6-ea3d-4c8d-8a56-b928f2ca6b91",
+      "target_ref": "attack-pattern--c0c800b6-1200-4ea0-bd6f-e3c321ab9d45",
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--536b0493-5463-46eb-937f-f095d63fd587",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "campaign--1b67f374-2c06-444d-8cf8-0051184ffab7",
+      "target_ref": "attack-pattern--15fb2f76-c4b6-455b-8dc2-487b32d0a42f",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--fbdb1dc9-f53a-45cd-b57b-e829d8a3a1b3",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "incident--5d3361e6-3fbd-4601-bd87-3d149022630a",
+      "start_time": "2023-09-01T08:30:00Z",
+      "confidence": 85,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "sighting",
+      "spec_version": "2.1",
+      "id": "sighting--f3a14e1f-1111-4a11-b111-e1f1c1d1a1b1",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "first_seen": "2023-09-01T09:00:00Z",
+      "last_seen": "2023-09-15T23:59:59Z",
+      "count": 140,
+      "sighting_of_ref": "indicator--3ea0b8e6-e910-4cfd-9226-7bcbc8f8c253",
+      "where_sighted_refs": ["location--7cd675e2-2a21-4ea6-8dd3-cc00a12e2c56"],
+      "confidence": 100,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "sighting",
+      "spec_version": "2.1",
+      "id": "sighting--0a7b4ef5-8c64-466d-bd3b-5b5abf83e032",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "first_seen": "2023-09-10T12:30:00Z",
+      "last_seen": "2023-09-10T12:30:00Z",
+      "count": 1,
+      "sighting_of_ref": "indicator--d54ec4cf-706f-45b6-bfd0-cc9a0df47a17",
+      "where_sighted_refs": ["location--7cd675e2-2a21-4ea6-8dd3-cc00a12e2c56"],
+      "confidence": 100,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "note",
+      "spec_version": "2.1",
+      "id": "note--4a3b7890-1234-4abc-8def-abcdef012345",
+      "created": "2023-10-10T09:00:00Z",
+      "modified": "2023-10-10T09:00:00Z",
+      "abstract": "Análisis de atribución — Operación Tormenta Híbrida Ibérica",
+      "content": "Análisis preliminar confirma atribución con alta confianza al grupo Bear Whisperer (APT-Bear). Se detectaron TTPs coherentes con operaciones previas del grupo en Europa del Este: uso de spearphishing como vector inicial, posterior dumping de credenciales y despliegue de IberianStealer. En paralelo, la operación cognitiva empleó perfiles sintéticos coordinados y deepfakes de audio dirigidos a medios nacionales. Recomendación: elevar alerta a nivel nacional e informar a organismos aliados (ENISA, CCN-CERT).",
+      "authors": ["Unidad de Análisis CTI"],
+      "object_refs": ["incident--02446f25-bd64-44b2-a4f2-938a2024b3ad"],
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "malware-analysis",
+      "spec_version": "2.1",
+      "id": "malware-analysis--5b4c8901-2345-4bcd-9ef0-bcdef0123456",
+      "created": "2023-09-16T12:00:00Z",
+      "modified": "2023-09-16T12:00:00Z",
+      "product": "VirusTotal",
+      "version": "3.0",
+      "result": "malicious",
+      "result_name": "Infostealer.IberianStealer.Gen",
+      "analysis_started": "2023-09-16T11:00:00Z",
+      "analysis_ended": "2023-09-16T12:00:00Z",
+      "sample_ref": "malware--8c9bf7c3-379e-43f1-b844-325cfd7ee608",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "observed-data",
+      "spec_version": "2.1",
+      "id": "observed-data--6c5d9012-3456-4cde-af01-cdef01234567",
+      "created": "2023-09-15T08:00:00Z",
+      "modified": "2023-09-15T08:00:00Z",
+      "first_observed": "2023-09-01T08:30:00Z",
+      "last_observed": "2023-11-15T23:59:59Z",
+      "number_observed": 1847,
+      "object_refs": [
+        "indicator--3ea0b8e6-e910-4cfd-9226-7bcbc8f8c253",
+        "indicator--d54ec4cf-706f-45b6-bfd0-cc9a0df47a17"
+      ],
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--7d6e0123-4567-4abc-8def-abcdef012345",
+      "created": "2023-10-10T09:00:00Z",
+      "modified": "2023-10-10T09:00:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "note--4a3b7890-1234-4abc-8def-abcdef012345",
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--8e7f1234-5678-4bcd-9ef0-bcdef0123456",
+      "created": "2023-09-16T12:00:00Z",
+      "modified": "2023-09-16T12:00:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "malware-analysis--5b4c8901-2345-4bcd-9ef0-bcdef0123456",
+      "start_time": "2023-09-16T12:00:00Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--9f801345-6789-4cde-af01-cdef01234567",
+      "created": "2023-09-16T12:00:00Z",
+      "modified": "2023-09-16T12:00:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "malware-analysis--5b4c8901-2345-4bcd-9ef0-bcdef0123456",
+      "target_ref": "malware--8c9bf7c3-379e-43f1-b844-325cfd7ee608",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--0a912456-7890-4def-8356-012345678901",
+      "created": "2023-09-15T08:00:00Z",
+      "modified": "2023-09-15T08:00:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "observed-data--6c5d9012-3456-4cde-af01-cdef01234567",
+      "start_time": "2023-09-01T08:30:00Z",
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "vulnerability",
+      "spec_version": "2.1",
+      "id": "vulnerability--c8fe1a2b-3c4d-4e5f-8a9b-0c1d2e3f4a5b",
+      "created": "2023-09-12T08:00:00Z",
+      "modified": "2023-09-12T08:00:00Z",
+      "name": "CVE-2023-23397",
+      "description": "Vulnerabilidad crítica de escalada de privilegios en Microsoft Outlook mediante la captura de Net-NTLMv2 hashes. Explotada activamente por Bear Whisperer para obtener credenciales de funcionarios españoles sin interacción del usuario.",
+      "external_references": [
+        {
+          "source_name": "cve",
+          "external_id": "CVE-2023-23397",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-23397"
+        },
+        {
+          "source_name": "mitre-attack",
+          "external_id": "T1187"
+        }
+      ],
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "course-of-action",
+      "spec_version": "2.1",
+      "id": "course-of-action--d9af2b3c-4d5e-4f60-9b0c-1d2e3f4a5b6c",
+      "created": "2023-11-16T10:00:00Z",
+      "modified": "2023-11-16T10:00:00Z",
+      "name": "Contención y remediación post-incidente",
+      "description": "1) Aplicar parche KB5023455 (CVE-2023-23397) en todos los sistemas Outlook. 2) Revocar y regenerar credenciales NTLM de cuentas comprometidas. 3) Habilitar MFA en servicios corporativos expuestos. 4) Bloquear tráfico saliente hacia IPs C2 conocidas (198.51.100.45). 5) Aislar segmento de red afectado y realizar análisis forense. 6) Notificar a CCN-CERT y coordinar con ENISA.",
+      "confidence": 100,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--e0b03a4b-5c6d-4e7f-8a9b-0c1d2e3f4a5b",
+      "created": "2023-10-05T10:00:00Z",
+      "modified": "2023-10-05T10:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "tool--5e305d2c-80ed-4fb1-ac21-a3b0faaa4b0f",
+      "start_time": "2023-10-05T00:00:00Z",
+      "confidence": 85,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--f1c14b5c-6d7e-4f80-9bcd-1d2e3f4a5b6c",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "attributed-to",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "intrusion-set--8b4566c7-31bd-4d57-b2fa-c917fb692135",
+      "start_time": "2023-09-01T08:30:00Z",
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--a2d25c6d-7e8f-4091-abcd-2e3f4a5b6c7d",
+      "created": "2023-09-12T08:00:00Z",
+      "modified": "2023-09-12T08:00:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "vulnerability--c8fe1a2b-3c4d-4e5f-8a9b-0c1d2e3f4a5b",
+      "start_time": "2023-09-12T08:00:00Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--b3e36d7e-8f90-4102-bcde-3f4a5b6c7d8e",
+      "created": "2023-11-16T10:00:00Z",
+      "modified": "2023-11-16T10:00:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "target_ref": "course-of-action--d9af2b3c-4d5e-4f60-9b0c-1d2e3f4a5b6c",
+      "start_time": "2023-11-16T10:00:00Z",
+      "confidence": 100,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "campaign",
+      "spec_version": "2.1",
+      "id": "campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "name": "Operación Neptuno",
+      "description": "Campaña de espionaje de larga duración dirigida contra infraestructuras de comunicaciones de la OTAN en los países bálticos, combinando intrusión persistente avanzada con operaciones de supply chain y exfiltración sigilosa de inteligencia estratégica.",
+      "objective": "Recopilar inteligencia sobre planes de defensa bálticos y comprometer canales seguros de comunicación de la OTAN para detectar movimientos logísticos.",
+      "first_seen": "2024-01-15T06:00:00Z",
+      "last_seen": "2024-04-20T23:59:59Z",
+      "aliases": ["Operation Neptune", "NEPTUNE-2024"],
+      "confidence": 88,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ],
+      "external_references": [
+        {
+          "source_name": "ENISA Threat Landscape 2024",
+          "url": "https://cyber-intelligence.eu/reportes/operacion-neptuno-2024"
+        }
+      ]
+    },
+    {
+      "type": "threat-actor",
+      "spec_version": "2.1",
+      "id": "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "name": "PHOSPHOR Unit",
+      "description": "Grupo APT de origen asiático con patrocinio estatal, especializado en operaciones de espionaje estratégico de largo plazo contra alianzas militares occidentales. Reconocido por el uso de implantes modulares y técnicas de living-off-the-land.",
+      "aliases": ["Iron Tide", "APT-PHOSPHOR", "Jade Viper"],
+      "threat_actor_types": ["nation-state"],
+      "sophistication": "advanced",
+      "resource_level": "government",
+      "primary_motivation": "espionage",
+      "confidence": 80,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "attack-pattern",
+      "spec_version": "2.1",
+      "id": "attack-pattern--a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "name": "Supply Chain Compromise",
+      "description": "Compromiso de proveedores de software legítimos utilizados por organismos de defensa bálticos para inyectar código malicioso en actualizaciones firmadas digitalmente.",
+      "confidence": 85,
+      "kill_chain_phases": [
+        {
+          "kill_chain_name": "mitre-attack",
+          "phase_name": "initial-access"
+        }
+      ],
+      "external_references": [
+        {
+          "source_name": "mitre-attack",
+          "external_id": "T1195"
+        }
+      ],
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "attack-pattern",
+      "spec_version": "2.1",
+      "id": "attack-pattern--b2c3d4e5-f6a7-4b5c-9d0e-1f2a3b4c5d6e",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "name": "Exfiltration Over C2 Channel",
+      "description": "Exfiltración de documentos clasificados a través del canal de comando y control existente, usando fragmentación de datos y cifrado personalizado para evadir DLP.",
+      "confidence": 90,
+      "kill_chain_phases": [
+        {
+          "kill_chain_name": "mitre-attack",
+          "phase_name": "exfiltration"
+        }
+      ],
+      "external_references": [
+        {
+          "source_name": "mitre-attack",
+          "external_id": "T1041"
+        }
+      ],
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "attack-pattern",
+      "spec_version": "2.1",
+      "id": "attack-pattern--c3d4e5f6-a7b8-4c5d-9e0f-1a2b3c4d5e6f",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "name": "Phishing for Credentials",
+      "description": "Envío de correos electrónicos de spearphishing altamente personalizados a personal de ciberseguridad de la OTAN para robar credenciales de portales VPN y servicios colaborativos.",
+      "confidence": 88,
+      "kill_chain_phases": [
+        {
+          "kill_chain_name": "mitre-attack",
+          "phase_name": "credential-access"
+        }
+      ],
+      "external_references": [
+        {
+          "source_name": "mitre-attack",
+          "external_id": "T1598"
+        }
+      ],
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "malware",
+      "spec_version": "2.1",
+      "id": "malware--d4e5f6a7-b8c9-4d5e-af2a-3b4c5d6e7f8a",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "name": "NeptuneRAT",
+      "description": "Implante modular de acceso remoto con capacidades de persistencia mediante COM hijacking, exfiltración por DNS tunelizado y actualización dinámica de módulos desde el C2.",
+      "malware_types": ["remote-access-trojan", "backdoor"],
+      "is_family": false,
+      "confidence": 92,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "tool",
+      "spec_version": "2.1",
+      "id": "tool--e5f6a7b8-c9d0-4e5f-ba3b-4c5d6e7f8a9b",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "name": "ExfilBeacon",
+      "description": "Herramienta personalizada de exfiltración que fragmenta y cifra documentos robados antes de subirlos a repositorios cloud legítimos (OneDrive, Google Drive) usados como proxies de C2.",
+      "tool_types": ["exfiltration"],
+      "confidence": 78,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--f6a7b8c9-d0e1-4f6a-ab4c-5d6e7f8a9b0c",
+      "created": "2024-02-01T12:00:00Z",
+      "modified": "2024-02-01T12:00:00Z",
+      "name": "Dominio C2 NeptuneRAT",
+      "description": "Dominio registrado en proveedor offshore utilizado como servidor de comando y control primario por NeptuneRAT.",
+      "pattern_type": "stix",
+      "pattern": "[domain-name:value = 'secure-updates-cdn.net']",
+      "valid_from": "2024-01-15T00:00:00Z",
+      "confidence": 93,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ],
+      "external_references": [
+        {
+          "source_name": "CTI Unit Analysis",
+          "url": "https://threat-intel.com/ioc/secure-updates-cdn.net"
+        }
+      ]
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--a7b8c9d0-e1f2-4a7b-bc5d-6e7f8a9b0c1d",
+      "created": "2024-02-15T09:30:00Z",
+      "modified": "2024-02-15T09:30:00Z",
+      "name": "IP de C2 ExfilBeacon",
+      "description": "Servidor de exfiltración secundario detectado en correlación con actividad de ExfilBeacon en redes de defensa lituana.",
+      "pattern_type": "stix",
+      "pattern": "[ipv4-addr:value = '203.0.113.212']",
+      "valid_from": "2024-01-20T00:00:00Z",
+      "confidence": 87,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ],
+      "external_references": [
+        {
+          "source_name": "IP Reputation Feed",
+          "url": "https://ip-check.com/203.0.113.212"
+        }
+      ]
+    },
+    {
+      "type": "location",
+      "spec_version": "2.1",
+      "id": "location--b8c9d0e1-f2a3-4b8c-ad6e-7f8a9b0c1d2e",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "name": "Asia Oriental (Origen probable)",
+      "description": "Región de origen atribuida con confianza media según análisis de infraestructura, patrones horarios de actividad y overlaps con campañas previas atribuidas al mismo actor.",
+      "region": "eastern-asia",
+      "latitude": 35.8617,
+      "longitude": 104.1954,
+      "confidence": 72,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "location",
+      "spec_version": "2.1",
+      "id": "location--c9d0e1f2-a3b4-4c9d-be7f-8a9b0c1d2e3f",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "name": "Vilnius, Lituania (Objetivo principal)",
+      "region": "northern-europe",
+      "country": "LT",
+      "latitude": 54.6872,
+      "longitude": 25.2797,
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "identity",
+      "spec_version": "2.1",
+      "id": "identity--d0e1f2a3-b4c5-4d0e-8f8a-9b0c1d2e3f4a",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "name": "Ministerio de Defensa de Lituania",
+      "identity_class": "organization",
+      "sectors": ["government", "defense"],
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "identity",
+      "spec_version": "2.1",
+      "id": "identity--e1f2a3b4-c5d6-4e1f-8a9b-0c1d2e3f4a5b",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "name": "NATO Communications and Information Agency (NCI Agency)",
+      "identity_class": "organization",
+      "sectors": ["government", "defense", "communications"],
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "vulnerability",
+      "spec_version": "2.1",
+      "id": "vulnerability--f2a3b4c5-d6e7-4f2a-9b0c-1d2e3f4a5b6c",
+      "created": "2024-02-20T10:00:00Z",
+      "modified": "2024-02-20T10:00:00Z",
+      "name": "CVE-2024-21626",
+      "description": "Vulnerabilidad de escape de contenedor en runc (CVSS 8.6) explotada por PHOSPHOR Unit para comprometer entornos containerizados en infraestructura de defensa báltica con configuraciones Kubernetes desactualizadas.",
+      "external_references": [
+        {
+          "source_name": "cve",
+          "external_id": "CVE-2024-21626",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-21626"
+        }
+      ],
+      "confidence": 82,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "course-of-action",
+      "spec_version": "2.1",
+      "id": "course-of-action--a3b4c5d6-e7f8-4a3b-ac1d-2e3f4a5b6c7d",
+      "created": "2024-04-21T08:00:00Z",
+      "modified": "2024-04-21T08:00:00Z",
+      "name": "Contención y respuesta — Operación Neptuno",
+      "description": "1) Actualizar runc a versión ≥ 1.1.12 (CVE-2024-21626) en todos los nodos Kubernetes. 2) Bloquear tráfico hacia dominio secure-updates-cdn.net e IP 203.0.113.212 en firewalls perimetrales. 3) Auditar y revocar credenciales VPN y SSO de personal afectado. 4) Aislar y analizar sistemas comprometidos en busca de NeptuneRAT. 5) Activar monitorización avanzada de exfiltración en servicios cloud corporativos. 6) Notificar a CERT-LT y compartir IOCs con MISP de la OTAN.",
+      "confidence": 100,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "note",
+      "spec_version": "2.1",
+      "id": "note--b4c5d6e7-f8a9-4b4c-8d2e-3f4a5b6c7d8e",
+      "created": "2024-04-10T14:00:00Z",
+      "modified": "2024-04-10T14:00:00Z",
+      "abstract": "Análisis de atribución — Operación Neptuno",
+      "content": "Análisis forense y de TTPs confirma con confianza media-alta (80%) la atribución a PHOSPHOR Unit (Iron Tide). Se identificaron overlaps significativos con infraestructura de campañas previas del mismo grupo: reutilización de dominio de staging, certificados TLS con mismo emisor y patrones de horario de actividad consistentes con UTC+8/+9. El uso de NeptuneRAT es coherente con el toolkit documentado de PHOSPHOR. El vector de supply chain apunta a un proveedor de software de gestión de activos utilizado por tres ministerios de defensa bálticos. Se recomienda coordinación urgente con socios OTAN para evaluar el alcance real del compromiso.",
+      "authors": ["Unidad de Análisis CTI — Equipo APT"],
+      "object_refs": ["campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8"],
+      "confidence": 80,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--c5d6e7f8-a9b0-4c5d-9e3f-4a5b6c7d8e9f",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "relationship_type": "attributed-to",
+      "source_ref": "campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8",
+      "target_ref": "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+      "start_time": "2024-01-15T06:00:00Z",
+      "confidence": 80,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--d6e7f8a9-b0c1-4d6e-8f4a-5b6c7d8e9f0a",
+      "created": "2024-01-20T10:00:00Z",
+      "modified": "2024-01-20T10:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8",
+      "target_ref": "attack-pattern--a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d",
+      "start_time": "2024-01-15T06:00:00Z",
+      "confidence": 85,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--e7f8a9b0-c1d2-4e7f-a05b-6c7d8e9f0a1b",
+      "created": "2024-02-10T08:00:00Z",
+      "modified": "2024-02-10T08:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8",
+      "target_ref": "attack-pattern--b2c3d4e5-f6a7-4b5c-9d0e-1f2a3b4c5d6e",
+      "start_time": "2024-02-01T00:00:00Z",
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--f8a9b0c1-d2e3-4f8a-b16c-7d8e9f0a1b2c",
+      "created": "2024-01-25T14:00:00Z",
+      "modified": "2024-01-25T14:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8",
+      "target_ref": "attack-pattern--c3d4e5f6-a7b8-4c5d-9e0f-1a2b3c4d5e6f",
+      "start_time": "2024-01-25T00:00:00Z",
+      "confidence": 88,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--a9b0c1d2-e3f4-4a9b-8e7d-8e9f0a1b2c3d",
+      "created": "2024-02-05T09:00:00Z",
+      "modified": "2024-02-05T09:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8",
+      "target_ref": "malware--d4e5f6a7-b8c9-4d5e-af2a-3b4c5d6e7f8a",
+      "start_time": "2024-02-05T00:00:00Z",
+      "confidence": 92,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--b0c1d2e3-f4a5-4b0c-9e8e-9f0a1b2c3d4e",
+      "created": "2024-02-15T11:00:00Z",
+      "modified": "2024-02-15T11:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8",
+      "target_ref": "tool--e5f6a7b8-c9d0-4e5f-ba3b-4c5d6e7f8a9b",
+      "start_time": "2024-02-15T00:00:00Z",
+      "confidence": 78,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--c1d2e3f4-a5b6-4c1d-af9f-0a1b2c3d4e5f",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "relationship_type": "targets",
+      "source_ref": "campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8",
+      "target_ref": "location--c9d0e1f2-a3b4-4c9d-be7f-8a9b0c1d2e3f",
+      "start_time": "2024-01-15T00:00:00Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--d2e3f4a5-b6c7-4d2e-ba0a-1b2c3d4e5f6a",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "relationship_type": "targets",
+      "source_ref": "campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8",
+      "target_ref": "identity--d0e1f2a3-b4c5-4d0e-8f8a-9b0c1d2e3f4a",
+      "start_time": "2024-01-15T00:00:00Z",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--e3f4a5b6-c7d8-4e3f-8e1b-2c3d4e5f6a7b",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "relationship_type": "targets",
+      "source_ref": "campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8",
+      "target_ref": "identity--e1f2a3b4-c5d6-4e1f-8a9b-0c1d2e3f4a5b",
+      "start_time": "2024-02-01T00:00:00Z",
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--f4a5b6c7-d8e9-4f4a-9f2c-3d4e5f6a7b8c",
+      "created": "2024-02-01T12:00:00Z",
+      "modified": "2024-02-01T12:00:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8",
+      "target_ref": "indicator--f6a7b8c9-d0e1-4f6a-ab4c-5d6e7f8a9b0c",
+      "start_time": "2024-01-15T00:00:00Z",
+      "confidence": 93,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--a5b6c7d8-e9f0-4a5b-a03d-4e5f6a7b8c9d",
+      "created": "2024-02-15T09:30:00Z",
+      "modified": "2024-02-15T09:30:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8",
+      "target_ref": "indicator--a7b8c9d0-e1f2-4a7b-bc5d-6e7f8a9b0c1d",
+      "start_time": "2024-01-20T00:00:00Z",
+      "confidence": 87,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--b6c7d8e9-f0a1-4b6c-b14e-5f6a7b8c9d0e",
+      "created": "2024-02-20T10:00:00Z",
+      "modified": "2024-02-20T10:00:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8",
+      "target_ref": "vulnerability--f2a3b4c5-d6e7-4f2a-9b0c-1d2e3f4a5b6c",
+      "start_time": "2024-01-18T00:00:00Z",
+      "confidence": 82,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--c7d8e9f0-a1b2-4c7d-8e5f-6a7b8c9d0e1f",
+      "created": "2024-04-21T08:00:00Z",
+      "modified": "2024-04-21T08:00:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8",
+      "target_ref": "course-of-action--a3b4c5d6-e7f8-4a3b-ac1d-2e3f4a5b6c7d",
+      "start_time": "2024-04-21T00:00:00Z",
+      "confidence": 100,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--d8e9f0a1-b2c3-4d8e-9f6a-7b8c9d0e1f2a",
+      "created": "2024-04-10T14:00:00Z",
+      "modified": "2024-04-10T14:00:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8",
+      "target_ref": "note--b4c5d6e7-f8a9-4b4c-8d2e-3f4a5b6c7d8e",
+      "confidence": 80,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--e9f0a1b2-c3d4-4e9f-a07b-8c9d0e1f2a3b",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "relationship_type": "originates-from",
+      "source_ref": "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+      "target_ref": "location--b8c9d0e1-f2a3-4b8c-ad6e-7f8a9b0c1d2e",
+      "confidence": 72,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--f0a1b2c3-d4e5-4f0a-b18c-9d0e1f2a3b4c",
+      "created": "2024-02-15T09:30:00Z",
+      "modified": "2024-02-15T09:30:00Z",
+      "relationship_type": "indicates",
+      "source_ref": "indicator--a7b8c9d0-e1f2-4a7b-bc5d-6e7f8a9b0c1d",
+      "target_ref": "malware--d4e5f6a7-b8c9-4d5e-af2a-3b4c5d6e7f8a",
+      "start_time": "2024-01-20T00:00:00Z",
+      "confidence": 87,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--a1b2c3d4-e5f6-4a1b-8e9d-0e1f2a3b4c5d",
+      "created": "2024-02-01T12:00:00Z",
+      "modified": "2024-02-01T12:00:00Z",
+      "relationship_type": "indicates",
+      "source_ref": "indicator--f6a7b8c9-d0e1-4f6a-ab4c-5d6e7f8a9b0c",
+      "target_ref": "malware--d4e5f6a7-b8c9-4d5e-af2a-3b4c5d6e7f8a",
+      "start_time": "2024-01-15T00:00:00Z",
+      "confidence": 93,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--b1c2d3e4-f5a6-4b1c-9f0e-1a2b3c4d5e6f",
+      "created": "2024-02-01T12:00:00Z",
+      "modified": "2024-02-01T12:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+      "target_ref": "attack-pattern--a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d",
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--c2d3e4f5-a6b7-4c2d-a001-2b3c4d5e6f7a",
+      "created": "2024-02-01T12:00:00Z",
+      "modified": "2024-02-01T12:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+      "target_ref": "malware--d4e5f6a7-b8c9-4d5e-af2a-3b4c5d6e7f8a",
+      "confidence": 88,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--d3e4f5a6-b7c8-4d3e-b112-3c4d5e6f7a8b",
+      "created": "2024-02-01T12:00:00Z",
+      "modified": "2024-02-01T12:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+      "target_ref": "tool--e5f6a7b8-c9d0-4e5f-ba3b-4c5d6e7f8a9b",
+      "confidence": 85,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--e4f5a6b7-c8d9-4e4f-c223-4d5e6f7a8b9c",
+      "created": "2024-02-01T12:00:00Z",
+      "modified": "2024-02-01T12:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "malware--d4e5f6a7-b8c9-4d5e-af2a-3b4c5d6e7f8a",
+      "target_ref": "tool--e5f6a7b8-c9d0-4e5f-ba3b-4c5d6e7f8a9b",
+      "confidence": 82,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--f5a6b7c8-d9e0-4f5a-d334-5e6f7a8b9c0d",
+      "created": "2024-02-01T12:00:00Z",
+      "modified": "2024-02-01T12:00:00Z",
+      "relationship_type": "exploits",
+      "source_ref": "malware--d4e5f6a7-b8c9-4d5e-af2a-3b4c5d6e7f8a",
+      "target_ref": "vulnerability--f2a3b4c5-d6e7-4f2a-9b0c-1d2e3f4a5b6c",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--a6b7c8d9-e0f1-4a6b-e445-6f7a8b9c0d1e",
+      "created": "2024-02-01T12:00:00Z",
+      "modified": "2024-02-01T12:00:00Z",
+      "relationship_type": "delivers",
+      "source_ref": "attack-pattern--a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d",
+      "target_ref": "malware--d4e5f6a7-b8c9-4d5e-af2a-3b4c5d6e7f8a",
+      "confidence": 87,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--b7c8d9e0-f1a2-4b7c-f556-7a8b9c0d1e2f",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "threat-actor--b21008d6-ea3d-4c8d-8a56-b928f2ca6b91",
+      "target_ref": "malware--8c9bf7c3-379e-43f1-b844-325cfd7ee608",
+      "confidence": 91,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--c8d9e0f1-a2b3-4c8d-a667-8b9c0d1e2f3a",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "delivers",
+      "source_ref": "attack-pattern--c0c800b6-1200-4ea0-bd6f-e3c321ab9d45",
+      "target_ref": "malware--8c9bf7c3-379e-43f1-b844-325cfd7ee608",
+      "confidence": 84,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--d9e0f1a2-b3c4-4d9e-b778-9c0d1e2f3a4b",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "drops",
+      "source_ref": "malware--8c9bf7c3-379e-43f1-b844-325cfd7ee608",
+      "target_ref": "tool--5e305d2c-80ed-4fb1-ac21-a3b0faaa4b0f",
+      "confidence": 78,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--e0f1a2b3-c4d5-4e0f-c889-0d1e2f3a4b5c",
+      "created": "2023-10-06T10:00:00Z",
+      "modified": "2023-10-06T10:00:00Z",
+      "relationship_type": "exploits",
+      "source_ref": "attack-pattern--7c1c1fce-1052-4752-97ba-efb43c68db28",
+      "target_ref": "vulnerability--c8fe1a2b-3c4d-4e5f-8a9b-0c1d2e3f4a5b",
+      "confidence": 80,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "sighting",
+      "spec_version": "2.1",
+      "id": "sighting--a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      "created": "2024-04-20T08:00:00Z",
+      "modified": "2024-04-20T08:00:00Z",
+      "sighting_of_ref": "malware--d4e5f6a7-b8c9-4d5e-af2a-3b4c5d6e7f8a",
+      "where_sighted_refs": ["identity--d0e1f2a3-b4c5-4d0e-8f8a-9b0c1d2e3f4a"],
+      "count": 4,
+      "first_seen": "2024-03-01T00:00:00Z",
+      "last_seen": "2024-04-10T00:00:00Z",
+      "description": "NeptuneRAT detected on 4 separate occasions within Ministerio de Defensa de Lituania network segments.",
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "sighting",
+      "spec_version": "2.1",
+      "id": "sighting--b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
+      "created": "2024-04-21T10:00:00Z",
+      "modified": "2024-04-21T10:00:00Z",
+      "sighting_of_ref": "campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8",
+      "where_sighted_refs": [
+        "identity--d0e1f2a3-b4c5-4d0e-8f8a-9b0c1d2e3f4a",
+        "identity--e1f2a3b4-c5d6-4e1f-8a9b-0c1d2e3f4a5b"
+      ],
+      "count": 2,
+      "first_seen": "2024-02-15T00:00:00Z",
+      "last_seen": "2024-04-18T00:00:00Z",
+      "description": "Operación Neptuno campaign activities confirmed across two NATO member organization networks.",
+      "confidence": 85,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "sighting",
+      "spec_version": "2.1",
+      "id": "sighting--c3d4e5f6-a7b8-4c9d-ae0f-2a3b4c5d6e7f",
+      "created": "2023-09-15T12:00:00Z",
+      "modified": "2023-09-15T12:00:00Z",
+      "sighting_of_ref": "malware--8c9bf7c3-379e-43f1-b844-325cfd7ee608",
+      "where_sighted_refs": ["identity--10fa3c15-fbf1-4d11-b0e6-ec32be8c5bc1"],
+      "count": 7,
+      "first_seen": "2023-07-01T00:00:00Z",
+      "last_seen": "2023-09-10T00:00:00Z",
+      "description": "IberianStealer identified in 7 separate infection chains targeting Ministerio de Asuntos Exteriores de España.",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "sighting",
+      "spec_version": "2.1",
+      "id": "sighting--d4e5f6a7-b8c9-4d0e-bf1a-3b4c5d6e7f8a",
+      "created": "2023-10-10T09:00:00Z",
+      "modified": "2023-10-10T09:00:00Z",
+      "sighting_of_ref": "incident--02446f25-bd64-44b2-a4f2-938a2024b3ad",
+      "where_sighted_refs": [
+        "identity--10fa3c15-fbf1-4d11-b0e6-ec32be8c5bc1",
+        "identity--99276d1e-2dd2-4b2e-a579-22a8ff246c48"
+      ],
+      "count": 3,
+      "first_seen": "2023-09-01T00:00:00Z",
+      "last_seen": "2023-10-05T00:00:00Z",
+      "description": "Operation confirmed through multiple signals across Spanish government and media sector networks.",
+      "confidence": 88,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "intrusion-set",
+      "spec_version": "2.1",
+      "id": "intrusion-set--fa1b2c3d-4e5f-4fa1-b6c7-d8e9f0a1b2c3",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "name": "Iron Tide APT",
+      "description": "Cluster de actividad persistente avanzada asociado a PHOSPHOR Unit, activo desde al menos 2021 en operaciones de espionaje contra alianzas de defensa occidentales. Conocido por el uso de implantes modulares de largo plazo y técnicas living-off-the-land.",
+      "aliases": ["APT-PHOSPHOR", "Jade Viper Cluster", "Iron Tide"],
+      "first_seen": "2021-03-01T00:00:00Z",
+      "last_seen": "2024-04-20T23:59:59Z",
+      "resource_level": "government",
+      "primary_motivation": "espionage",
+      "confidence": 80,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "attack-pattern",
+      "spec_version": "2.1",
+      "id": "attack-pattern--fb1c2d3e-5f6a-4fb1-c7d8-e9f0a1b2c3d4",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "name": "Strategic Narrative Seeding",
+      "description": "Inyección sistemática de narrativas falsas en canales de información estratégica y medios de comunicación de países bálticos para erosionar la confianza en la OTAN y su capacidad de respuesta, acompañando la campaña de espionaje técnico.",
+      "confidence": 75,
+      "kill_chain_phases": [
+        {
+          "kill_chain_name": "mitre-influence",
+          "phase_name": "establish-legitimacy"
+        }
+      ],
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "attack-pattern",
+      "spec_version": "2.1",
+      "id": "attack-pattern--fc1d2e3f-6a7b-4fc1-d8e9-f0a1b2c3d4e5",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "name": "Perception Management via Social Engineering",
+      "description": "Uso de perfiles sintéticos en redes sociales y foros especializados de defensa para difundir desinformación sobre la capacidad operativa de la OTAN en los países bálticos y generar desconfianza entre aliados.",
+      "confidence": 70,
+      "kill_chain_phases": [
+        {
+          "kill_chain_name": "cognitive-warfare",
+          "phase_name": "influence"
+        }
+      ],
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "note",
+      "spec_version": "2.1",
+      "id": "note--fd1e2f3a-7b8c-4fd1-e9f0-a1b2c3d4e5f6",
+      "created": "2024-04-22T10:00:00Z",
+      "modified": "2024-04-22T10:00:00Z",
+      "abstract": "Perfil cognitivo y evaluación estratégica — PHOSPHOR Unit",
+      "content": "PHOSPHOR Unit combina capacidades técnicas de primera línea (implantes modulares, supply chain compromise) con una capa de operaciones cognitivas orientada a debilitar cohesión política en alianzas objetivo. El patrón de comportamiento sugiere coordinación entre equipos de CNO e InfoOps: la fase de espionaje técnico precede cronológicamente a la amplificación de narrativas de desconfianza. Esta sincronización indica planificación centralizada y recursos de inteligencia estatales. Se recomienda elevar el nivel de vigilancia sobre proveedores de software de gestión de activos en infraestructuras de defensa bálticas y establecer canales de intercambio de inteligencia acelerados con el SOC de la NCI Agency.",
+      "authors": ["Unidad de Análisis CTI — Equipo APT"],
+      "object_refs": ["threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765"],
+      "confidence": 78,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--aa1b2c3d-4e5f-4aa1-b6c7-d8e9f0a1b2c3",
+      "created": "2024-02-10T08:00:00Z",
+      "modified": "2024-02-10T08:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+      "target_ref": "attack-pattern--b2c3d4e5-f6a7-4b5c-9d0e-1f2a3b4c5d6e",
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--ab2c3d4e-5f6a-4ab2-c7d8-e9f0a1b2c3d4",
+      "created": "2024-01-25T14:00:00Z",
+      "modified": "2024-01-25T14:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+      "target_ref": "attack-pattern--c3d4e5f6-a7b8-4c5d-9e0f-1a2b3c4d5e6f",
+      "confidence": 88,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--ac3d4e5f-6a7b-4ac3-d8e9-f0a1b2c3d4e5",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "relationship_type": "targets",
+      "source_ref": "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+      "target_ref": "identity--d0e1f2a3-b4c5-4d0e-8f8a-9b0c1d2e3f4a",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--ad4e5f6a-7b8c-4ad4-e9f0-a1b2c3d4e5f6",
+      "created": "2024-02-01T12:00:00Z",
+      "modified": "2024-02-01T12:00:00Z",
+      "relationship_type": "targets",
+      "source_ref": "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+      "target_ref": "identity--e1f2a3b4-c5d6-4e1f-8a9b-0c1d2e3f4a5b",
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--ae5f6a7b-8c9d-4ae5-f0a1-b2c3d4e5f6a7",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "relationship_type": "targets",
+      "source_ref": "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+      "target_ref": "location--c9d0e1f2-a3b4-4c9d-be7f-8a9b0c1d2e3f",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--af6a7b8c-9d0e-4af6-a1b2-c3d4e5f6a7b8",
+      "created": "2024-02-20T10:00:00Z",
+      "modified": "2024-02-20T10:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+      "target_ref": "vulnerability--f2a3b4c5-d6e7-4f2a-9b0c-1d2e3f4a5b6c",
+      "confidence": 82,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--ba7b8c9d-0e1f-4ba7-b2c3-d4e5f6a7b8c9",
+      "created": "2024-03-10T09:00:00Z",
+      "modified": "2024-03-10T09:00:00Z",
+      "relationship_type": "attributed-to",
+      "source_ref": "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+      "target_ref": "intrusion-set--fa1b2c3d-4e5f-4fa1-b6c7-d8e9f0a1b2c3",
+      "confidence": 80,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--bb8c9d0e-1f2a-4bb8-c3d4-e5f6a7b8c9d0",
+      "created": "2024-03-15T10:00:00Z",
+      "modified": "2024-03-15T10:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+      "target_ref": "attack-pattern--fb1c2d3e-5f6a-4fb1-c7d8-e9f0a1b2c3d4",
+      "confidence": 75,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--bc9d0e1f-2a3b-4bc9-d4e5-f6a7b8c9d0e1",
+      "created": "2024-03-15T10:00:00Z",
+      "modified": "2024-03-15T10:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+      "target_ref": "attack-pattern--fc1d2e3f-6a7b-4fc1-d8e9-f0a1b2c3d4e5",
+      "confidence": 70,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--bd0e1f2a-3b4c-4bd0-e5f6-a7b8c9d0e1f2",
+      "created": "2024-04-22T10:00:00Z",
+      "modified": "2024-04-22T10:00:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+      "target_ref": "note--fd1e2f3a-7b8c-4fd1-e9f0-a1b2c3d4e5f6",
+      "confidence": 78,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "note",
+      "spec_version": "2.1",
+      "id": "note--a1b2c3d4-e5f6-4a1b-b2c3-d4e5f6a7b8c9",
+      "created": "2023-11-20T11:00:00Z",
+      "modified": "2023-11-20T11:00:00Z",
+      "abstract": "Perfil de actor y evaluación de capacidades — Bear Whisperer (APT-Bear)",
+      "content": "Bear Whisperer es un actor de amenazas persistentes avanzadas (APT) de origen ruso con patrocinio estatal documentado, activo al menos desde 2019. Su metodología distingue dos vectores complementarios: operaciones técnicas de red (CNO) orientadas a exfiltración de datos estratégicos e inteligencia de señales, y operaciones de información (InfoOps) destinadas a erosionar la confianza en instituciones y alianzas democráticas occidentales. En la Operación Tormenta Híbrida Ibérica (2023), el actor demostró elevada sofisticación operativa: uso de spearphishing dirigido como vector de acceso inicial, posterior movimiento lateral mediante credenciales robadas, despliegue del implante IberianStealer para exfiltración selectiva de documentación gubernamental clasificada y, en paralelo, una campaña cognitiva con deepfakes de audio y perfiles sintéticos coordinados dirigidos a medios de comunicación nacionales. El nivel de recursos indica infraestructura de inteligencia estatal; se estima coordinación entre equipos CNO e InfoOps con planificación centralizada. Recomendaciones: elevar nivel de alerta en organismos gubernamentales españoles, compartir IOCs con CCN-CERT y ENISA, y establecer monitorización proactiva sobre los TTP documentados (T1566, T1003).",
+      "authors": ["Unidad de Análisis CTI — Equipo APT"],
+      "object_refs": ["threat-actor--b21008d6-ea3d-4c8d-8a56-b928f2ca6b91"],
+      "confidence": 87,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--be1f2a3b-4c5d-4be1-f2a3-b4c5d6e7f8a9",
+      "created": "2023-11-20T11:00:00Z",
+      "modified": "2023-11-20T11:00:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "threat-actor--b21008d6-ea3d-4c8d-8a56-b928f2ca6b91",
+      "target_ref": "note--a1b2c3d4-e5f6-4a1b-b2c3-d4e5f6a7b8c9",
+      "confidence": 87,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "report",
+      "spec_version": "2.1",
+      "id": "report--a2b3c4d5-e6f7-4a2b-9c0d-1e2f3a4b5c6d",
+      "created": "2024-04-15T09:00:00Z",
+      "modified": "2024-04-15T09:00:00Z",
+      "name": "Informe Estratégico: PHOSPHOR Unit — Operación Neptuno",
+      "description": "Análisis estratégico y técnico del grupo de amenaza persistente avanzada PHOSPHOR Unit (Iron Tide APT) y su Operación Neptuno: compromiso de la cadena de suministro de software de gestión de activos utilizado por tres ministerios de defensa bálticos, despliegue de NeptuneRAT y ExfilBeacon para espionaje selectivo, y capa paralela de operaciones cognitivas para erosionar la cohesión política en alianzas OTAN. El informe cubre vectores de ataque, infraestructura de mando y control, TTPs, indicadores de compromiso, atribución con confianza media-alta (80%) y recomendaciones de respuesta urgente coordinada con socios aliados.",
+      "published": "2024-04-15T09:00:00Z",
+      "report_types": ["threat-report", "campaign", "intrusion-set", "malware"],
+      "object_refs": [
+        "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+        "intrusion-set--fa1b2c3d-4e5f-4fa1-b6c7-d8e9f0a1b2c3",
+        "campaign--4e8f1a2b-3c4d-4e6f-b192-a3b4c5d6e7f8",
+        "malware--d4e5f6a7-b8c9-4d5e-af2a-3b4c5d6e7f8a",
+        "malware-analysis--5b4c8901-2345-4bcd-9ef0-bcdef0123456",
+        "tool--e5f6a7b8-c9d0-4e5f-ba3b-4c5d6e7f8a9b",
+        "attack-pattern--a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d",
+        "attack-pattern--b2c3d4e5-f6a7-4b5c-9d0e-1f2a3b4c5d6e",
+        "attack-pattern--c3d4e5f6-a7b8-4c5d-9e0f-1a2b3c4d5e6f",
+        "attack-pattern--fb1c2d3e-5f6a-4fb1-c7d8-e9f0a1b2c3d4",
+        "attack-pattern--fc1d2e3f-6a7b-4fc1-d8e9-f0a1b2c3d4e5",
+        "indicator--f6a7b8c9-d0e1-4f6a-ab4c-5d6e7f8a9b0c",
+        "indicator--a7b8c9d0-e1f2-4a7b-bc5d-6e7f8a9b0c1d",
+        "vulnerability--f2a3b4c5-d6e7-4f2a-9b0c-1d2e3f4a5b6c",
+        "course-of-action--a3b4c5d6-e7f8-4a3b-ac1d-2e3f4a5b6c7d",
+        "identity--d0e1f2a3-b4c5-4d0e-8f8a-9b0c1d2e3f4a",
+        "identity--e1f2a3b4-c5d6-4e1f-8a9b-0c1d2e3f4a5b",
+        "location--b8c9d0e1-f2a3-4b8c-ad6e-7f8a9b0c1d2e",
+        "location--c9d0e1f2-a3b4-4c9d-be7f-8a9b0c1d2e3f",
+        "observed-data--6c5d9012-3456-4cde-af01-cdef01234567",
+        "note--b4c5d6e7-f8a9-4b4c-8d2e-3f4a5b6c7d8e",
+        "note--fd1e2f3a-7b8c-4fd1-e9f0-a1b2c3d4e5f6"
+      ],
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ],
+      "external_references": [
+        {
+          "source_name": "CTI Platform",
+          "description": "Informe estratégico sobre PHOSPHOR Unit — Operación Neptuno",
+          "url": "https://cti-platform.internal/reports/phosphor-neptuno"
+        },
+        {
+          "source_name": "ENISA",
+          "description": "ENISA Threat Landscape 2024 — APT groups targeting NATO infrastructure",
+          "url": "https://www.enisa.europa.eu/publications/enisa-threat-landscape-2024",
+          "external_id": "ETL2024"
+        },
+        {
+          "source_name": "NATO CCDCOE",
+          "description": "NATO Cooperative Cyber Defence Centre of Excellence — Supply Chain Risk Advisory",
+          "url": "https://ccdcoe.org/research/",
+          "external_id": "CCDCOE-SCR-2024"
+        },
+        {
+          "source_name": "NVD",
+          "description": "CVE-2024-21626 — runc container breakout vulnerability exploited in supply chain stage",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-21626",
+          "external_id": "CVE-2024-21626"
+        }
+      ]
+    },
+    {
+      "type": "intrusion-set",
+      "spec_version": "2.1",
+      "id": "intrusion-set--a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "created": "2023-06-01T00:00:00Z",
+      "modified": "2023-10-10T00:00:00Z",
+      "name": "Cozy Cloud",
+      "description": "A sophisticated state-sponsored intrusion set attributed to Russian intelligence, known for long-term persistent access to government and think-tank networks across Europe and North America.",
+      "aliases": ["APT29", "The Dukes", "Midnight Blizzard"],
+      "first_seen": "2014-01-01T00:00:00Z",
+      "last_seen": "2023-10-01T00:00:00Z",
+      "goals": "Intelligence collection, political espionage",
+      "resource_level": "government",
+      "primary_motivation": "espionage",
+      "confidence": 90,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ],
+      "external_references": [
+        {
+          "source_name": "mitre-attack",
+          "url": "https://attack.mitre.org/groups/G0016/",
+          "external_id": "G0016"
+        }
+      ]
+    },
+    {
+      "type": "intrusion-set",
+      "spec_version": "2.1",
+      "id": "intrusion-set--b2c3d4e5-f6a7-8901-bcde-f23456789012",
+      "created": "2023-05-15T00:00:00Z",
+      "modified": "2023-11-01T00:00:00Z",
+      "name": "Fancy Bear",
+      "description": "A Russian military intelligence (GRU) intrusion set with a long track record of targeting political organizations, election systems, and critical infrastructure, often combining cyber operations with influence activities.",
+      "aliases": ["APT28", "Sofacy", "Forest Blizzard"],
+      "first_seen": "2007-01-01T00:00:00Z",
+      "last_seen": "2023-09-15T00:00:00Z",
+      "goals": "Intelligence gathering, destabilization, disinformation support",
+      "resource_level": "government",
+      "primary_motivation": "espionage",
+      "confidence": 95,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ],
+      "external_references": [
+        {
+          "source_name": "mitre-attack",
+          "url": "https://attack.mitre.org/groups/G0007/",
+          "external_id": "G0007"
+        }
+      ]
+    },
+    {
+      "type": "intrusion-set",
+      "spec_version": "2.1",
+      "id": "intrusion-set--c3d4e5f6-a7b8-9012-cdef-345678901234",
+      "created": "2023-07-20T00:00:00Z",
+      "modified": "2023-10-25T00:00:00Z",
+      "name": "Lazarus Group",
+      "description": "A North Korean state-sponsored threat group responsible for financially motivated attacks against financial institutions, cryptocurrency exchanges, and defense contractors worldwide.",
+      "aliases": ["Hidden Cobra", "Zinc", "Sapphire Sleet"],
+      "first_seen": "2009-01-01T00:00:00Z",
+      "last_seen": "2023-10-20T00:00:00Z",
+      "goals": "Financial gain, sanctions evasion, intelligence collection",
+      "resource_level": "government",
+      "primary_motivation": "personal-gain",
+      "confidence": 88,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ],
+      "external_references": [
+        {
+          "source_name": "mitre-attack",
+          "url": "https://attack.mitre.org/groups/G0032/",
+          "external_id": "G0032"
+        }
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--d4e5f6a7-b8c9-0123-def0-456789012345",
+      "created": "2023-10-10T00:00:00Z",
+      "modified": "2023-10-10T00:00:00Z",
+      "relationship_type": "attributed-to",
+      "source_ref": "threat-actor--b21008d6-ea3d-4c8d-8a56-b928f2ca6b91",
+      "target_ref": "intrusion-set--a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "description": "Bear Whisperer is attributed to the Cozy Cloud intrusion set based on TTPs and infrastructure overlap.",
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--e5f6a7b8-c9d0-1234-ef01-567890123456",
+      "created": "2023-10-10T00:00:00Z",
+      "modified": "2023-10-10T00:00:00Z",
+      "relationship_type": "attributed-to",
+      "source_ref": "threat-actor--9d8c7b6a-5f4e-4d2c-8b0a-fedcba098765",
+      "target_ref": "intrusion-set--b2c3d4e5-f6a7-8901-bcde-f23456789012",
+      "description": "Second threat actor attributed to Fancy Bear intrusion set based on shared tooling and command-and-control patterns.",
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--f6a7b8c9-d0e1-2345-f012-678901234567",
+      "created": "2023-10-15T00:00:00Z",
+      "modified": "2023-10-15T00:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "intrusion-set--a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "target_ref": "attack-pattern--c0c800b6-1200-4ea0-bd6f-e3c321ab9d45",
+      "description": "Cozy Cloud intrusion set employs this attack pattern in its persistent espionage operations.",
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--a7b8c9d0-e1f2-3456-0123-789012345678",
+      "created": "2023-10-15T00:00:00Z",
+      "modified": "2023-10-15T00:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "intrusion-set--b2c3d4e5-f6a7-8901-bcde-f23456789012",
+      "target_ref": "attack-pattern--d3023e60-4054-47bd-8656-b09e2cf331b2",
+      "description": "Fancy Bear employs this attack pattern as part of its information operations and espionage campaigns.",
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    }
+  ]
+}

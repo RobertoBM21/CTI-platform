@@ -46,7 +46,9 @@ test-results
 
 # workspace files
 secrets/
-docs/
+images/
+docs/*
+!docs/data-sample.json
 .github/copilot-instructions.md
 .github/instructions/
 
