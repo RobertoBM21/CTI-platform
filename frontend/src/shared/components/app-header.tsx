@@ -17,6 +17,7 @@ import { usePathname } from 'next/navigation';
 
 /** Map URL path segment → display label */
 const SECTION_LABELS: Record<string, string> = {
+    home: 'Home',
     incidents: 'Incidents',
     campaigns: 'Campaigns',
     'threat-actors': 'Threat Actors',

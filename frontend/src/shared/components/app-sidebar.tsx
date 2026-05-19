@@ -3,7 +3,13 @@
 import { cn } from '@/lib/utils';
 import { entityConfig } from '@/shared/components/entity-type-badge';
 import { IngestionPanel } from '@/shared/components/ingestion-panel';
-import { ChevronLeft, ChevronRight, ShieldAlert, Upload } from 'lucide-react';
+import {
+    ChevronLeft,
+    ChevronRight,
+    LayoutDashboard,
+    ShieldAlert,
+    Upload,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -101,9 +107,50 @@ export function AppSidebar() {
 
                 {/* Nav section */}
                 <nav className="space-y-1 p-3">
+                    {/* Home section */}
                     {!collapsed && (
                         <p className="mb-1 px-3 pb-1 text-[0.85rem] font-bold tracking-widest text-white/25 uppercase">
-                            General
+                            Home
+                        </p>
+                    )}
+                    {[
+                        { label: 'Home', href: '/home', icon: LayoutDashboard },
+                    ].map((item) => {
+                        const isActive = pathname.startsWith(item.href);
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                title={collapsed ? item.label : undefined}
+                                className={cn(
+                                    'group flex items-center gap-3 rounded-xl p-3 text-sm font-medium transition-all duration-200',
+                                    isActive
+                                        ? 'bg-primary/10 text-primary'
+                                        : 'text-sidebar-foreground/50 hover:bg-white/5 hover:text-white',
+                                    collapsed && 'justify-center',
+                                )}
+                            >
+                                <item.icon
+                                    className={cn(
+                                        'size-5 shrink-0',
+                                        isActive
+                                            ? 'text-primary'
+                                            : 'text-sidebar-foreground/50 group-hover:text-white',
+                                    )}
+                                />
+                                {!collapsed && <span>{item.label}</span>}
+                                {isActive && !collapsed && (
+                                    <span className="bg-primary ml-auto size-1.5 rounded-full" />
+                                )}
+                            </Link>
+                        );
+                    })}
+
+                    <div className="my-2 border-t border-white/10" />
+
+                    {!collapsed && (
+                        <p className="mb-1 px-3 pb-1 text-[0.85rem] font-bold tracking-widest text-white/25 uppercase">
+                            Details
                         </p>
                     )}
                     {generalNavItems.map((item) => {

@@ -6,9 +6,9 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('Home page', () => {
-    it('redirects to /incidents', async () => {
+    it('redirects to /home', async () => {
         const { default: Home } = await import('@/app/page');
         Home();
-        expect(redirect).toHaveBeenCalledWith('/incidents');
+        expect(redirect).toHaveBeenCalledWith('/home');
     });
 });
