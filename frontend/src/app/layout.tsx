@@ -1,7 +1,5 @@
-import { PageTitleProvider } from '@/providers/page-title-context';
+import { AuthProvider } from '@/providers/auth-context';
 import { QueryProvider } from '@/providers/query-provider';
-import { AppHeader } from '@/shared/components/app-header';
-import { AppSidebar } from '@/shared/components/app-sidebar';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
@@ -41,17 +39,7 @@ export default function RootLayout({
             </head>
             <body className="selection:bg-primary/20 antialiased">
                 <QueryProvider>
-                    <PageTitleProvider>
-                        <div className="bg-background text-foreground flex h-screen overflow-hidden">
-                            <AppSidebar />
-                            <div className="flex flex-1 flex-col overflow-hidden">
-                                <AppHeader />
-                                <main className="flex-1 overflow-y-auto">
-                                    {children}
-                                </main>
-                            </div>
-                        </div>
-                    </PageTitleProvider>
+                    <AuthProvider>{children}</AuthProvider>
                 </QueryProvider>
             </body>
         </html>

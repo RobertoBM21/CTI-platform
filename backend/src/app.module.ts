@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import appConfig from './config/app.config';
+import authConfig from './config/auth.config';
 import databaseConfig from './config/database.config';
+import { AuthModule } from './contexts/auth/infrastructure/auth.module';
 import { CyberModule } from './contexts/cyber/infrastructure/cyber.module';
 import { ReportingModule } from './contexts/reporting/infrastructure/reporting.module';
 import { BundleIngestionService } from './contexts/shared/application/services/bundle-ingestion.service';
@@ -16,7 +18,7 @@ import { ThreatModule } from './contexts/threat/infrastructure/threat.module';
         ConfigModule.forRoot({
             isGlobal: true,
             envFilePath: '../.env',
-            load: [appConfig, databaseConfig],
+            load: [appConfig, authConfig, databaseConfig],
         }),
 
         MongooseModule.forRootAsync({
@@ -30,6 +32,7 @@ import { ThreatModule } from './contexts/threat/infrastructure/threat.module';
         }),
 
         SharedModule,
+        AuthModule,
         ThreatModule,
         CyberModule,
         ReportingModule,

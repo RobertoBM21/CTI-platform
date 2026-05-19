@@ -30,8 +30,8 @@ Desarrollar una plataforma mantenible y testeable para gestionar inteligencia de
 
 En esta fase:
 
-- No se implementa autenticación.
 - El foco funcional está en los contextos `Threat` y `Cyber` (SDOs técnicos STIX 2.1).
+- Autenticación completa: registro/login local con JWT y login con Google OAuth2.
 - Se prioriza una arquitectura clara y desacoplada entre dominio y adaptadores.
 - Backend y frontend operan como aplicaciones separadas en un monorepo pnpm.
 
@@ -96,18 +96,22 @@ flowchart LR
 - Contexto `Cyber` completo: 12 SDOs técnicos STIX 2.1 (`Malware`, `Tool`, `Vulnerability`, `InfrastructureEntity`, `IntrusionSet`, `Identity`, `Location`, `CourseOfAction`, `Note`, `Opinion`, `MalwareAnalysis`, `ObservedData`), persistencia completa, servicios read-only, registrados en `StixRefResolver` y `BundleIngestionService`.
 - Detalle enriquecido (`EnrichedDetail<T>`): objetos relacionados resueltos cross-context + sightings. `DetailEnricher` incluye una segunda pasada para devolver también las relaciones entre nodos periféricos (no solo las del centro).
 - `POST /ingestion/bundles`: ingesta manual de bundles STIX 2.1 con soporte de 21 tipos, idempotente por `domainId`.
+- Contexto `Auth` completo: `POST /auth/register`, `POST /auth/login` (Passport local + JWT), `GET /auth/google` + `GET /auth/google/callback` (OAuth2), `GET /auth/me`, `POST /auth/logout`. Bcryptjs 12 rounds. `JwtAuthGuard` protege `POST /ingestion/bundles`.
 - Suite de tests unitarios de dominio + application + repositorios + e2e en verde.
 
 ### Frontend
 
 - Identidad visual: IBM Plex Sans/Mono + paleta corporativa (`#CF4931` primary, `#EDE9E3` bg, `#092028` sidebar) mapeada a tokens shadcn/ui. Tema claro/oscuro.
 - TanStack Query + API client base con tipado de respuestas paginadas.
-- Feature `incidents/`: catálogo paginado + vista detalle completa con 5 tabs (Executive Summary, Network Analysis, Artifacts & IOCs, Map, Audit & Timeline). Conectado al backend real.
-- Feature `campaigns/`: catálogo paginado + vista detalle con las mismas 5 tabs. Conectado al backend real.
-- Feature `threat-actors/`: catálogo paginado + vista detalle con 4 tabs (Actor Overview, Cyber, Info-Ops, Hybrid Graph). Conectado al backend real. Grafo híbrido con 3 clusters por dominio (Cyber, Threat, Info) usando d3-force `forceX`/`forceY`.
-- Capa `shared/` con componentes, tabs, utilidades y tipos reutilizables por todos los features: `EntityCatalog`, `EntityCard`, `EntityListRow`, `DetailPageHeader`, `EntityInfoCard`, `NetworkGraphTab` (d3-force + ReactFlow), `ExecutiveSummaryTab`, `ArtifactsTab`, `MapTab` (MapLibre + react-map-gl), `TimelineTab`, `DetailSidePanel`, `SectionTitle`, `SectionCard`, `ObservationWindow`, `SightingCount`, `EmptyState`, `TlpBadge`, `ConfidenceBadge`, `CatalogFiltersPanel`, estados de carga/error, etc.
-- `NetworkGraphTab`: layout de fuerzas d3-force, aristas con estilos por `relationshipType`, deduplicación de nodos, card unificada lista + grafo con separador vertical, panel lateral `DetailSidePanel`.
-- Tests E2E Playwright para incidentes y campañas (catálogo + detalle completo sobre datos reales de BD).
+- Feature `incidents/`: catálogo paginado + vista detalle con 5 tabs (Executive Summary, Network Analysis, Artifacts & IOCs, Map, Audit & Timeline). Exportación JSON y PDF. Conectado al backend real.
+- Feature `campaigns/`: catálogo paginado + vista detalle con 5 tabs. Exportación JSON y PDF. Conectado al backend real.
+- Feature `threat-actors/`: catálogo paginado + vista detalle con 4 tabs (Actor Overview, Cyber, Info-Ops, Hybrid Graph). Exportación JSON y PDF. Grafo híbrido con 3 clusters d3-force. Conectado al backend real.
+- Feature `reports/`: catálogo paginado + vista detalle con 7 tabs (Datos, Resumen, Actores, Mapa, Targets, Artefactos, Grafo). Exportación JSON y PDF.
+- Feature `threat-domain/`: vista unificada con pestañas All / Incidents / Campaigns / Threat Actors / Attack Patterns. Filtro cruzado por ATT&CK e Intrusion Set.
+- Feature `ingestion/`: panel lateral (Sheet) para ingestar bundles STIX 2.1 desde la UI. Requiere sesión activa.
+- Autenticación completa: páginas `/login` y `/register` en route group `(public)/`, middleware de protección de rutas, Route Handlers BFF en `/api/auth/` (login, register, logout, me, google, callback), cookie httpOnly `auth_token`. Dropdown de usuario en `AppHeader`.
+- Capa `shared/` con componentes, tabs, utilidades y tipos reutilizables: `EntityCatalog`, `EntityCard`, `EntityListRow`, `DetailPageHeader`, `EntityInfoCard`, `NetworkGraphTab` (d3-force + ReactFlow), `ExecutiveSummaryTab`, `ArtifactsTab`, `MapTab` (MapLibre + react-map-gl), `TimelineTab`, `DetailSidePanel`, `SectionTitle`, `SectionCard`, `ObservationWindow`, `SightingCount`, `EmptyState`, `TlpBadge`, `ConfidenceBadge`, `CatalogFiltersPanel`, estados de carga/error, etc.
+- Tests E2E Playwright para todos los features (catálogo + detalle sobre datos reales). Suite de autenticación (login, register, logout).
 - Dockerfile multi-stage (development + production con standalone output).
 
 ---
@@ -166,6 +170,16 @@ backend/src/
             domain/                              # SDOs técnicos STIX 2.1, VOs y puertos
             application/services/                # Servicios read-only (findById por entidad)
             infrastructure/persistence/          # Schemas Mongoose + repositorios
+
+        auth/
+            domain/entities/                     # User entity
+            application/dtos/                    # LoginDto, RegisterDto
+            application/services/                # AuthService, UserService
+            infrastructure/controllers/          # AuthController
+            infrastructure/persistence/          # UserDocument schema + UserMongooseRepository
+            infrastructure/guards/               # JwtAuthGuard, LocalAuthGuard
+            infrastructure/strategies/           # JwtStrategy, LocalStrategy, GoogleStrategy
+            infrastructure/auth.module.ts
 ```
 
 ### Frontend
@@ -175,23 +189,39 @@ frontend/src/
     app/
         layout.tsx                               # Layout raíz con providers, fuentes, metadata
         globals.css                              # Tema + tokens shadcn/ui (OKLCH)
-        incidents/                               # Catálogo y detalle de incidentes
-        campaigns/                               # Catálogo y detalle de campañas
-        threat-actors/                           # Catálogo y detalle de actores de amenaza
+        (authenticated)/                         # Route group con layout completo (sidebar + header)
+            layout.tsx
+            page.tsx                             # Home / Dashboard
+            incidents/                           # Catálogo y detalle de incidentes
+            campaigns/                           # Catálogo y detalle de campañas
+            threat-actors/                       # Catálogo y detalle de actores de amenaza
+            reports/                             # Catálogo y detalle de informes
+            threat-domain/                       # Vista unificada con pestañas por tipo
+        (public)/                                # Route group sin sidebar (login, registro)
+            login/
+            register/
+        api/auth/                                # Route Handlers BFF (login, register, logout, me, google, callback)
+        api/ingestion/                           # Route Handler proxy para ingesta protegida
     components/ui/                               # Componentes shadcn/ui (autogenerados)
     features/
         incidents/                               # API hooks, tipos y componentes de incidentes
         campaigns/                               # API hooks, tipos y componentes de campañas
         threat-actors/                           # API hooks, tipos y componentes de actores
+        reports/                                 # API hooks, tipos y componentes de informes
+        ingestion/                               # Sheet de ingesta de bundles STIX
+        auth/                                    # API adapters, hooks (use-login, use-logout, use-register), login-form
+        threat-domain/                           # Vista unificada con pestañas por tipo de entidad
     shared/
-        components/                              # Componentes reutilizables (EntityCatalog, tabs, DetailPageHeader, badges, estados…)
+        components/                              # Componentes reutilizables (EntityCatalog, tabs, DetailPageHeader, badges, estados, AppSidebar, AppHeader…)
         components/tabs/                         # Tabs compartidas (ExecutiveSummary, NetworkGraph, Artifacts, Map, Timeline)
-        hooks/                                   # Hooks transversales (useTheme…)
-        lib/                                     # stix.ts (getStixType, getStixConfig, formatDate…)
+        hooks/                                   # Hooks transversales (useTheme, useDetailTab, useEntityPageTitle)
+        lib/                                     # stix.ts, export-utils.ts (exportToJson, exportToPdf)
         types/                                   # entity.ts (EntityBase, EntityDetail<T>, SightingItem…)
     providers/
         query-provider.tsx                       # TanStack Query provider
         page-title-context.tsx                   # Contexto de título de página
+        auth-context.tsx                         # AuthProvider, useAuth()
+    middleware.ts                                # Protección de rutas autenticadas
 ```
 
 ---
@@ -202,15 +232,19 @@ Usa `.env` en la raíz del repositorio como fuente única de configuración. Tom
 
 Las variables se consumen mediante configuración tipada con espacios de nombres (`app.*`, `database.*`) — evita acceder a variables sueltas del entorno y facilita escalar la configuración.
 
-| Variable             | Descripción                                        | Default |
-| -------------------- | -------------------------------------------------- | ------- |
-| `PORT`               | Puerto del backend                                 | `3000`  |
-| `NODE_ENV`           | Entorno de ejecución                               | —       |
-| `CORS_ORIGIN`        | Origen permitido para CORS                         | —       |
-| `MONGODB_URI`        | URI de MongoDB para ejecución local                | —       |
-| `API_URL`            | URL del backend para el proxy del frontend (local) | —       |
-| `MONGODB_URI_DOCKER` | URI de MongoDB con hostname Docker (`mongo`)       | —       |
-| `API_URL_DOCKER`     | URL del backend con hostname Docker (`backend`)    | —       |
+| Variable               | Descripción                                        | Default |
+| ---------------------- | -------------------------------------------------- | ------- |
+| `PORT`                 | Puerto del backend                                 | `3000`  |
+| `NODE_ENV`             | Entorno de ejecución                               | —       |
+| `CORS_ORIGIN`          | Origen permitido para CORS                         | —       |
+| `MONGODB_URI`          | URI de MongoDB para ejecución local                | —       |
+| `API_URL`              | URL del backend para el proxy del frontend (local) | —       |
+| `MONGODB_URI_DOCKER`   | URI de MongoDB con hostname Docker (`mongo`)       | —       |
+| `API_URL_DOCKER`       | URL del backend con hostname Docker (`backend`)    | —       |
+| `JWT_SECRET`           | Secreto de firma para tokens JWT                   | —       |
+| `JWT_EXPIRES_IN`       | Duración del token JWT                             | `7d`    |
+| `GOOGLE_CLIENT_ID`     | Client ID de OAuth2 Google                         | —       |
+| `GOOGLE_CLIENT_SECRET` | Client Secret de OAuth2 Google                     | —       |
 
 ---
 
@@ -300,15 +334,22 @@ pnpm frontend:dev                                  # Frontend en :3001
 docker compose -f docker-compose.yml up --build
 ```
 
-### 2. Ingestar un bundle de datos de prueba
+### 2. Crear una cuenta y autenticarse
 
-```bash
-curl -X POST http://localhost:3000/ingestion/bundles \
-  -H "Content-Type: application/json" \
-  -d data.json
-```
+Navega a `http://localhost:3001/register` para crear una cuenta con email, contraseña y nombre.
 
-La respuesta incluye un resumen `{ total, processed, skipped, failed }`. Los objetos `marking-definition` y `report` se cuentan como `skipped` (no implementados en backend todavía); el resto se procesa.
+Una vez autenticado, usa el panel **Ingest Bundle** en la barra lateral para cargar el archivo `docs/data-sample.json`.
+
+> Alternativamente, con un token Bearer obtenido de `POST /auth/login`:
+>
+> ```bash
+> curl -X POST http://localhost:3000/ingestion/bundles \
+>   -H "Content-Type: application/json" \
+>   -H "Authorization: Bearer <token>" \
+>   --data-binary @docs/data-sample.json
+> ```
+
+La respuesta incluye un resumen `{ total, processed, skipped, failed }`. Solo `marking-definition` se cuenta como `skipped`; el resto se procesa. La ingesta es **idempotente**.
 
 ### 3. Navegar la aplicación
 
@@ -360,6 +401,35 @@ Carga manualmente un bundle STIX 2.1 completo.
   | Cyber   | `malware`, `tool`, `vulnerability`, `infrastructure`, `intrusion-set`, `identity`, `location`, `course-of-action`, `note`, `opinion`, `malware-analysis`, `observed-data` |
   | Shared  | `relationship`, `sighting`                                                                                                                                                |
 
-- Los tipos no soportados (`marking-definition`, `report`, …) se ignoran sin abortar la ingesta (`skipped`).
+- Los tipos no soportados (`marking-definition`, …) se ignoran sin abortar la ingesta (`skipped`).
 - Cada objeto se persiste con semántica de **upsert idempotente** por `domainId`: si ya existe, se actualizan los campos mutables y se preserva el `createdAt` original del bundle STIX.
 - La respuesta devuelve `{ total, processed, skipped, failed }`.
+- El endpoint está protegido con `JwtAuthGuard`. Es necesario incluir el header `Authorization: Bearer <token>`.
+
+---
+
+## Tests
+
+### Backend
+
+```bash
+pnpm backend:test          # tests unitarios (Jest + SWC)
+pnpm backend:test:e2e      # tests e2e (mongodb-memory-server, Supertest)
+```
+
+Suite completa en verde: tests unitarios de dominio, application, repositorios y tests e2e de los endpoints HTTP.
+
+### Frontend
+
+```bash
+pnpm frontend:test         # tests unitarios (Vitest + React Testing Library)
+pnpm frontend:test:e2e     # tests Playwright E2E
+```
+
+Los tests E2E requieren que backend y frontend estén activos. El `globalSetup` de Playwright:
+
+1. Registra el usuario de prueba `e2e@cti-platform.test`.
+2. Ingesta el bundle de `docs/data-sample.json` (autenticado con JWT).
+3. Guarda el estado de autenticación en `e2e/.auth/state.json` para que todos los tests arranquen con sesión iniciada.
+
+Specs E2E disponibles: `home`, `incidents`, `campaigns`, `threat-actors`, `reports`, `threat-domain`, `auth`.

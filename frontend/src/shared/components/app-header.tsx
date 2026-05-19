@@ -1,8 +1,17 @@
 'use client';
 
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useLogout } from '@/features/auth/hooks/use-logout';
+import { useAuth } from '@/providers/auth-context';
 import { usePageTitle } from '@/providers/page-title-context';
 import { ThemeToggle } from '@/shared/components/theme-toggle';
-import { User } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -18,6 +27,8 @@ const SECTION_LABELS: Record<string, string> = {
 export function AppHeader() {
     const pathname = usePathname();
     const { pageTitle } = usePageTitle();
+    const { user } = useAuth();
+    const { mutate: logout, isPending: isLoggingOut } = useLogout();
 
     const segments = pathname.split('/').filter(Boolean);
 
@@ -67,9 +78,33 @@ export function AppHeader() {
             </nav>
             <div className="flex shrink-0 items-center gap-4">
                 <ThemeToggle />
-                <div className="border-foreground/10 bg-card text-foreground/70 flex size-9 items-center justify-center rounded-full border shadow-sm">
-                    <User className="size-4" />
-                </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger className="border-foreground/10 bg-card text-foreground/70 hover:text-foreground flex size-9 cursor-pointer items-center justify-center rounded-full border shadow-sm transition-colors">
+                        <User className="size-4" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                        align="end"
+                        className="w-auto min-w-40"
+                    >
+                        {user && (
+                            <>
+                                <div className="px-1.5 py-2 text-sm font-medium whitespace-nowrap">
+                                    {user.name}
+                                </div>
+                                <DropdownMenuSeparator />
+                            </>
+                        )}
+                        <DropdownMenuItem
+                            onClick={() => logout()}
+                            disabled={isLoggingOut}
+                            variant="destructive"
+                            className="cursor-pointer gap-2"
+                        >
+                            <LogOut className="size-4" />
+                            Sign out
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </header>
     );

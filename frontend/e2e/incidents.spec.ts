@@ -201,4 +201,26 @@ test.describe('Incident detail page', () => {
         await page.getByRole('link', { name: /back/i }).click();
         await expect(page).toHaveURL(/\/incidents(\?.*)?$/);
     });
+
+    // ──  Export ─────────────────────────────────────────────
+
+    test('Export button is visible in detail header', async ({ page }) => {
+        await expect(page.getByRole('button', { name: /export/i })).toBeVisible(
+            { timeout: 5_000 },
+        );
+    });
+
+    test('Export dropdown shows PDF and JSON options', async ({ page }) => {
+        await page.getByRole('button', { name: /export/i }).click();
+        await expect(
+            page
+                .getByRole('menuitem', { name: /json/i })
+                .or(page.getByText(/export json/i)),
+        ).toBeVisible({ timeout: 5_000 });
+        await expect(
+            page
+                .getByRole('menuitem', { name: /pdf/i })
+                .or(page.getByText(/export pdf/i)),
+        ).toBeVisible({ timeout: 5_000 });
+    });
 });
