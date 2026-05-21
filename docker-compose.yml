@@ -5,17 +5,17 @@ services:
       dockerfile: backend/Dockerfile
       target: production
     ports:
-      - "${PORT}:${PORT}"
+      - "${PORT:-3000}:${PORT:-3000}"
     environment:
-      - PORT=${PORT}
+      - PORT=${PORT:-3000}
       - NODE_ENV=production
-      - CORS_ORIGIN=${CORS_ORIGIN}
-      - MONGODB_URI=${MONGODB_URI_DOCKER}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3001}
+      - MONGODB_URI=${MONGODB_URI_DOCKER:-mongodb://mongo:27017/cti-platform}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-7d}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:?GOOGLE_CLIENT_ID is required}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:?GOOGLE_CLIENT_SECRET is required}
+      - GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL:?GOOGLE_CALLBACK_URL is required}
     depends_on:
       mongo:
         condition: service_healthy
@@ -27,12 +27,12 @@ services:
       dockerfile: frontend/Dockerfile
       target: production
       args:
-        - API_URL=${API_URL_DOCKER}
+        - API_URL=${API_URL_DOCKER:-http://backend:3000}
     ports:
       - "3001:3000"
     environment:
       - NODE_ENV=production
-      - API_URL=${API_URL_DOCKER}
+      - API_URL=${API_URL_DOCKER:-http://backend:3000}
     depends_on:
       - backend
     restart: unless-stopped

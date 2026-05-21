@@ -189,7 +189,9 @@ export function useAttackPatternsTab({
 export function useIntrusionSetsDropdown() {
     return useQuery({
         queryKey: ['intrusion-sets', 'dropdown'],
-        queryFn: () => fetchIntrusionSets({ page: 1, limit: 500 }),
+        queryFn: () =>
+            // Backend pagination DTO enforces limit <= 100.
+            fetchIntrusionSets({ page: 1, limit: 100 }),
         staleTime: 5 * 60 * 1000,
     });
 }

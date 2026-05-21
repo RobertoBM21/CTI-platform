@@ -2,12 +2,11 @@
 
 import { Button } from '@/components/ui/button';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { CatalogFiltersPanel } from '@/shared/components/catalog-filters-panel';
 import { EntityCard } from '@/shared/components/entity-card';
@@ -34,7 +33,7 @@ import {
     getCoreRowModel,
     useReactTable,
 } from '@tanstack/react-table';
-import { Crosshair, X } from 'lucide-react';
+import { ChevronDown, Crosshair, X } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import {
@@ -733,34 +732,64 @@ function IntrusionSetSection({
     value,
     onChange,
 }: IntrusionSetSectionProps) {
+    const selectedIntrusionSetName = intrusionSets.find(
+        (intrusionSet) => intrusionSet.id === value,
+    )?.name;
+
+    const triggerLabel =
+        intrusionSets.length === 0
+            ? 'No intrusion sets available'
+            : (selectedIntrusionSetName ?? 'Choose an intrusion set');
+
+    const hasSelection = Boolean(selectedIntrusionSetName);
+
     return (
         <div>
             <p className="text-foreground mb-3 text-sm font-bold">
                 Intrusion Set
             </p>
-            <Select
-                value={value ?? ''}
-                onValueChange={(v) => onChange(v || undefined)}
-                disabled={intrusionSets.length === 0}
-            >
-                <SelectTrigger className="w-full">
-                    <SelectValue
-                        placeholder={
-                            intrusionSets.length === 0
-                                ? 'No intrusion sets available'
-                                : 'All intrusion sets'
-                        }
-                    />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="">All intrusion sets</SelectItem>
-                    {intrusionSets.map((is) => (
-                        <SelectItem key={is.id} value={is.id}>
-                            {is.name}
-                        </SelectItem>
+            <DropdownMenu>
+                <DropdownMenuTrigger
+                    disabled={intrusionSets.length === 0}
+                    className={cn(
+                        'text-foreground/80 hover:text-foreground bg-secondary hover:bg-secondary/80 inline-flex h-9 w-full items-center justify-between gap-1.5 rounded-md border border-transparent px-3 text-sm font-medium transition-colors',
+                        'disabled:pointer-events-none disabled:opacity-50',
+                    )}
+                >
+                    <span
+                        className={cn(
+                            'truncate',
+                            intrusionSets.length > 0 &&
+                                !hasSelection &&
+                                'text-muted-foreground',
+                        )}
+                    >
+                        {triggerLabel}
+                    </span>
+                    <ChevronDown className="text-muted-foreground size-3.5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="max-h-64">
+                    {intrusionSets.map((intrusionSet) => (
+                        <DropdownMenuItem
+                            key={intrusionSet.id}
+                            onClick={() =>
+                                onChange(
+                                    value === intrusionSet.id
+                                        ? undefined
+                                        : intrusionSet.id,
+                                )
+                            }
+                            className={
+                                value === intrusionSet.id
+                                    ? 'bg-accent text-accent-foreground'
+                                    : undefined
+                            }
+                        >
+                            {intrusionSet.name}
+                        </DropdownMenuItem>
                     ))}
-                </SelectContent>
-            </Select>
+                </DropdownMenuContent>
+            </DropdownMenu>
         </div>
     );
 }
