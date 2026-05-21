@@ -11,7 +11,7 @@ export default function AuthenticatedLayout({
         <PageTitleProvider>
             <div className="bg-background text-foreground flex h-screen overflow-hidden">
                 <AppSidebar />
-                <div className="flex flex-1 flex-col overflow-hidden">
+                <div className="relative z-10 flex flex-1 flex-col overflow-hidden">
                     <AppHeader />
                     <main className="flex-1 overflow-y-auto">{children}</main>
                 </div>

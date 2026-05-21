@@ -164,6 +164,19 @@ describe('Reports API (e2e)', () => {
             .expect(400);
     });
 
+    it('GET /reports should validate invalid sort order', () => {
+        return request(app.getHttpServer())
+            .get('/reports?sortOrder=invalid')
+            .expect(400);
+    });
+
+    it('GET /reports should validate pagination bounds', async () => {
+        await request(app.getHttpServer()).get('/reports?page=0').expect(400);
+        await request(app.getHttpServer())
+            .get('/reports?limit=101')
+            .expect(400);
+    });
+
     it('GET /reports/:id should return enriched report detail', () => {
         return request(app.getHttpServer())
             .get('/reports/report--rep-e2e-1')

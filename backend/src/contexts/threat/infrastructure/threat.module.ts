@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CyberModule } from '../../cyber/infrastructure/cyber.module';
 import { SharedModule } from '../../shared/infrastructure/shared.module';
@@ -46,7 +46,7 @@ import {
 @Module({
     imports: [
         SharedModule,
-        CyberModule,
+        forwardRef(() => CyberModule),
         MongooseModule.forFeature([
             { name: ThreatActorDocument.name, schema: ThreatActorSchema },
             { name: CampaignDocument.name, schema: CampaignSchema },

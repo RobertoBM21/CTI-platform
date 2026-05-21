@@ -11,7 +11,17 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+    ApiBadRequestResponse,
+    ApiBearerAuth,
+    ApiConflictResponse,
+    ApiCreatedResponse,
+    ApiFoundResponse,
+    ApiOkResponse,
+    ApiOperation,
+    ApiTags,
+    ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { RegisterDto } from '../../application/dtos/register.dto';
 import { AuthService } from '../../application/services/auth.service';
@@ -45,7 +55,25 @@ export class AuthController {
 
     @Post('register')
     @ApiOperation({ summary: 'Register a new user' })
-    @ApiOkResponse({ description: 'User registered' })
+    @ApiCreatedResponse({
+        description: 'User registered',
+        schema: {
+            type: 'object',
+            properties: {
+                accessToken: { type: 'string' },
+                user: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string' },
+                        email: { type: 'string', format: 'email' },
+                        name: { type: 'string' },
+                    },
+                },
+            },
+        },
+    })
+    @ApiBadRequestResponse({ description: 'Invalid registration payload' })
+    @ApiConflictResponse({ description: 'Email already registered' })
     async register(
         @Body() dto: RegisterDto,
         @Res({ passthrough: true }) res: Response,
@@ -65,7 +93,24 @@ export class AuthController {
     @UseGuards(LocalAuthGuard)
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Login with email and password' })
-    @ApiOkResponse({ description: 'Returns user info; sets auth_token cookie' })
+    @ApiOkResponse({
+        description: 'Returns user info and sets auth_token cookie',
+        schema: {
+            type: 'object',
+            properties: {
+                accessToken: { type: 'string' },
+                user: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string' },
+                        email: { type: 'string', format: 'email' },
+                        name: { type: 'string' },
+                    },
+                },
+            },
+        },
+    })
+    @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
     login(
         @Req() req: Request & { user: User },
         @Res({ passthrough: true }) res: Response,
@@ -78,7 +123,15 @@ export class AuthController {
     @Post('logout')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Logout — clears auth cookie' })
-    @ApiOkResponse({ description: 'Cookie cleared' })
+    @ApiOkResponse({
+        description: 'Cookie cleared',
+        schema: {
+            type: 'object',
+            properties: {
+                ok: { type: 'boolean', example: true },
+            },
+        },
+    })
     logout(@Res({ passthrough: true }) res: Response) {
         res.clearCookie(AUTH_COOKIE, { path: '/' });
         return { ok: true };
@@ -86,8 +139,20 @@ export class AuthController {
 
     @Get('me')
     @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth('bearer')
     @ApiOperation({ summary: 'Get current authenticated user' })
-    @ApiOkResponse({ description: 'Returns authenticated user info' })
+    @ApiOkResponse({
+        description: 'Returns authenticated user info',
+        schema: {
+            type: 'object',
+            properties: {
+                id: { type: 'string' },
+                email: { type: 'string', format: 'email' },
+                name: { type: 'string' },
+            },
+        },
+    })
+    @ApiUnauthorizedResponse({ description: 'Missing or invalid credentials' })
     me(@Req() req: Request & { user: User }) {
         const { id, email, name } = req.user;
         return { id, email, name };
@@ -96,14 +161,16 @@ export class AuthController {
     @Get('google')
     @UseGuards(GoogleAuthGuard)
     @ApiOperation({ summary: 'Initiate Google OAuth2 login' })
-    @ApiOkResponse({ description: 'Redirects to Google OAuth2' })
+    @ApiFoundResponse({ description: 'Redirects to Google OAuth2' })
+    @ApiUnauthorizedResponse({ description: 'Google authentication failed' })
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     googleAuth() {}
 
     @Get('google/callback')
     @UseGuards(GoogleAuthGuard)
     @ApiOperation({ summary: 'Google OAuth2 callback' })
-    @ApiOkResponse({ description: 'Redirects to frontend with JWT token' })
+    @ApiFoundResponse({ description: 'Redirects to frontend with JWT token' })
+    @ApiUnauthorizedResponse({ description: 'Google authentication failed' })
     googleCallback(@Req() req: Request & { user: User }, @Res() res: Response) {
         const result = this.authService.buildTokenResponse(req.user);
         const frontendUrl = this.configService.get<string>(

@@ -12,6 +12,7 @@ import { ExecutiveSummaryTab } from '@/shared/components/tabs/executive-summary-
 import { MapTab } from '@/shared/components/tabs/map-tab';
 import { NetworkGraphTab } from '@/shared/components/tabs/network-graph-tab';
 import { TimelineTab } from '@/shared/components/tabs/timeline-tab';
+import { useDetailNavigationContext } from '@/shared/hooks/use-detail-navigation-context';
 import { useDetailTab } from '@/shared/hooks/use-detail-tab';
 import { useEntityPageTitle } from '@/shared/hooks/use-entity-page-title';
 import {
@@ -44,6 +45,7 @@ interface IncidentDetailPageProps {
 export function IncidentDetailPage({ id }: IncidentDetailPageProps) {
     const [activeTab, setActiveTab] = useDetailTab(TABS);
     const { data, isLoading, isError } = useIncidentDetail(id);
+    const { backPath } = useDetailNavigationContext('/incidents');
     useEntityPageTitle(data?.entity?.name);
 
     async function handleExportPdf() {
@@ -92,7 +94,7 @@ export function IncidentDetailPage({ id }: IncidentDetailPageProps) {
         return (
             <DetailErrorState
                 message="Failed to load the requested incident."
-                backPath="/incidents"
+                backPath={backPath}
                 backLabel="Back to catalog"
             />
         );
@@ -131,7 +133,7 @@ export function IncidentDetailPage({ id }: IncidentDetailPageProps) {
             {/* ── Sticky action bar ───────────────────────────── */}
             <DetailPageHeader
                 entityTypeLabel="INCIDENT"
-                backPath="/incidents"
+                backPath={backPath}
                 name={entity.name}
                 tlp={entity.tlp as TLP}
                 confidence={entity.confidence}

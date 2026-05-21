@@ -11,9 +11,10 @@ import {
 } from '../api/threat-domain.api';
 import type { AttackPatternFilters } from '../types';
 
-const ALL_PREVIEW_LIMIT = 5;
-const ATTACK_PATTERNS_PAGE_SIZE = 10;
+const ALL_PREVIEW_LIMIT = 100;
 const ITEMS_PAGE_SIZE = 3;
+// Attack patterns render in a dense table, so this tab intentionally uses a larger page size.
+const ATTACK_PATTERNS_TABLE_PAGE_SIZE = 10;
 
 // ── All-tab multi-fetch ────────────────────────────────────────────────
 
@@ -178,7 +179,7 @@ export function useAttackPatternsTab({
                 tlp: filters.tlp,
                 sortOrder: filters.sortOrder,
                 page,
-                limit: ATTACK_PATTERNS_PAGE_SIZE,
+                limit: ATTACK_PATTERNS_TABLE_PAGE_SIZE,
             }),
     });
 }

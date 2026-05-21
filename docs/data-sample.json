@@ -857,13 +857,27 @@
         {
           "source_name": "cve",
           "external_id": "CVE-2023-23397",
-          "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-23397"
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-23397",
+          "description": "Microsoft Outlook Elevation of Privilege Vulnerability. CVSS 3.1 Base Score 9.8 (Critical). Zero-click exploitation via crafted calendar invitation."
         },
         {
           "source_name": "mitre-attack",
-          "external_id": "T1187"
+          "external_id": "T1187",
+          "url": "https://attack.mitre.org/techniques/T1187/",
+          "description": "Forced Authentication — credential capture via UNC path in calendar item"
+        },
+        {
+          "source_name": "microsoft",
+          "external_id": "ADV230003",
+          "url": "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-23397",
+          "description": "Microsoft Security Update Guide — patch KB5023455"
         }
       ],
+      "x_cvss3_base_score": 9.8,
+      "x_cvss3_severity": "CRITICAL",
+      "x_cvss3_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "x_epss_score": 0.512,
+      "x_epss_percentile": 0.97,
       "confidence": 95,
       "object_marking_refs": [
         "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
@@ -1198,14 +1212,31 @@
       "created": "2024-02-20T10:00:00Z",
       "modified": "2024-02-20T10:00:00Z",
       "name": "CVE-2024-21626",
-      "description": "Vulnerabilidad de escape de contenedor en runc (CVSS 8.6) explotada por PHOSPHOR Unit para comprometer entornos containerizados en infraestructura de defensa báltica con configuraciones Kubernetes desactualizadas.",
+      "description": "Vulnerabilidad de escape de contenedor en runc explotada por PHOSPHOR Unit para comprometer entornos containerizados en infraestructura de defensa báltica con configuraciones Kubernetes desactualizadas.",
       "external_references": [
         {
           "source_name": "cve",
           "external_id": "CVE-2024-21626",
-          "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-21626"
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-21626",
+          "description": "Improper Handling of Insufficient Permissions or Privileges in runc. Allows container escape via a crafted container image using relative paths in a volume bind mount."
+        },
+        {
+          "source_name": "github",
+          "external_id": "GHSA-xr7r-f8xq-vfvv",
+          "url": "https://github.com/advisories/GHSA-xr7r-f8xq-vfvv",
+          "description": "runc container escape — GitHub Security Advisory"
+        },
+        {
+          "source_name": "kubernetes",
+          "url": "https://kubernetes.io/blog/2024/01/31/cve-2024-21626-runc-vulnerability/",
+          "description": "Kubernetes blog: runc CVE-2024-21626 — recommended mitigation and upgrade path for affected clusters"
         }
       ],
+      "x_cvss3_base_score": 8.6,
+      "x_cvss3_severity": "HIGH",
+      "x_cvss3_vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:H",
+      "x_epss_score": 0.231,
+      "x_epss_percentile": 0.89,
       "confidence": 82,
       "object_marking_refs": [
         "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"

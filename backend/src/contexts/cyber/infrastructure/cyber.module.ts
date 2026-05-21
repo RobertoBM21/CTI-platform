@@ -1,5 +1,6 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ThreatModule } from '../../threat/infrastructure/threat.module';
 import {
     CourseOfActionService,
     IdentityService,
@@ -30,6 +31,9 @@ import {
 } from '../domain';
 import { IntrusionSetsController } from './controllers/intrusion-sets.controller';
 import { LocationsController } from './controllers/locations.controller';
+import { MalwareController } from './controllers/malware.controller';
+import { ToolsController } from './controllers/tools.controller';
+import { VulnerabilitiesController } from './controllers/vulnerabilities.controller';
 import {
     CourseOfActionMongooseRepository,
     IdentityMongooseRepository,
@@ -72,8 +76,15 @@ import {
 } from './persistence/schemas';
 
 @Module({
-    controllers: [IntrusionSetsController, LocationsController],
+    controllers: [
+        IntrusionSetsController,
+        LocationsController,
+        MalwareController,
+        ToolsController,
+        VulnerabilitiesController,
+    ],
     imports: [
+        forwardRef(() => ThreatModule),
         MongooseModule.forFeature([
             { name: MalwareDocument.name, schema: MalwareSchema },
             { name: ToolDocument.name, schema: ToolSchema },

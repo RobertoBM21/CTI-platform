@@ -6,6 +6,7 @@ import {
     Query,
 } from '@nestjs/common';
 import {
+    ApiBadRequestResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
@@ -27,14 +28,33 @@ export class ReportsController {
 
     @Get()
     @ApiOperation({ summary: 'List intelligence reports' })
-    @ApiOkResponse({ description: 'Reports retrieved successfully' })
+    @ApiOkResponse({
+        description: 'Reports retrieved successfully',
+        schema: {
+            type: 'object',
+            properties: {
+                data: {
+                    type: 'array',
+                    items: { type: 'object', additionalProperties: true },
+                },
+            },
+            additionalProperties: true,
+        },
+    })
+    @ApiBadRequestResponse({ description: 'Invalid report query parameters' })
     list(@Query() query: ReportCatalogQueryDto) {
         return this.reportService.list(query);
     }
 
     @Get(':id')
     @ApiOperation({ summary: 'Get report detail with referenced objects' })
-    @ApiOkResponse({ description: 'Report retrieved successfully' })
+    @ApiOkResponse({
+        description: 'Report retrieved successfully',
+        schema: {
+            type: 'object',
+            additionalProperties: true,
+        },
+    })
     @ApiNotFoundResponse({ description: 'Report not found' })
     async detail(@Param('id') id: string) {
         const report = await this.reportService.findById(id);

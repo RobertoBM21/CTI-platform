@@ -8,6 +8,13 @@ import { AppModule } from '../src/app.module';
 describe('Ingestion API (e2e)', () => {
     let app: INestApplication<App>;
     let mongod: MongoMemoryServer;
+    let accessToken: string;
+
+    const testUser = {
+        email: 'ingestion-e2e@cti-platform.test',
+        password: 'IngestionE2e123!',
+        name: 'Ingestion E2E User',
+    };
 
     const stixBundle = {
         type: 'bundle',
@@ -75,6 +82,13 @@ describe('Ingestion API (e2e)', () => {
             }),
         );
         await app.init();
+
+        const registerResponse = await request(app.getHttpServer())
+            .post('/auth/register')
+            .send(testUser)
+            .expect(201);
+
+        accessToken = registerResponse.body.accessToken;
     });
 
     afterAll(async () => {
@@ -85,6 +99,7 @@ describe('Ingestion API (e2e)', () => {
     it('POST /ingestion/bundles should ingest a STIX bundle', async () => {
         const response = await request(app.getHttpServer())
             .post('/ingestion/bundles')
+            .set('Authorization', `Bearer ${accessToken}`)
             .send(stixBundle)
             .expect(201);
 
@@ -99,6 +114,7 @@ describe('Ingestion API (e2e)', () => {
     it('should be idempotent — ingesting same bundle twice produces no duplicates', async () => {
         const response = await request(app.getHttpServer())
             .post('/ingestion/bundles')
+            .set('Authorization', `Bearer ${accessToken}`)
             .send(stixBundle)
             .expect(201);
 
@@ -135,6 +151,7 @@ describe('Ingestion API (e2e)', () => {
 
         await request(app.getHttpServer())
             .post('/ingestion/bundles')
+            .set('Authorization', `Bearer ${accessToken}`)
             .send(modifiedBundle)
             .expect(201);
 
@@ -179,6 +196,7 @@ describe('Ingestion API (e2e)', () => {
 
         const response = await request(app.getHttpServer())
             .post('/ingestion/bundles')
+            .set('Authorization', `Bearer ${accessToken}`)
             .send(bundleWithUnknown)
             .expect(201);
 
@@ -193,7 +211,23 @@ describe('Ingestion API (e2e)', () => {
     it('should reject invalid bundles', async () => {
         await request(app.getHttpServer())
             .post('/ingestion/bundles')
+            .set('Authorization', `Bearer ${accessToken}`)
             .send({ type: 'not-a-bundle', id: 'x', objects: [] })
             .expect(400);
+    });
+
+    it('should return 401 when no auth token is provided', async () => {
+        await request(app.getHttpServer())
+            .post('/ingestion/bundles')
+            .send(stixBundle)
+            .expect(401);
+    });
+
+    it('should return 401 when bearer token is invalid', async () => {
+        await request(app.getHttpServer())
+            .post('/ingestion/bundles')
+            .set('Authorization', 'Bearer invalid.token.value')
+            .send(stixBundle)
+            .expect(401);
     });
 });

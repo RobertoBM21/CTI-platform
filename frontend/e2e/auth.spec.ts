@@ -16,7 +16,9 @@ test.describe('Login page', () => {
 
     test('renders login form', async ({ page }) => {
         await expect(
-            page.getByRole('heading', { name: /sign in/i }),
+            page.locator('[data-slot="card-title"]').filter({
+                hasText: 'CTI Platform',
+            }),
         ).toBeVisible();
         await expect(page.locator('input[type="email"]')).toBeVisible();
         await expect(page.locator('input[type="password"]')).toBeVisible();
@@ -49,7 +51,7 @@ test.describe('Login page', () => {
         await page.locator('input[type="email"]').fill(TEST_EMAIL);
         await page.locator('input[type="password"]').fill(TEST_PASSWORD);
         await page.getByRole('button', { name: /sign in/i }).click();
-        await expect(page).toHaveURL('/', { timeout: 15_000 });
+        await expect(page).toHaveURL('/home', { timeout: 15_000 });
     });
 
     test('unauthenticated access to protected route redirects to login', async ({
@@ -71,7 +73,9 @@ test.describe('Register page', () => {
 
     test('renders registration form', async ({ page }) => {
         await expect(
-            page.getByRole('heading', { name: /create account/i }),
+            page.locator('[data-slot="card-title"]').filter({
+                hasText: 'Create account',
+            }),
         ).toBeVisible();
         await expect(page.locator('input#name')).toBeVisible();
         await expect(page.locator('input[type="email"]')).toBeVisible();

@@ -30,6 +30,15 @@ async function bootstrap() {
         .setTitle('CTI Platform API')
         .setDescription('Cyber Threat Intelligence Platform - MVP')
         .setVersion('0.1.0')
+        .addBearerAuth(
+            {
+                type: 'http',
+                scheme: 'bearer',
+                bearerFormat: 'JWT',
+                description: 'JWT access token in Authorization header',
+            },
+            'bearer',
+        )
         .build();
 
     const document = SwaggerModule.createDocument(app, swaggerConfig);

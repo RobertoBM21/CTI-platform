@@ -12,6 +12,7 @@ interface EntityCardProps {
     entity: CatalogEntity;
     /** Route prefix, e.g. "/incidents" or "/campaigns" */
     basePath: string;
+    detailQueryParams?: Record<string, string | undefined>;
     className?: string;
 }
 
@@ -19,12 +20,22 @@ function formatDate(iso: string): string {
     return new Date(iso).toISOString().split('T')[0];
 }
 
-export function EntityCard({ entity, basePath, className }: EntityCardProps) {
+export function EntityCard({
+    entity,
+    basePath,
+    detailQueryParams,
+    className,
+}: EntityCardProps) {
+    const query = new URLSearchParams();
+    Object.entries(detailQueryParams ?? {}).forEach(([key, value]) => {
+        if (value) {
+            query.set(key, value);
+        }
+    });
+    const href = `${basePath}/${entity.id}${query.toString() ? `?${query.toString()}` : ''}`;
+
     return (
-        <Link
-            href={`${basePath}/${entity.id}`}
-            className={cn('block h-full', className)}
-        >
+        <Link href={href} className={cn('block h-full', className)}>
             <article
                 className={cn(
                     'group bg-card hover:border-primary/30 relative flex h-full flex-col rounded-2xl border border-transparent p-7 shadow-sm transition-all duration-300 hover:shadow-md',

@@ -8,12 +8,14 @@ const INCIDENT_NAME = 'Operación Tormenta Híbrida Ibérica';
 test.describe('Incidents catalog', () => {
     test.beforeEach(async ({ page }) => {
         await page.goto('/incidents');
-        await expect(page.getByRole('main')).toBeVisible();
+        await expect(
+            page.getByRole('heading', { name: /incident library/i }),
+        ).toBeVisible();
     });
 
     test('shows the incidents page heading', async ({ page }) => {
         await expect(
-            page.getByRole('heading', { name: /incidents/i }),
+            page.getByRole('heading', { name: /incident library/i }),
         ).toBeVisible();
     });
 
@@ -29,7 +31,7 @@ test.describe('Incidents catalog', () => {
     });
 
     test('search filters incidents by name', async ({ page }) => {
-        const searchInput = page.getByRole('searchbox');
+        const searchInput = page.getByPlaceholder(/search/i);
         await searchInput.fill('Tormenta');
         await expect(
             page.getByText(INCIDENT_NAME, { exact: false }),
@@ -37,7 +39,7 @@ test.describe('Incidents catalog', () => {
     });
 
     test('search with no match shows empty state', async ({ page }) => {
-        const searchInput = page.getByRole('searchbox');
+        const searchInput = page.getByPlaceholder(/search/i);
         await searchInput.fill('xyznonexistent999');
         await expect(page.getByText(/no incidents found/i)).toBeVisible({
             timeout: 8_000,
@@ -66,7 +68,9 @@ test.describe('Incidents catalog', () => {
         });
         if (await clearChip.isVisible()) {
             await clearChip.click();
-            await expect(page.getByRole('main')).toBeVisible();
+            await expect(
+                page.getByRole('heading', { name: /incident library/i }),
+            ).toBeVisible();
         }
     });
 
@@ -91,7 +95,9 @@ test.describe('Incidents catalog', () => {
         });
         if (await oldestFirst.isVisible()) {
             await oldestFirst.click();
-            await expect(page.getByRole('main')).toBeVisible();
+            await expect(
+                page.getByRole('heading', { name: /incident library/i }),
+            ).toBeVisible();
         }
     });
 });
@@ -102,13 +108,13 @@ test.describe('Incident detail page', () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(`/incidents/${INCIDENT_ID}`);
         await expect(
-            page.getByText(INCIDENT_NAME, { exact: false }),
+            page.getByRole('heading', { name: INCIDENT_NAME }),
         ).toBeVisible({ timeout: 15_000 });
     });
 
     test('shows incident name in header', async ({ page }) => {
         await expect(
-            page.getByText(INCIDENT_NAME, { exact: false }),
+            page.getByRole('heading', { name: INCIDENT_NAME }),
         ).toBeVisible();
     });
 
@@ -154,7 +160,7 @@ test.describe('Incident detail page', () => {
 
     test('Network Analysis tab renders graph', async ({ page }) => {
         await page.getByRole('button', { name: /network analysis/i }).click();
-        await expect(page.url()).toContain('tab=network');
+        await expect(page).toHaveURL(/tab=network/, { timeout: 5_000 });
         await expect(page.locator('[class*="react-flow"]').first()).toBeVisible(
             { timeout: 10_000 },
         );
@@ -162,7 +168,7 @@ test.describe('Incident detail page', () => {
 
     test('Artifacts tab renders IoC list or empty state', async ({ page }) => {
         await page.getByRole('button', { name: /artifacts/i }).click();
-        await expect(page.url()).toContain('tab=artifacts');
+        await expect(page).toHaveURL(/tab=artifacts/, { timeout: 5_000 });
         await expect(
             page.getByText(/attachments/i).or(page.getByText(/no indicators/i)),
         ).toBeVisible({ timeout: 8_000 });
@@ -170,7 +176,7 @@ test.describe('Incident detail page', () => {
 
     test('Map tab renders map container', async ({ page }) => {
         await page.getByRole('button', { name: /^map$/i }).click();
-        await expect(page.url()).toContain('tab=map');
+        await expect(page).toHaveURL(/tab=map/, { timeout: 5_000 });
         await expect(page.locator('canvas').first()).toBeVisible({
             timeout: 10_000,
         });
@@ -178,20 +184,20 @@ test.describe('Incident detail page', () => {
 
     test('Timeline tab renders dual-domain timeline', async ({ page }) => {
         await page.getByRole('button', { name: /timeline/i }).click();
-        await expect(page.url()).toContain('tab=timeline');
-        await expect(page.getByText(/timeline/i, { exact: false })).toBeVisible(
-            { timeout: 8_000 },
-        );
+        await expect(page).toHaveURL(/tab=timeline/, { timeout: 5_000 });
+        await expect(
+            page.getByRole('heading', { name: /dual-domain timeline/i }),
+        ).toBeVisible({ timeout: 8_000 });
     });
 
     test('selected tab persists on page reload', async ({ page }) => {
         await page.getByRole('button', { name: /^map$/i }).click();
-        await expect(page.url()).toContain('tab=map');
+        await expect(page).toHaveURL(/tab=map/, { timeout: 5_000 });
         await page.reload();
         await expect(
-            page.getByText(INCIDENT_NAME, { exact: false }),
+            page.getByRole('heading', { name: INCIDENT_NAME }),
         ).toBeVisible({ timeout: 15_000 });
-        await expect(page.url()).toContain('tab=map');
+        await expect(page).toHaveURL(/tab=map/, { timeout: 5_000 });
         await expect(page.locator('canvas').first()).toBeVisible({
             timeout: 10_000,
         });

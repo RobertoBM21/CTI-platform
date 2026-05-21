@@ -7,6 +7,7 @@ import {
     DetailErrorState,
     DetailLoadingState,
 } from '@/shared/components/error-state';
+import { useDetailNavigationContext } from '@/shared/hooks/use-detail-navigation-context';
 import { useDetailTab } from '@/shared/hooks/use-detail-tab';
 import { useEntityPageTitle } from '@/shared/hooks/use-entity-page-title';
 import {
@@ -42,6 +43,7 @@ interface ThreatActorDetailPageProps {
 export function ThreatActorDetailPage({ id }: ThreatActorDetailPageProps) {
     const [activeTab, setActiveTab] = useDetailTab(TABS);
     const { data, isLoading, isError } = useThreatActorDetail(id);
+    const { backPath } = useDetailNavigationContext('/threat-actors');
     useEntityPageTitle(data?.entity?.name);
 
     async function handleExportPdf() {
@@ -107,7 +109,7 @@ export function ThreatActorDetailPage({ id }: ThreatActorDetailPageProps) {
         return (
             <DetailErrorState
                 message="Failed to load the requested threat actor."
-                backPath="/threat-actors"
+                backPath={backPath}
                 backLabel="Back to registry"
             />
         );
@@ -146,7 +148,7 @@ export function ThreatActorDetailPage({ id }: ThreatActorDetailPageProps) {
             {/* ── Sticky action bar ───────────────────────────── */}
             <DetailPageHeader
                 entityTypeLabel="THREAT ACTOR"
-                backPath="/threat-actors"
+                backPath={backPath}
                 name={entity.name}
                 tlp={entity.tlp as TLP}
                 confidence={entity.confidence}

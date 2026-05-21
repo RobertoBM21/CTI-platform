@@ -84,7 +84,9 @@ test.describe('Campaigns catalog', () => {
         const clearChip = page.getByRole('button', { name: /TLP:CLEAR/i });
         if (await clearChip.isVisible()) {
             await clearChip.click();
-            await expect(page.getByRole('main')).toBeVisible();
+            await expect(
+                page.getByRole('heading', { name: /campaign library/i }),
+            ).toBeVisible();
         }
     });
 
@@ -105,7 +107,9 @@ test.describe('Campaigns catalog', () => {
         const oldestFirst = page.getByRole('button', { name: /oldest first/i });
         if (await oldestFirst.isVisible()) {
             await oldestFirst.click();
-            await expect(page.getByRole('main')).toBeVisible();
+            await expect(
+                page.getByRole('heading', { name: /campaign library/i }),
+            ).toBeVisible();
         }
     });
 
@@ -113,7 +117,9 @@ test.describe('Campaigns catalog', () => {
         const gridToggle = page.getByRole('button', { name: /grid/i });
         if (await gridToggle.isVisible()) {
             await gridToggle.click();
-            await expect(page.getByRole('main')).toBeVisible();
+            await expect(
+                page.getByRole('heading', { name: /campaign library/i }),
+            ).toBeVisible();
         }
     });
 

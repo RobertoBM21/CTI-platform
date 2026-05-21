@@ -13,7 +13,10 @@ import { CatalogFiltersPanel } from '@/shared/components/catalog-filters-panel';
 import { EntityCard } from '@/shared/components/entity-card';
 import { EntityCatalog } from '@/shared/components/entity-catalog';
 import { EntityListRow } from '@/shared/components/entity-list-row';
-import { entityConfig } from '@/shared/components/entity-type-badge';
+import {
+    domainConfig,
+    entityConfig,
+} from '@/shared/components/entity-type-badge';
 import {
     CatalogEmptyState,
     CatalogErrorState,
@@ -21,6 +24,8 @@ import {
 import { LoadingState } from '@/shared/components/loading-state';
 import { ResultPagination } from '@/shared/components/result-pagination';
 import { TlpBadge } from '@/shared/components/tlp-badge';
+import { buildDomainContextQuery } from '@/shared/lib/domain-navigation';
+import { getStixConfig, hexToRgba } from '@/shared/lib/stix';
 import type { BaseCatalogFilters, ViewMode } from '@/shared/types/entity';
 import type { TLP } from '@/shared/types/enums';
 import {
@@ -29,7 +34,7 @@ import {
     getCoreRowModel,
     useReactTable,
 } from '@tanstack/react-table';
-import { BarChart3, Crosshair, ShieldAlert, X } from 'lucide-react';
+import { Crosshair, X } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import {
@@ -51,7 +56,7 @@ import type {
 
 const TABS: { id: ThreatDomainTab; label: string; icon: React.ElementType }[] =
     [
-        { id: 'all', label: 'All', icon: BarChart3 },
+        { id: 'all', label: 'All', icon: domainConfig['threat-domain'].icon },
         {
             id: 'incidents',
             label: 'Incidents',
@@ -73,6 +78,13 @@ const TABS: { id: ThreatDomainTab; label: string; icon: React.ElementType }[] =
             icon: entityConfig['attack-pattern'].icon,
         },
     ];
+
+const TAB_COLOR_MAP: Partial<Record<ThreatDomainTab, string>> = {
+    incidents: getStixConfig('incident').color,
+    campaigns: getStixConfig('campaign').color,
+    'threat-actors': getStixConfig('threat-actor').color,
+    'attack-patterns': getStixConfig('attack-pattern').color,
+};
 
 // ── Attack Pattern filter chip ─────────────────────────────────────────
 
@@ -238,6 +250,7 @@ function AllTab({ attackPatternId }: AllTabProps) {
         attackPatternId,
         page,
     });
+    const sourceTab = 'all';
 
     if (isLoading) return <LoadingState />;
     if (isError) return <CatalogErrorState />;
@@ -262,6 +275,10 @@ function AllTab({ attackPatternId }: AllTabProps) {
                     key={item.id}
                     entity={item}
                     basePath={BASE_PATH_MAP[item.entityType] ?? '/incidents'}
+                    detailQueryParams={buildDomainContextQuery(
+                        'threat-domain',
+                        sourceTab,
+                    )}
                 />
             ))}
             {totalPages > 1 && (
@@ -333,10 +350,24 @@ function IncidentsTab({ attackPatternId, onTlpChange }: IncidentsTabProps) {
             limit={meta?.limit ?? 3}
             onPageChange={setPage}
             renderCard={(item) => (
-                <EntityCard entity={item} basePath="/incidents" />
+                <EntityCard
+                    entity={item}
+                    basePath="/incidents"
+                    detailQueryParams={buildDomainContextQuery(
+                        'threat-domain',
+                        'incidents',
+                    )}
+                />
             )}
             renderRow={(item) => (
-                <EntityListRow entity={item} basePath="/incidents" />
+                <EntityListRow
+                    entity={item}
+                    basePath="/incidents"
+                    detailQueryParams={buildDomainContextQuery(
+                        'threat-domain',
+                        'incidents',
+                    )}
+                />
             )}
             entityLabel="incidents"
         />
@@ -419,10 +450,24 @@ function CampaignsTab({
             limit={meta?.limit ?? 3}
             onPageChange={setPage}
             renderCard={(item) => (
-                <EntityCard entity={item} basePath="/campaigns" />
+                <EntityCard
+                    entity={item}
+                    basePath="/campaigns"
+                    detailQueryParams={buildDomainContextQuery(
+                        'threat-domain',
+                        'campaigns',
+                    )}
+                />
             )}
             renderRow={(item) => (
-                <EntityListRow entity={item} basePath="/campaigns" />
+                <EntityListRow
+                    entity={item}
+                    basePath="/campaigns"
+                    detailQueryParams={buildDomainContextQuery(
+                        'threat-domain',
+                        'campaigns',
+                    )}
+                />
             )}
             entityLabel="campaigns"
         />
@@ -505,10 +550,24 @@ function ThreatActorsTab({
             limit={meta?.limit ?? 3}
             onPageChange={setPage}
             renderCard={(item) => (
-                <EntityCard entity={item} basePath="/threat-actors" />
+                <EntityCard
+                    entity={item}
+                    basePath="/threat-actors"
+                    detailQueryParams={buildDomainContextQuery(
+                        'threat-domain',
+                        'threat-actors',
+                    )}
+                />
             )}
             renderRow={(item) => (
-                <EntityListRow entity={item} basePath="/threat-actors" />
+                <EntityListRow
+                    entity={item}
+                    basePath="/threat-actors"
+                    detailQueryParams={buildDomainContextQuery(
+                        'threat-domain',
+                        'threat-actors',
+                    )}
+                />
             )}
             entityLabel="threat actors"
         />
@@ -773,6 +832,7 @@ export function ThreatDomainCatalog() {
         threatActorsTlp,
         attackPatternsTlp,
     });
+    const DomainIcon = domainConfig['threat-domain'].icon;
 
     const TAB_COUNTS: Record<ThreatDomainTab, number | undefined> = {
         all: counts?.all,
@@ -788,7 +848,7 @@ export function ThreatDomainCatalog() {
             <div>
                 <div className="flex items-center gap-3">
                     <div className="bg-primary/10 flex size-10 items-center justify-center rounded-xl">
-                        <ShieldAlert className="text-primary size-5" />
+                        <DomainIcon className="text-primary size-5" />
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">
@@ -821,6 +881,7 @@ export function ThreatDomainCatalog() {
                     {TABS.map((tab) => {
                         const Icon = tab.icon;
                         const isActive = activeTab === tab.id;
+                        const accent = TAB_COLOR_MAP[tab.id];
                         return (
                             <button
                                 key={tab.id}
@@ -828,9 +889,19 @@ export function ThreatDomainCatalog() {
                                 className={cn(
                                     'flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors',
                                     isActive
-                                        ? 'border-primary text-primary'
+                                        ? accent
+                                            ? ''
+                                            : 'border-primary text-primary'
                                         : 'text-foreground/60 hover:border-foreground/20 hover:text-foreground border-transparent',
                                 )}
+                                style={
+                                    isActive && accent
+                                        ? {
+                                              borderColor: accent,
+                                              color: accent,
+                                          }
+                                        : undefined
+                                }
                             >
                                 <Icon className="size-4" />
                                 {tab.label}
@@ -839,9 +910,23 @@ export function ThreatDomainCatalog() {
                                         className={cn(
                                             'min-w-5 rounded-full px-1.5 py-0.5 text-center text-[0.65rem] font-bold tabular-nums',
                                             isActive
-                                                ? 'bg-primary/15 text-primary'
+                                                ? accent
+                                                    ? ''
+                                                    : 'bg-primary/15 text-primary'
                                                 : 'bg-foreground/10 text-foreground/50',
                                         )}
+                                        style={
+                                            isActive && accent
+                                                ? {
+                                                      backgroundColor:
+                                                          hexToRgba(
+                                                              accent,
+                                                              0.12,
+                                                          ),
+                                                      color: accent,
+                                                  }
+                                                : undefined
+                                        }
                                     >
                                         {TAB_COUNTS[tab.id]}
                                     </span>

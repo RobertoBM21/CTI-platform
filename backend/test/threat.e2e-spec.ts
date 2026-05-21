@@ -157,6 +157,16 @@ describe('Threat API (e2e)', () => {
             });
     });
 
+    it('GET /threat-actors should validate pagination bounds', async () => {
+        await request(app.getHttpServer())
+            .get('/threat-actors?page=0')
+            .expect(400);
+
+        await request(app.getHttpServer())
+            .get('/threat-actors?limit=101')
+            .expect(400);
+    });
+
     it('GET /threat-actors/:id should return enriched detail', () => {
         return request(app.getHttpServer())
             .get('/threat-actors/threat-actor--actor-a')
@@ -205,9 +215,56 @@ describe('Threat API (e2e)', () => {
             });
     });
 
+    it('GET /campaigns/:id should return enriched detail and 404 when missing', async () => {
+        await request(app.getHttpServer())
+            .get('/campaigns/campaign--camp-1')
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.entity).toHaveProperty(
+                    'id',
+                    'campaign--camp-1',
+                );
+                expect(res.body.relatedObjects).toBeDefined();
+                expect(res.body.sightings).toBeDefined();
+            });
+
+        await request(app.getHttpServer())
+            .get('/campaigns/campaign--missing')
+            .expect(404);
+    });
+
     it('GET /incidents should validate invalid sort field', () => {
         return request(app.getHttpServer())
             .get('/incidents?sortBy=invalid')
+            .expect(400);
+    });
+
+    it('GET /incidents/:id should return enriched detail and 404 when missing', async () => {
+        await request(app.getHttpServer())
+            .get('/incidents/incident--inc-1')
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.entity).toHaveProperty('id', 'incident--inc-1');
+                expect(res.body.relatedObjects).toBeDefined();
+                expect(res.body.sightings).toBeDefined();
+            });
+
+        await request(app.getHttpServer())
+            .get('/incidents/incident--missing')
+            .expect(404);
+    });
+
+    it('GET /attack-patterns should return catalog data and validate sort order', async () => {
+        await request(app.getHttpServer())
+            .get('/attack-patterns')
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.meta.total).toBe(1);
+                expect(res.body.data[0]?.id).toBe('attack-pattern--ap-1');
+            });
+
+        await request(app.getHttpServer())
+            .get('/attack-patterns?sortOrder=invalid')
             .expect(400);
     });
 
@@ -234,6 +291,12 @@ describe('Threat API (e2e)', () => {
                 expect(res.body.data[0]?.value).toBe('1.1.1.1');
                 expect(res.body.data[1]?.value).toBe('zzz.example');
             });
+    });
+
+    it('GET /indicators should validate invalid sort order', () => {
+        return request(app.getHttpServer())
+            .get('/indicators?sortOrder=invalid')
+            .expect(400);
     });
 
     it('GET /indicators/:id should return enriched detail', () => {

@@ -9,7 +9,17 @@ export class HealthController {
 
     @Get()
     @ApiOperation({ summary: 'Health check endpoint' })
-    @ApiOkResponse({ description: 'Service health status' })
+    @ApiOkResponse({
+        description: 'Service health status',
+        schema: {
+            type: 'object',
+            properties: {
+                status: { type: 'string', example: 'ok' },
+                timestamp: { type: 'string', format: 'date-time' },
+                database: { type: 'string', example: 'connected' },
+            },
+        },
+    })
     check(): HealthStatusResponse {
         return this.healthService.check();
     }

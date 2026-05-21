@@ -132,6 +132,23 @@ export function getStixConfig(typeOrId: string): StixTypeConfig {
     return STIX_CONFIG[type] ?? { ...FALLBACK, label: type };
 }
 
+export function hexToRgba(hex: string, alpha: number): string {
+    const normalized = hex.replace('#', '');
+    const safeHex =
+        normalized.length === 3
+            ? normalized
+                  .split('')
+                  .map((char) => char + char)
+                  .join('')
+            : normalized;
+
+    const red = Number.parseInt(safeHex.slice(0, 2), 16);
+    const green = Number.parseInt(safeHex.slice(2, 4), 16);
+    const blue = Number.parseInt(safeHex.slice(4, 6), 16);
+
+    return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+}
+
 export function formatDate(iso: string): string {
     return new Date(iso).toLocaleDateString('en-CA'); // YYYY-MM-DD
 }

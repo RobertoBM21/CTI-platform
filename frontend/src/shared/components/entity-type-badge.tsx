@@ -2,6 +2,8 @@
 
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import type { DomainRoute } from '@/shared/lib/domain-navigation';
+import { getStixConfig, hexToRgba } from '@/shared/lib/stix';
 import type { EntityType } from '@/shared/types/enums';
 import {
     Activity,
@@ -18,8 +20,10 @@ import {
     Microscope,
     Server,
     ShieldAlert,
+    ShieldOff,
     User,
     Users,
+    Waypoints,
     Wrench,
 } from 'lucide-react';
 
@@ -169,6 +173,23 @@ export const stixTypeIconMap: Record<
     report: FileText,
 };
 
+export const domainConfig: Record<
+    DomainRoute,
+    {
+        label: string;
+        icon: React.ComponentType<{ className?: string }>;
+    }
+> = {
+    'threat-domain': {
+        label: 'Threat Domain',
+        icon: ShieldOff,
+    },
+    'cyber-domain': {
+        label: 'Cyber Domain',
+        icon: Waypoints,
+    },
+};
+
 interface EntityTypeBadgeProps {
     entityType: EntityType;
     className?: string;
@@ -180,6 +201,8 @@ export function EntityTypeBadge({
 }: EntityTypeBadgeProps) {
     const config = entityConfig[entityType];
     const Icon = config.icon;
+    const accent = getStixConfig(entityType).color;
+
     return (
         <Badge
             variant="outline"
@@ -188,6 +211,11 @@ export function EntityTypeBadge({
                 config.className,
                 className,
             )}
+            style={{
+                borderColor: hexToRgba(accent, 0.28),
+                color: accent,
+                backgroundColor: hexToRgba(accent, 0.08),
+            }}
         >
             <Icon className="size-3" />
             {config.label}

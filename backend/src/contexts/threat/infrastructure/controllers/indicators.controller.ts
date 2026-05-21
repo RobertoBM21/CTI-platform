@@ -6,6 +6,7 @@ import {
     Query,
 } from '@nestjs/common';
 import {
+    ApiBadRequestResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
@@ -24,14 +25,35 @@ export class IndicatorsController {
 
     @Get()
     @ApiOperation({ summary: 'List indicators' })
-    @ApiOkResponse({ description: 'Indicators retrieved successfully' })
+    @ApiOkResponse({
+        description: 'Indicators retrieved successfully',
+        schema: {
+            type: 'object',
+            properties: {
+                data: {
+                    type: 'array',
+                    items: { type: 'object', additionalProperties: true },
+                },
+            },
+            additionalProperties: true,
+        },
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid indicator query parameters',
+    })
     list(@Query() query: IndicatorListQueryDto) {
         return this.indicatorService.list(query);
     }
 
     @Get(':id')
     @ApiOperation({ summary: 'Get indicator detail' })
-    @ApiOkResponse({ description: 'Indicator retrieved successfully' })
+    @ApiOkResponse({
+        description: 'Indicator retrieved successfully',
+        schema: {
+            type: 'object',
+            additionalProperties: true,
+        },
+    })
     @ApiNotFoundResponse({ description: 'Indicator not found' })
     async detail(@Param('id') id: string) {
         const indicator = await this.indicatorService.findById(id);

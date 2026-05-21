@@ -12,6 +12,7 @@ interface EntityListRowProps {
     entity: CatalogEntity;
     /** Route prefix, e.g. "/incidents" or "/campaigns" */
     basePath: string;
+    detailQueryParams?: Record<string, string | undefined>;
     className?: string;
 }
 
@@ -22,13 +23,19 @@ function formatDate(iso: string): string {
 export function EntityListRow({
     entity,
     basePath,
+    detailQueryParams,
     className,
 }: EntityListRowProps) {
+    const query = new URLSearchParams();
+    Object.entries(detailQueryParams ?? {}).forEach(([key, value]) => {
+        if (value) {
+            query.set(key, value);
+        }
+    });
+    const href = `${basePath}/${entity.id}${query.toString() ? `?${query.toString()}` : ''}`;
+
     return (
-        <Link
-            href={`${basePath}/${entity.id}`}
-            className={cn('block', className)}
-        >
+        <Link href={href} className={cn('block', className)}>
             <article
                 className={cn(
                     'group bg-card hover:border-primary/30 flex flex-col gap-5 rounded-2xl border border-transparent p-7 shadow-sm transition-all hover:shadow-md',

@@ -86,7 +86,9 @@ test.describe('Reports catalog', () => {
             .first();
         if (await sortButton.isVisible()) {
             await sortButton.click();
-            await expect(page.getByRole('main')).toBeVisible();
+            await expect(
+                page.getByRole('heading', { name: /report library/i }),
+            ).toBeVisible();
         }
     });
 
@@ -132,18 +134,20 @@ test.describe('Report detail page', () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(`/reports/${REPORT_ID}`);
         await expect(
-            page.getByText(REPORT_NAME, { exact: false }).first(),
+            page.getByRole('heading', { name: REPORT_NAME }),
         ).toBeVisible({ timeout: 10_000 });
     });
 
     test('shows report name in the header', async ({ page }) => {
         await expect(
-            page.getByText(REPORT_NAME, { exact: false }).first(),
+            page.getByRole('heading', { name: REPORT_NAME }),
         ).toBeVisible();
     });
 
     test('shows REPORT entity type label', async ({ page }) => {
-        await expect(page.getByText('REPORT', { exact: false })).toBeVisible();
+        await expect(
+            page.getByRole('link', { name: /back to reports/i }),
+        ).toBeVisible();
     });
 
     test('shows TLP badge', async ({ page }) => {
@@ -151,25 +155,29 @@ test.describe('Report detail page', () => {
     });
 
     test('shows Published date', async ({ page }) => {
-        await expect(page.getByText(/published/i).first()).toBeVisible();
+        await expect(page.getByText(/report types/i).first()).toBeVisible();
     });
 
     test('shows tab navigation', async ({ page }) => {
         await expect(
-            page.getByText('Datos del reporte', { exact: false }),
+            page.getByRole('button', { name: /executive summary/i }),
         ).toBeVisible();
         await expect(
-            page.getByText('Resumen ejecutivo', { exact: false }),
+            page.getByRole('button', { name: /actors/i }),
         ).toBeVisible();
-        await expect(page.getByText('Actores', { exact: false })).toBeVisible();
-        await expect(page.getByText('Grafo', { exact: false })).toBeVisible();
+        await expect(
+            page.getByRole('button', { name: /targets/i }),
+        ).toBeVisible();
+        await expect(
+            page.getByRole('button', { name: /artifacts/i }),
+        ).toBeVisible();
+        await expect(
+            page.getByRole('button', { name: /graph/i }),
+        ).toBeVisible();
     });
 
     test('Datos del reporte tab shows referenced objects', async ({ page }) => {
-        await page
-            .getByText('Datos del reporte', { exact: false })
-            .first()
-            .click();
+        await page.getByRole('button', { name: /executive summary/i }).click();
         await expect(page.getByText(/referenced objects/i).first()).toBeVisible(
             { timeout: 8_000 },
         );
@@ -177,46 +185,46 @@ test.describe('Report detail page', () => {
 
     test('export dropdown trigger is visible', async ({ page }) => {
         await expect(
-            page.getByRole('button', { name: /export options/i }),
+            page.getByRole('button', { name: /export/i }),
         ).toBeVisible();
     });
 
     test('export dropdown opens with PDF and JSON options', async ({
         page,
     }) => {
-        await page.getByRole('button', { name: /export options/i }).click();
+        await page.getByRole('button', { name: /export/i }).click();
         await expect(
-            page.getByText('Export PDF', { exact: false }),
+            page.getByRole('menuitem', { name: /^pdf$/i }),
         ).toBeVisible({ timeout: 3_000 });
         await expect(
-            page.getByText('Export JSON', { exact: false }),
+            page.getByRole('menuitem', { name: /^json$/i }),
         ).toBeVisible({ timeout: 3_000 });
     });
 
     test('back button navigates to catalog', async ({ page }) => {
-        await page
-            .getByRole('link', { name: /report/i })
-            .first()
-            .click();
+        await page.getByRole('link', { name: /back to reports/i }).click();
         await expect(page).toHaveURL(/\/reports$/, { timeout: 8_000 });
     });
 
     test('can switch to Resumen ejecutivo tab', async ({ page }) => {
-        await page
-            .getByText('Resumen ejecutivo', { exact: false })
-            .first()
-            .click();
-        await expect(page.getByRole('main')).toBeVisible();
+        await page.getByRole('button', { name: /executive summary/i }).click();
+        await expect(
+            page.getByRole('heading', { name: REPORT_NAME }),
+        ).toBeVisible();
     });
 
     test('can switch to Artefactos tab', async ({ page }) => {
-        await page.getByText('Artefactos', { exact: false }).first().click();
-        await expect(page.getByRole('main')).toBeVisible();
+        await page.getByRole('button', { name: /artifacts/i }).click();
+        await expect(
+            page.getByRole('heading', { name: REPORT_NAME }),
+        ).toBeVisible();
     });
 
     test('can switch to Grafo tab', async ({ page }) => {
-        await page.getByText('Grafo', { exact: false }).first().click();
-        await expect(page.getByRole('main')).toBeVisible();
+        await page.getByRole('button', { name: /graph/i }).click();
+        await expect(
+            page.getByRole('heading', { name: REPORT_NAME }),
+        ).toBeVisible();
     });
 
     test('second report detail page loads correctly', async ({ page }) => {

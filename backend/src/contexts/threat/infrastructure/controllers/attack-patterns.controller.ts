@@ -6,6 +6,7 @@ import {
     Query,
 } from '@nestjs/common';
 import {
+    ApiBadRequestResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
@@ -27,14 +28,35 @@ export class AttackPatternsController {
 
     @Get()
     @ApiOperation({ summary: 'List attack patterns' })
-    @ApiOkResponse({ description: 'Attack patterns retrieved successfully' })
+    @ApiOkResponse({
+        description: 'Attack patterns retrieved successfully',
+        schema: {
+            type: 'object',
+            properties: {
+                data: {
+                    type: 'array',
+                    items: { type: 'object', additionalProperties: true },
+                },
+            },
+            additionalProperties: true,
+        },
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid attack pattern query parameters',
+    })
     list(@Query() query: ThreatCatalogQueryDto) {
         return this.attackPatternService.list(query);
     }
 
     @Get(':id')
     @ApiOperation({ summary: 'Get attack pattern detail' })
-    @ApiOkResponse({ description: 'Attack pattern retrieved successfully' })
+    @ApiOkResponse({
+        description: 'Attack pattern retrieved successfully',
+        schema: {
+            type: 'object',
+            additionalProperties: true,
+        },
+    })
     @ApiNotFoundResponse({ description: 'Attack pattern not found' })
     async detail(@Param('id') id: string) {
         const attackPattern = await this.attackPatternService.findById(id);

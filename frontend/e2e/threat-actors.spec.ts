@@ -84,7 +84,9 @@ test.describe('Threat Actors catalog', () => {
         const clearChip = page.getByRole('button', { name: /TLP:CLEAR/i });
         if (await clearChip.isVisible()) {
             await clearChip.click();
-            await expect(page.getByRole('main')).toBeVisible();
+            await expect(
+                page.getByRole('heading', { name: /threat actor library/i }),
+            ).toBeVisible();
         }
     });
 
@@ -105,7 +107,9 @@ test.describe('Threat Actors catalog', () => {
         const oldestFirst = page.getByRole('button', { name: /oldest first/i });
         if (await oldestFirst.isVisible()) {
             await oldestFirst.click();
-            await expect(page.getByRole('main')).toBeVisible();
+            await expect(
+                page.getByRole('heading', { name: /threat actor library/i }),
+            ).toBeVisible();
         }
     });
 
@@ -113,7 +117,9 @@ test.describe('Threat Actors catalog', () => {
         const gridToggle = page.getByRole('button', { name: /grid/i });
         if (await gridToggle.isVisible()) {
             await gridToggle.click();
-            await expect(page.getByRole('main')).toBeVisible();
+            await expect(
+                page.getByRole('heading', { name: /threat actor library/i }),
+            ).toBeVisible();
         }
     });
 
@@ -131,13 +137,13 @@ test.describe('Threat Actor detail page — PHOSPHOR Unit', () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(`/threat-actors/${ACTOR_ID}`);
         await expect(
-            page.getByText(ACTOR_NAME, { exact: false }).first(),
+            page.getByRole('heading', { name: ACTOR_NAME }),
         ).toBeVisible({ timeout: 15_000 });
     });
 
     test('shows actor name in header', async ({ page }) => {
         await expect(
-            page.getByText(ACTOR_NAME, { exact: false }).first(),
+            page.getByRole('heading', { name: ACTOR_NAME }),
         ).toBeVisible();
     });
 
@@ -176,20 +182,23 @@ test.describe('Threat Actor detail page — PHOSPHOR Unit', () => {
 
     test('Actor Overview tab shows nation-state type', async ({ page }) => {
         await expect(
-            page.getByText(/nation-state/i, { exact: false }),
+            page.getByText(/nation state/i, { exact: false }),
         ).toBeVisible({ timeout: 8_000 });
     });
 
     test('Actor Overview tab shows aliases (Iron Tide)', async ({ page }) => {
-        await expect(
-            page.getByText(/iron tide/i, { exact: false }),
-        ).toBeVisible({ timeout: 8_000 });
+        await expect(page.getByText('Iron Tide', { exact: true })).toBeVisible({
+            timeout: 8_000,
+        });
     });
 
-    test('Actor Overview tab shows espionage motivation', async ({ page }) => {
+    test('Actor Overview tab shows capabilities section', async ({ page }) => {
         await expect(
-            page.getByText(/espionage/i, { exact: false }),
+            page.getByText(/capabilities/i, { exact: false }),
         ).toBeVisible({ timeout: 8_000 });
+        await expect(page.getByText(/advanced/i, { exact: false })).toBeVisible(
+            { timeout: 8_000 },
+        );
     });
 
     test('Actor Overview tab shows Narratives section with PHOSPHOR info note abstract', async ({
@@ -242,7 +251,9 @@ test.describe('Threat Actor detail page — PHOSPHOR Unit', () => {
     test('Info-Ops tab renders without error', async ({ page }) => {
         await page.getByRole('button', { name: /info-ops/i }).click();
         await page.waitForURL(/tab=info/, { timeout: 5_000 });
-        await expect(page.getByRole('main')).toBeVisible();
+        await expect(
+            page.getByRole('heading', { name: ACTOR_NAME }),
+        ).toBeVisible();
     });
 
     test('Info-Ops tab shows info note with abstract as title', async ({

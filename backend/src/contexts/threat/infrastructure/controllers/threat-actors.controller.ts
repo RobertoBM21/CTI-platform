@@ -6,6 +6,7 @@ import {
     Query,
 } from '@nestjs/common';
 import {
+    ApiBadRequestResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
@@ -24,14 +25,35 @@ export class ThreatActorsController {
 
     @Get()
     @ApiOperation({ summary: 'List threat actors' })
-    @ApiOkResponse({ description: 'Threat actors retrieved successfully' })
+    @ApiOkResponse({
+        description: 'Threat actors retrieved successfully',
+        schema: {
+            type: 'object',
+            properties: {
+                data: {
+                    type: 'array',
+                    items: { type: 'object', additionalProperties: true },
+                },
+            },
+            additionalProperties: true,
+        },
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid threat actor query parameters',
+    })
     list(@Query() query: ThreatCatalogQueryDto) {
         return this.threatActorService.list(query);
     }
 
     @Get(':id')
     @ApiOperation({ summary: 'Get threat actor detail' })
-    @ApiOkResponse({ description: 'Threat actor retrieved successfully' })
+    @ApiOkResponse({
+        description: 'Threat actor retrieved successfully',
+        schema: {
+            type: 'object',
+            additionalProperties: true,
+        },
+    })
     @ApiNotFoundResponse({ description: 'Threat actor not found' })
     async detail(@Param('id') id: string) {
         const threatActor = await this.threatActorService.findById(id);
