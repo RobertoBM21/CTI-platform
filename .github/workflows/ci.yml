@@ -21,34 +21,7 @@ on:
       - "docker-compose*.yml"
 
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: read
-    outputs:
-      backend: ${{ steps.filter.outputs.backend }}
-      frontend: ${{ steps.filter.outputs.frontend }}
-    steps:
-      - uses: actions/checkout@v6
-      - uses: dorny/paths-filter@v4
-        id: filter
-        with:
-          filters: |
-            backend:
-              - 'backend/**'
-              - 'package.json'
-              - 'pnpm-*.yaml' 
-              - '.github/workflows/**'
-            frontend:
-              - 'frontend/**'
-              - 'package.json'
-              - 'pnpm-*.yaml'
-              - '.github/workflows/**'
-
-  backend:
-    needs: changes
-    if: needs.changes.outputs.backend == 'true'
+  ci:
     runs-on: ubuntu-latest
 
     steps:
@@ -68,45 +41,38 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Linting (ESLint)
-        run: pnpm backend:lint
+      - name: Install Playwright browser (Chromium)
+        run: pnpm --filter @cti-platform/frontend exec playwright install --with-deps chromium
 
-      - name: Run unit tests (Jest + SWC)
-        run: pnpm backend:test
+      - name: Linting (workspace)
+        run: pnpm lint
 
-      - name: Run E2E tests (Supertest + Mongo In-Memory)
-        run: pnpm backend:test:e2e
+      - name: Run unit tests (workspace)
+        run: pnpm test
 
-      - name: Build application (SWC)
-        run: pnpm backend:build
+      - name: Build and start production stack (Docker Compose)
+        run: docker compose --env-file .env.example -f docker-compose.yml up -d --build
 
-  frontend:
-    needs: changes
-    if: needs.changes.outputs.frontend == 'true'
-    runs-on: ubuntu-latest
+      - name: Wait for backend and frontend readiness
+        run: pnpm dlx wait-on http://localhost:3000 http://localhost:3001 -t 120000
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - name: Run E2E tests (workspace)
+        run: pnpm test:e2e
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v5
-
-      - name: Use Node.js 24.x
-        uses: actions/setup-node@v6
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
         with:
-          node-version: 24
-          cache: "pnpm"
-          cache-dependency-path: pnpm-lock.yaml
+          name: playwright-report
+          path: |
+            frontend/playwright-report
+            frontend/test-results
+          if-no-files-found: ignore
+          retention-days: 7
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Build applications (workspace)
+        run: pnpm build
 
-      - name: Linting (ESLint)
-        run: pnpm frontend:lint
-
-      - name: Run unit tests (Vitest)
-        run: pnpm frontend:test
-
-      - name: Build application (Next.js)
-        run: pnpm frontend:build
+      - name: Show Docker Compose logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.yml logs --no-color

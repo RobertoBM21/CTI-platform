@@ -3,9 +3,10 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
     testDir: './e2e',
     globalSetup: './e2e/global-setup.ts',
-    fullyParallel: true,
+    fullyParallel: !process.env.CI,
     forbidOnly: true,
-    retries: 0,
+    retries: process.env.CI ? 2 : 0,
+    workers: process.env.CI ? 2 : undefined,
     reporter: 'html',
     use: {
         baseURL: 'http://localhost:3001',

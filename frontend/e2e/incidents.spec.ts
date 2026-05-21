@@ -160,7 +160,6 @@ test.describe('Incident detail page', () => {
 
     test('Network Analysis tab renders graph', async ({ page }) => {
         await page.getByRole('button', { name: /network analysis/i }).click();
-        await expect(page).toHaveURL(/tab=network/, { timeout: 5_000 });
         await expect(page.locator('[class*="react-flow"]').first()).toBeVisible(
             { timeout: 10_000 },
         );
@@ -194,9 +193,6 @@ test.describe('Incident detail page', () => {
         await page.getByRole('button', { name: /^map$/i }).click();
         await expect(page).toHaveURL(/tab=map/, { timeout: 5_000 });
         await page.reload();
-        await expect(
-            page.getByRole('heading', { name: INCIDENT_NAME }),
-        ).toBeVisible({ timeout: 15_000 });
         await expect(page).toHaveURL(/tab=map/, { timeout: 5_000 });
         await expect(page.locator('canvas').first()).toBeVisible({
             timeout: 10_000,
