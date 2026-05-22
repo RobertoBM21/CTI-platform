@@ -6,23 +6,29 @@ import {
     DOMAIN_DETAIL_SEGMENTS,
     domainNavItems,
     generalNavItems,
+    homeNavItems,
 } from '@/shared/lib/app-navigation';
-import {
-    ChevronLeft,
-    ChevronRight,
-    LayoutDashboard,
-    Upload,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ComponentType } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocationSearch } from '../hooks/use-location-search';
+
+const SIDEBAR_COLLAPSED_STORAGE_KEY = 'cti.sidebar.collapsed';
 
 export function AppSidebar() {
     const pathname = usePathname();
     const search = useLocationSearch();
-    const [collapsed, setCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState<boolean>(() => {
+        if (typeof window === 'undefined') return false;
+
+        try {
+            return localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY) === '1';
+        } catch {
+            return false;
+        }
+    });
     const searchParams = new URLSearchParams(search);
     const fromDomain = searchParams.get('fromDomain');
     const segments = pathname.split('/').filter(Boolean);
@@ -32,6 +38,17 @@ export function AppSidebar() {
         DOMAIN_DETAIL_SEGMENTS.includes(
             segments[0] as (typeof DOMAIN_DETAIL_SEGMENTS)[number],
         );
+
+    useEffect(() => {
+        try {
+            localStorage.setItem(
+                SIDEBAR_COLLAPSED_STORAGE_KEY,
+                collapsed ? '1' : '0',
+            );
+        } catch {
+            // Ignore storage failures (private mode, blocked storage, etc.)
+        }
+    }, [collapsed]);
 
     function SidebarLink({
         item,
@@ -144,9 +161,7 @@ export function AppSidebar() {
                             Home
                         </p>
                     )}
-                    {[
-                        { label: 'Home', href: '/home', icon: LayoutDashboard },
-                    ].map((item) => {
+                    {homeNavItems.map((item) => {
                         const isActive = pathname.startsWith(item.href);
                         return (
                             <SidebarLink

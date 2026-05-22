@@ -63,7 +63,8 @@ test.describe('Cyber Domain catalog', () => {
 
     test('sidebar link navigates to Cyber Domain', async ({ page }) => {
         await page.goto('/home');
-        const link = page.getByRole('link', { name: /cyber domain/i }).first();
+        const link = page.locator('aside nav a[href="/cyber-domain"]').first();
+        await expect(link).toBeVisible();
         await link.click();
         await expect(page).toHaveURL(/\/cyber-domain/);
     });

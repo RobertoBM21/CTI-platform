@@ -2,6 +2,7 @@ import {
     domainConfig,
     entityConfig,
 } from '@/shared/components/entity-type-badge';
+import { LayoutDashboard } from 'lucide-react';
 import type { ComponentType } from 'react';
 
 export interface AppNavItem {
@@ -33,6 +34,14 @@ export const DOMAIN_DETAIL_SEGMENTS = [
     'vulnerabilities',
     'intrusion-sets',
 ] as const;
+
+export const homeNavItems: AppNavItem[] = [
+    {
+        label: 'Home',
+        href: '/home',
+        icon: LayoutDashboard,
+    },
+];
 
 export const generalNavItems: AppNavItem[] = [
     {

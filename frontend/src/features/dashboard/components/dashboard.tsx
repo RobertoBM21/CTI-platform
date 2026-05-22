@@ -1,8 +1,9 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { BarChart3, Globe } from 'lucide-react';
-import { useState } from 'react';
+import { entityConfig } from '@/shared/components/entity-type-badge';
+import { useDetailTab } from '@/shared/hooks/use-detail-tab';
+import { Globe } from 'lucide-react';
 import type { DashboardTab } from '../types';
 import { OverviewTab } from './overview-tab';
 import { ThreatDomainTab } from './threat-tab';
@@ -11,13 +12,17 @@ import { ThreatDomainTab } from './threat-tab';
 
 const TABS: { id: DashboardTab; label: string; icon: React.ElementType }[] = [
     { id: 'overview', label: 'Overview', icon: Globe },
-    { id: 'threat-domain', label: 'Threat Domain', icon: BarChart3 },
+    {
+        id: 'threat-domain',
+        label: 'Threat Domain',
+        icon: entityConfig.incident.icon,
+    },
 ];
 
 // ── Dashboard ──────────────────────────────────────────────────────────
 
 export function Dashboard() {
-    const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
+    const [activeTab, setActiveTab] = useDetailTab(TABS);
 
     return (
         <div className="space-y-6">

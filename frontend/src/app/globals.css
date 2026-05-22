@@ -148,3 +148,18 @@
         @apply font-sans;
     }
 }
+
+.cti-map-popup .maplibregl-popup-content {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+.cti-map-popup .maplibregl-popup-tip {
+    border-top-color: rgba(255, 255, 255, 0.95);
+}
+
+.dark .cti-map-popup .maplibregl-popup-tip {
+    border-top-color: rgba(31, 41, 55, 0.95);
+}

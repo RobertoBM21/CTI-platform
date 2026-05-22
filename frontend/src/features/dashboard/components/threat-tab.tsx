@@ -8,21 +8,20 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { NetworkGraphTab } from '@/shared/components/tabs/network-graph-tab';
-import { getStixType } from '@/shared/lib/stix';
-import type { CatalogEntity, StixObject } from '@/shared/types/entity';
 import {
-    Activity,
-    Crosshair,
-    Globe,
-    Info,
-    MapPin,
-    ShieldAlert,
-    Users,
-    X,
-} from 'lucide-react';
+    EntityTypeBadge,
+    entityConfig,
+} from '@/shared/components/entity-type-badge';
+import { NetworkGraphTab } from '@/shared/components/tabs/network-graph-tab';
+import {
+    formatDate as formatStixDate,
+    getStixConfig,
+    getStixType,
+} from '@/shared/lib/stix';
+import type { CatalogEntity, StixObject } from '@/shared/types/entity';
+import { Activity, Globe, Info, MapPin, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import Map, { Marker, NavigationControl } from 'react-map-gl/maplibre';
+import MapLibreMap, { Marker, NavigationControl } from 'react-map-gl/maplibre';
 import {
     useAllCampaignsForSelect,
     useAllIncidentsForSelect,
@@ -41,6 +40,19 @@ import type { LocationItem } from '../types';
 
 const CARTO_LIGHT =
     'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+
+const SELECT_TRIGGER_CLASS =
+    'bg-card text-foreground hover:bg-card/95 h-11 w-full border shadow-sm transition-colors';
+const SELECT_CONTENT_CLASS = 'bg-card border shadow-lg';
+
+function getSelectWidth(options: { name: string }[], placeholder: string) {
+    const maxLabelLength = options.reduce(
+        (max, option) => Math.max(max, option.name.length),
+        placeholder.length,
+    );
+    const widthInCh = Math.min(Math.max(maxLabelLength + 6, 24), 38);
+    return `${widthInCh}ch`;
+}
 
 // ── Quick entity table ─────────────────────────────────────────────────
 
@@ -117,7 +129,9 @@ function QuickTable({
                                             {e.name}
                                         </td>
                                         <td className="text-foreground/60 px-4 py-2.5">
-                                            {getStixType(e.id)}
+                                            <EntityTypeBadge
+                                                entityType={e.entityType}
+                                            />
                                         </td>
                                     </tr>
                                 ))}
@@ -275,7 +289,7 @@ function FilteredMap({
                     </div>
                 ) : (
                     <div className="h-56 w-full">
-                        <Map
+                        <MapLibreMap
                             initialViewState={{
                                 longitude: 10,
                                 latitude: 25,
@@ -303,33 +317,11 @@ function FilteredMap({
                                     </div>
                                 </Marker>
                             ))}
-                        </Map>
+                        </MapLibreMap>
                     </div>
                 )}
             </CardContent>
         </Card>
-    );
-}
-
-// ── Selection chip ─────────────────────────────────────────────────────
-
-interface SelectionChipProps {
-    label: string;
-    onClear: () => void;
-}
-
-function SelectionChip({ label, onClear }: SelectionChipProps) {
-    return (
-        <div className="border-primary/30 bg-primary/10 text-primary flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold">
-            <span>{label}</span>
-            <button
-                onClick={onClear}
-                className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
-                aria-label="Clear selection"
-            >
-                <X className="size-3" />
-            </button>
-        </div>
     );
 }
 
@@ -372,7 +364,7 @@ function extractLocationsFromRelated(
 function formatDate(d?: string | null): string | undefined {
     if (!d) return undefined;
     try {
-        return new Date(d).toLocaleDateString();
+        return formatStixDate(d);
     } catch {
         return d;
     }
@@ -381,6 +373,14 @@ function formatDate(d?: string | null): string | undefined {
 // ── Threat Domain Tab ──────────────────────────────────────────────────
 
 export function ThreatDomainTab() {
+    const ThreatActorIcon = entityConfig['threat-actor'].icon;
+    const CampaignIcon = entityConfig.campaign.icon;
+    const IncidentIcon = entityConfig.incident.icon;
+
+    const threatActorColor = getStixConfig('threat-actor').color;
+    const campaignColor = getStixConfig('campaign').color;
+    const incidentColor = getStixConfig('incident').color;
+
     // Table pagination
     const [taPage, setTaPage] = useState(1);
     const [campaignsPage, setCampaignsPage] = useState(1);
@@ -394,6 +394,9 @@ export function ThreatDomainTab() {
     const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(
         null,
     );
+    const [threatActorSelectOpen, setThreatActorSelectOpen] = useState(false);
+    const [campaignSelectOpen, setCampaignSelectOpen] = useState(false);
+    const [incidentSelectOpen, setIncidentSelectOpen] = useState(false);
 
     // Table data
     const { data: taRes, isLoading: taLoading } =
@@ -408,6 +411,27 @@ export function ThreatDomainTab() {
     const { data: allCamRes } = useAllCampaignsForSelect();
     const { data: allIncRes } = useAllIncidentsForSelect();
 
+    const taSelectOptions = useMemo(() => {
+        const map = new Map<string, string>();
+        for (const item of allTaRes?.data ?? []) map.set(item.id, item.name);
+        for (const item of taRes?.data ?? []) map.set(item.id, item.name);
+        return [...map.entries()].map(([id, name]) => ({ id, name }));
+    }, [allTaRes, taRes]);
+
+    const campaignSelectOptions = useMemo(() => {
+        const map = new Map<string, string>();
+        for (const item of allCamRes?.data ?? []) map.set(item.id, item.name);
+        for (const item of camRes?.data ?? []) map.set(item.id, item.name);
+        return [...map.entries()].map(([id, name]) => ({ id, name }));
+    }, [allCamRes, camRes]);
+
+    const incidentSelectOptions = useMemo(() => {
+        const map = new Map<string, string>();
+        for (const item of allIncRes?.data ?? []) map.set(item.id, item.name);
+        for (const item of incRes?.data ?? []) map.set(item.id, item.name);
+        return [...map.entries()].map(([id, name]) => ({ id, name }));
+    }, [allIncRes, incRes]);
+
     // Selected entity details
     const { data: taDetail, isLoading: taDetailLoading } =
         useSelectedThreatActorDetail(selectedTaId);
@@ -416,9 +440,35 @@ export function ThreatDomainTab() {
     const { data: incDetail, isLoading: incDetailLoading } =
         useSelectedIncidentDetail(selectedIncidentId);
 
+    const selectedTaName =
+        taSelectOptions.find((item) => item.id === selectedTaId)?.name ??
+        taDetail?.entity.name;
+    const selectedCampaignName =
+        campaignSelectOptions.find((item) => item.id === selectedCampaignId)
+            ?.name ?? camDetail?.entity.name;
+    const selectedIncidentName =
+        incidentSelectOptions.find((item) => item.id === selectedIncidentId)
+            ?.name ?? incDetail?.entity.name;
+
+    const threatActorSelectWidth = useMemo(
+        () => getSelectWidth(taSelectOptions, 'Select Threat Actor'),
+        [taSelectOptions],
+    );
+    const campaignSelectWidth = useMemo(
+        () => getSelectWidth(campaignSelectOptions, 'Select Campaign'),
+        [campaignSelectOptions],
+    );
+    const incidentSelectWidth = useMemo(
+        () => getSelectWidth(incidentSelectOptions, 'Select Incident'),
+        [incidentSelectOptions],
+    );
+
     // Global locations fallback
     const { data: globalLocations } = useLocations();
-    const allLocations = globalLocations?.data ?? [];
+    const allLocations = useMemo(
+        () => globalLocations?.data ?? [],
+        [globalLocations],
+    );
 
     // Derived locations for maps (from selected entities or global fallback)
     const campaignLocations = useMemo(() => {
@@ -427,17 +477,15 @@ export function ThreatDomainTab() {
         if (taDetail)
             return extractLocationsFromRelated(taDetail.relatedObjects);
         return allLocations;
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [camDetail, taDetail, globalLocations]);
+    }, [camDetail, taDetail, allLocations]);
 
     const incidentLocations = useMemo(() => {
-        if (incDetail)
-            return extractLocationsFromRelated(incDetail.relatedObjects);
+        if (camDetail)
+            return extractLocationsFromRelated(camDetail.relatedObjects);
         if (taDetail)
             return extractLocationsFromRelated(taDetail.relatedObjects);
         return allLocations;
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [incDetail, taDetail, globalLocations]);
+    }, [camDetail, taDetail, allLocations]);
 
     // TA info rows
     const taInfoRows = useMemo(() => {
@@ -488,22 +536,67 @@ export function ThreatDomainTab() {
             {/* ── Selectors row ── */}
             <div className="flex flex-wrap items-center gap-3">
                 {/* Threat actor selector */}
-                <div className="flex min-w-52 flex-col gap-1">
+                <div
+                    className="flex max-w-full min-w-0 flex-col gap-1"
+                    style={{ width: threatActorSelectWidth }}
+                >
                     <span className="text-foreground/50 text-[0.7rem] font-medium tracking-wider uppercase">
                         Threat Actor
                     </span>
                     <Select
+                        open={threatActorSelectOpen}
+                        onOpenChange={setThreatActorSelectOpen}
                         value={selectedTaId ?? ''}
                         onValueChange={(v) => {
                             setSelectedTaId(v || null);
                         }}
                     >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select Threat Actor" />
+                        <SelectTrigger
+                            className={SELECT_TRIGGER_CLASS}
+                            style={
+                                selectedTaId
+                                    ? {
+                                          borderColor: `${threatActorColor}80`,
+                                          boxShadow: `0 0 0 1px ${threatActorColor}1f inset`,
+                                      }
+                                    : undefined
+                            }
+                        >
+                            {selectedTaId ? (
+                                <span className="flex min-w-0 items-center gap-2 text-sm font-medium">
+                                    <span style={{ color: threatActorColor }}>
+                                        <ThreatActorIcon className="size-3.5 shrink-0" />
+                                    </span>
+                                    <span className="truncate">
+                                        {selectedTaName ??
+                                            'Selected threat actor'}
+                                    </span>
+                                </span>
+                            ) : (
+                                <SelectValue placeholder="Select Threat Actor" />
+                            )}
                         </SelectTrigger>
-                        <SelectContent>
-                            {(allTaRes?.data ?? []).map((ta) => (
-                                <SelectItem key={ta.id} value={ta.id}>
+                        <SelectContent className={SELECT_CONTENT_CLASS}>
+                            {taSelectOptions.map((ta) => (
+                                <SelectItem
+                                    key={ta.id}
+                                    value={ta.id}
+                                    onMouseDown={(event) => {
+                                        if (selectedTaId !== ta.id) return;
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                        setSelectedTaId(null);
+                                        setThreatActorSelectOpen(false);
+                                    }}
+                                    style={
+                                        selectedTaId === ta.id
+                                            ? {
+                                                  color: threatActorColor,
+                                                  backgroundColor: `${threatActorColor}14`,
+                                              }
+                                            : undefined
+                                    }
+                                >
                                     {ta.name}
                                 </SelectItem>
                             ))}
@@ -512,22 +605,67 @@ export function ThreatDomainTab() {
                 </div>
 
                 {/* Campaign selector */}
-                <div className="flex min-w-52 flex-col gap-1">
+                <div
+                    className="flex max-w-full min-w-0 flex-col gap-1"
+                    style={{ width: campaignSelectWidth }}
+                >
                     <span className="text-foreground/50 text-[0.7rem] font-medium tracking-wider uppercase">
                         Campaign
                     </span>
                     <Select
+                        open={campaignSelectOpen}
+                        onOpenChange={setCampaignSelectOpen}
                         value={selectedCampaignId ?? ''}
                         onValueChange={(v) => {
                             setSelectedCampaignId(v || null);
                         }}
                     >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select Campaign" />
+                        <SelectTrigger
+                            className={SELECT_TRIGGER_CLASS}
+                            style={
+                                selectedCampaignId
+                                    ? {
+                                          borderColor: `${campaignColor}80`,
+                                          boxShadow: `0 0 0 1px ${campaignColor}1f inset`,
+                                      }
+                                    : undefined
+                            }
+                        >
+                            {selectedCampaignId ? (
+                                <span className="flex min-w-0 items-center gap-2 text-sm font-medium">
+                                    <span style={{ color: campaignColor }}>
+                                        <CampaignIcon className="size-3.5 shrink-0" />
+                                    </span>
+                                    <span className="truncate">
+                                        {selectedCampaignName ??
+                                            'Selected campaign'}
+                                    </span>
+                                </span>
+                            ) : (
+                                <SelectValue placeholder="Select Campaign" />
+                            )}
                         </SelectTrigger>
-                        <SelectContent>
-                            {(allCamRes?.data ?? []).map((c) => (
-                                <SelectItem key={c.id} value={c.id}>
+                        <SelectContent className={SELECT_CONTENT_CLASS}>
+                            {campaignSelectOptions.map((c) => (
+                                <SelectItem
+                                    key={c.id}
+                                    value={c.id}
+                                    onMouseDown={(event) => {
+                                        if (selectedCampaignId !== c.id) return;
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                        setSelectedCampaignId(null);
+                                        setCampaignSelectOpen(false);
+                                    }}
+                                    style={
+                                        selectedCampaignId === c.id
+                                            ? {
+                                                  color: campaignColor,
+                                                  backgroundColor: `${campaignColor}14`,
+                                              }
+                                            : undefined
+                                    }
+                                >
                                     {c.name}
                                 </SelectItem>
                             ))}
@@ -536,55 +674,80 @@ export function ThreatDomainTab() {
                 </div>
 
                 {/* Incident selector */}
-                <div className="flex min-w-52 flex-col gap-1">
+                <div
+                    className="flex max-w-full min-w-0 flex-col gap-1"
+                    style={{ width: incidentSelectWidth }}
+                >
                     <span className="text-foreground/50 text-[0.7rem] font-medium tracking-wider uppercase">
                         Incident
                     </span>
                     <Select
+                        open={incidentSelectOpen}
+                        onOpenChange={setIncidentSelectOpen}
                         value={selectedIncidentId ?? ''}
                         onValueChange={(v) => {
                             setSelectedIncidentId(v || null);
                         }}
                     >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select Incident" />
+                        <SelectTrigger
+                            className={SELECT_TRIGGER_CLASS}
+                            style={
+                                selectedIncidentId
+                                    ? {
+                                          borderColor: `${incidentColor}80`,
+                                          boxShadow: `0 0 0 1px ${incidentColor}1f inset`,
+                                      }
+                                    : undefined
+                            }
+                        >
+                            {selectedIncidentId ? (
+                                <span className="flex min-w-0 items-center gap-2 text-sm font-medium">
+                                    <span style={{ color: incidentColor }}>
+                                        <IncidentIcon className="size-3.5 shrink-0" />
+                                    </span>
+                                    <span className="truncate">
+                                        {selectedIncidentName ??
+                                            'Selected incident'}
+                                    </span>
+                                </span>
+                            ) : (
+                                <SelectValue placeholder="Select Incident" />
+                            )}
                         </SelectTrigger>
-                        <SelectContent>
-                            {(allIncRes?.data ?? []).map((i) => (
-                                <SelectItem key={i.id} value={i.id}>
+                        <SelectContent className={SELECT_CONTENT_CLASS}>
+                            {incidentSelectOptions.map((i) => (
+                                <SelectItem
+                                    key={i.id}
+                                    value={i.id}
+                                    onMouseDown={(event) => {
+                                        if (selectedIncidentId !== i.id) return;
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                        setSelectedIncidentId(null);
+                                        setIncidentSelectOpen(false);
+                                    }}
+                                    style={
+                                        selectedIncidentId === i.id
+                                            ? {
+                                                  color: incidentColor,
+                                                  backgroundColor: `${incidentColor}14`,
+                                              }
+                                            : undefined
+                                    }
+                                >
                                     {i.name}
                                 </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
                 </div>
-
-                {/* Active chips */}
-                {selectedTaId && (
-                    <SelectionChip
-                        label={`TA: ${allTaRes?.data?.find((t) => t.id === selectedTaId)?.name ?? selectedTaId}`}
-                        onClear={() => setSelectedTaId(null)}
-                    />
-                )}
-                {selectedCampaignId && (
-                    <SelectionChip
-                        label={`Campaign: ${allCamRes?.data?.find((c) => c.id === selectedCampaignId)?.name ?? selectedCampaignId}`}
-                        onClear={() => setSelectedCampaignId(null)}
-                    />
-                )}
-                {selectedIncidentId && (
-                    <SelectionChip
-                        label={`Incident: ${allIncRes?.data?.find((i) => i.id === selectedIncidentId)?.name ?? selectedIncidentId}`}
-                        onClear={() => setSelectedIncidentId(null)}
-                    />
-                )}
             </div>
 
             {/* ── Quick tables ── */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <QuickTable
                     title="Threat Actors"
-                    icon={Users}
+                    icon={ThreatActorIcon}
                     entities={taRes?.data ?? []}
                     total={taRes?.meta.total ?? 0}
                     page={taPage}
@@ -597,7 +760,7 @@ export function ThreatDomainTab() {
                 />
                 <QuickTable
                     title="Campaigns"
-                    icon={Crosshair}
+                    icon={CampaignIcon}
                     entities={camRes?.data ?? []}
                     total={camRes?.meta.total ?? 0}
                     page={campaignsPage}
@@ -612,7 +775,7 @@ export function ThreatDomainTab() {
                 />
                 <QuickTable
                     title="Incidents"
-                    icon={ShieldAlert}
+                    icon={IncidentIcon}
                     entities={incRes?.data ?? []}
                     total={incRes?.meta.total ?? 0}
                     page={incidentsPage}
@@ -628,8 +791,8 @@ export function ThreatDomainTab() {
             </div>
 
             {/* ── Relationship graph ── */}
-            <Card className="gap-0 rounded-xl py-0 shadow-sm">
-                <CardHeader className="px-5 pt-4 pb-2">
+            <div className="bg-card ring-foreground/10 overflow-hidden rounded-xl shadow-sm ring-1">
+                <div className="border-b px-4 py-3">
                     <div className="flex items-center gap-2">
                         <Activity className="text-foreground/50 size-4" />
                         <span className="text-sm font-semibold">
@@ -637,64 +800,60 @@ export function ThreatDomainTab() {
                         </span>
                         {selectedTaId && (
                             <span className="text-foreground/50 ml-1 text-xs">
-                                —{' '}
-                                {allTaRes?.data?.find(
-                                    (t) => t.id === selectedTaId,
-                                )?.name ?? selectedTaId}
+                                — {selectedTaName ?? 'Selected threat actor'}
                             </span>
                         )}
                     </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                    {!selectedTaId ? (
-                        <div className="text-foreground/40 flex h-72 flex-col items-center justify-center gap-2 text-sm">
-                            <Users className="size-8 opacity-30" />
-                            <span>
-                                Select a threat actor to view its relationship
-                                graph
-                            </span>
-                        </div>
-                    ) : taDetailLoading ? (
-                        <div className="flex h-72 items-center justify-center">
-                            <div className="border-primary size-6 animate-spin rounded-full border-2 border-t-transparent" />
-                        </div>
-                    ) : taDetail ? (
-                        <div className="h-125">
-                            <NetworkGraphTab detail={taDetail} />
-                        </div>
-                    ) : (
-                        <div className="text-foreground/40 flex h-72 items-center justify-center text-sm italic">
-                            Failed to load graph data
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+                </div>
+
+                {!selectedTaId ? (
+                    <div className="text-foreground/40 flex h-72 flex-col items-center justify-center gap-2 text-sm">
+                        <Users className="size-8 opacity-30" />
+                        <span>
+                            Select a threat actor to view its relationship graph
+                        </span>
+                    </div>
+                ) : taDetailLoading ? (
+                    <div className="flex h-72 items-center justify-center">
+                        <div className="border-primary size-6 animate-spin rounded-full border-2 border-t-transparent" />
+                    </div>
+                ) : taDetail ? (
+                    <NetworkGraphTab
+                        detail={taDetail}
+                        className="h-125 rounded-none shadow-none ring-0"
+                    />
+                ) : (
+                    <div className="text-foreground/40 flex h-72 items-center justify-center text-sm italic">
+                        Failed to load graph data
+                    </div>
+                )}
+            </div>
 
             {/* ── Maps row ── */}
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <FilteredMap
-                    title="Campaigns (attributed to selected Threat Actor)"
+                    title="Campaigns"
                     subtitle={
                         selectedCampaignId
-                            ? `Selected: ${allCamRes?.data?.find((c) => c.id === selectedCampaignId)?.name ?? '…'}`
+                            ? `Showing locations linked to campaign: ${selectedCampaignName ?? '…'}`
                             : selectedTaId
-                              ? `Filtered by: ${allTaRes?.data?.find((t) => t.id === selectedTaId)?.name ?? '…'}`
+                              ? `Showing locations linked to threat actor: ${selectedTaName ?? '…'}`
                               : 'Select a Threat Actor or Campaign to filter'
                     }
                     locations={campaignLocations}
                     loading={camDetailLoading || taDetailLoading}
                 />
                 <FilteredMap
-                    title="Incidents (attributed to selected Threat Actor / Campaign)"
+                    title="Incidents"
                     subtitle={
-                        selectedIncidentId
-                            ? `Selected: ${allIncRes?.data?.find((i) => i.id === selectedIncidentId)?.name ?? '…'}`
-                            : selectedTaId || selectedCampaignId
-                              ? 'Filtered by active selection'
-                              : 'Select a Threat Actor or Incident to filter'
+                        selectedCampaignId
+                            ? `Showing incident-related locations for campaign: ${selectedCampaignName ?? '…'}`
+                            : selectedTaId
+                              ? `Showing incident-related locations for threat actor: ${selectedTaName ?? '…'}`
+                              : 'Select a Threat Actor or Campaign to filter incidents'
                     }
                     locations={incidentLocations}
-                    loading={incDetailLoading || taDetailLoading}
+                    loading={camDetailLoading || taDetailLoading}
                 />
             </div>
 
@@ -702,21 +861,21 @@ export function ThreatDomainTab() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <EntityInfoCard
                     title="Threat Actor Information"
-                    icon={Users}
+                    icon={ThreatActorIcon}
                     rows={taInfoRows}
                     loading={taDetailLoading}
                     empty={!selectedTaId}
                 />
                 <EntityInfoCard
                     title="Campaign Information"
-                    icon={Crosshair}
+                    icon={CampaignIcon}
                     rows={camInfoRows}
                     loading={camDetailLoading}
                     empty={!selectedCampaignId}
                 />
                 <EntityInfoCard
                     title="Incident Information"
-                    icon={ShieldAlert}
+                    icon={IncidentIcon}
                     rows={incInfoRows}
                     loading={incDetailLoading}
                     empty={!selectedIncidentId}

@@ -13,11 +13,35 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { fetchDashboardStats, fetchLocations } from '../api/dashboard.api';
 
+const DASHBOARD_MAX_LIMIT = 100;
+
+export const dashboardQueryKeys = {
+    stats: ['dashboard', 'stats'] as const,
+    locations: ['dashboard', 'locations'] as const,
+    topCampaigns: ['dashboard', 'top-campaigns'] as const,
+    topIncidents: ['dashboard', 'top-incidents'] as const,
+    threatActorsPage: (page: number) =>
+        ['dashboard', 'threat-actors', page] as const,
+    campaignsPage: (page: number) => ['dashboard', 'campaigns', page] as const,
+    incidentsPage: (page: number) => ['dashboard', 'incidents', page] as const,
+    threatActorDetail: (id: string | null) =>
+        ['dashboard', 'threat-actor-detail', id] as const,
+    campaignDetail: (id: string | null) =>
+        ['dashboard', 'campaign-detail', id] as const,
+    incidentDetail: (id: string | null) =>
+        ['dashboard', 'incident-detail', id] as const,
+    allThreatActors: ['dashboard', 'all-threat-actors'] as const,
+    allCampaigns: ['dashboard', 'all-campaigns'] as const,
+    allIncidents: ['dashboard', 'all-incidents'] as const,
+    signalFeed: ['dashboard', 'signal-feed'] as const,
+    alertVolume: ['dashboard', 'alert-volume'] as const,
+};
+
 // ── Aggregate stats (totals) ────────────────────────────────────────────
 
 export function useDashboardStats() {
     return useQuery({
-        queryKey: ['dashboard', 'stats'],
+        queryKey: dashboardQueryKeys.stats,
         queryFn: fetchDashboardStats,
     });
 }
@@ -26,8 +50,8 @@ export function useDashboardStats() {
 
 export function useLocations() {
     return useQuery({
-        queryKey: ['dashboard', 'locations'],
-        queryFn: () => fetchLocations(200),
+        queryKey: dashboardQueryKeys.locations,
+        queryFn: () => fetchLocations(DASHBOARD_MAX_LIMIT),
     });
 }
 
@@ -35,15 +59,17 @@ export function useLocations() {
 
 export function useTopCampaigns() {
     return useQuery({
-        queryKey: ['dashboard', 'top-campaigns'],
-        queryFn: () => fetchCampaigns({ limit: 10, sortOrder: 'desc' }),
+        queryKey: dashboardQueryKeys.topCampaigns,
+        queryFn: () =>
+            fetchCampaigns({ limit: DASHBOARD_MAX_LIMIT, sortOrder: 'desc' }),
     });
 }
 
 export function useTopIncidents() {
     return useQuery({
-        queryKey: ['dashboard', 'top-incidents'],
-        queryFn: () => fetchIncidents({ limit: 10, sortOrder: 'desc' }),
+        queryKey: dashboardQueryKeys.topIncidents,
+        queryFn: () =>
+            fetchIncidents({ limit: DASHBOARD_MAX_LIMIT, sortOrder: 'desc' }),
     });
 }
 
@@ -51,21 +77,21 @@ export function useTopIncidents() {
 
 export function useDashboardThreatActors(page: number) {
     return useQuery({
-        queryKey: ['dashboard', 'threat-actors', page],
+        queryKey: dashboardQueryKeys.threatActorsPage(page),
         queryFn: () => fetchThreatActors({ limit: 5, page }),
     });
 }
 
 export function useDashboardCampaigns(page: number) {
     return useQuery({
-        queryKey: ['dashboard', 'campaigns', page],
+        queryKey: dashboardQueryKeys.campaignsPage(page),
         queryFn: () => fetchCampaigns({ limit: 5, page }),
     });
 }
 
 export function useDashboardIncidents(page: number) {
     return useQuery({
-        queryKey: ['dashboard', 'incidents', page],
+        queryKey: dashboardQueryKeys.incidentsPage(page),
         queryFn: () => fetchIncidents({ limit: 5, page }),
     });
 }
@@ -74,7 +100,7 @@ export function useDashboardIncidents(page: number) {
 
 export function useSelectedThreatActorDetail(id: string | null) {
     return useQuery({
-        queryKey: ['dashboard', 'threat-actor-detail', id],
+        queryKey: dashboardQueryKeys.threatActorDetail(id),
         queryFn: () => fetchThreatActorDetail(id!),
         enabled: Boolean(id),
     });
@@ -82,7 +108,7 @@ export function useSelectedThreatActorDetail(id: string | null) {
 
 export function useSelectedCampaignDetail(id: string | null) {
     return useQuery({
-        queryKey: ['dashboard', 'campaign-detail', id],
+        queryKey: dashboardQueryKeys.campaignDetail(id),
         queryFn: () => fetchCampaignDetail(id!),
         enabled: Boolean(id),
     });
@@ -90,7 +116,7 @@ export function useSelectedCampaignDetail(id: string | null) {
 
 export function useSelectedIncidentDetail(id: string | null) {
     return useQuery({
-        queryKey: ['dashboard', 'incident-detail', id],
+        queryKey: dashboardQueryKeys.incidentDetail(id),
         queryFn: () => fetchIncidentDetail(id!),
         enabled: Boolean(id),
     });
@@ -100,22 +126,25 @@ export function useSelectedIncidentDetail(id: string | null) {
 
 export function useAllThreatActorsForSelect() {
     return useQuery({
-        queryKey: ['dashboard', 'all-threat-actors'],
-        queryFn: () => fetchThreatActors({ limit: 100, sortOrder: 'asc' }),
+        queryKey: dashboardQueryKeys.allThreatActors,
+        queryFn: () =>
+            fetchThreatActors({ limit: DASHBOARD_MAX_LIMIT, sortOrder: 'asc' }),
     });
 }
 
 export function useAllCampaignsForSelect() {
     return useQuery({
-        queryKey: ['dashboard', 'all-campaigns'],
-        queryFn: () => fetchCampaigns({ limit: 100, sortOrder: 'asc' }),
+        queryKey: dashboardQueryKeys.allCampaigns,
+        queryFn: () =>
+            fetchCampaigns({ limit: DASHBOARD_MAX_LIMIT, sortOrder: 'asc' }),
     });
 }
 
 export function useAllIncidentsForSelect() {
     return useQuery({
-        queryKey: ['dashboard', 'all-incidents'],
-        queryFn: () => fetchIncidents({ limit: 100, sortOrder: 'asc' }),
+        queryKey: dashboardQueryKeys.allIncidents,
+        queryFn: () =>
+            fetchIncidents({ limit: DASHBOARD_MAX_LIMIT, sortOrder: 'asc' }),
     });
 }
 
@@ -123,7 +152,7 @@ export function useAllIncidentsForSelect() {
 
 export function useSignalFeed() {
     return useQuery({
-        queryKey: ['dashboard', 'signal-feed'],
+        queryKey: dashboardQueryKeys.signalFeed,
         queryFn: () => fetchIncidents({ limit: 8, sortOrder: 'desc' }),
     });
 }
@@ -132,7 +161,39 @@ export function useSignalFeed() {
 
 export function useAlertVolume() {
     return useQuery({
-        queryKey: ['dashboard', 'alert-volume'],
-        queryFn: () => fetchIncidents({ limit: 50, sortOrder: 'asc' }),
+        queryKey: dashboardQueryKeys.alertVolume,
+        queryFn: async () => {
+            const firstPage = await fetchIncidents({
+                page: 1,
+                limit: DASHBOARD_MAX_LIMIT,
+                sortOrder: 'asc',
+            });
+
+            const totalPages = firstPage.meta.totalPages;
+            if (totalPages <= 1) return firstPage;
+
+            const restPages = await Promise.all(
+                Array.from({ length: totalPages - 1 }, (_, idx) =>
+                    fetchIncidents({
+                        page: idx + 2,
+                        limit: DASHBOARD_MAX_LIMIT,
+                        sortOrder: 'asc',
+                    }),
+                ),
+            );
+
+            return {
+                data: [
+                    ...firstPage.data,
+                    ...restPages.flatMap((page) => page.data),
+                ],
+                meta: {
+                    ...firstPage.meta,
+                    totalPages,
+                    page: 1,
+                    limit: firstPage.meta.total,
+                },
+            };
+        },
     });
 }

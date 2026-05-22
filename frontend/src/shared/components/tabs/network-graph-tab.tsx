@@ -409,10 +409,12 @@ function GraphControls() {
 
 interface NetworkGraphTabProps<TEntity extends EntityBase = EntityBase> {
     detail: EntityDetail<TEntity>;
+    className?: string;
 }
 
 export function NetworkGraphTab<TEntity extends EntityBase = EntityBase>({
     detail,
+    className,
 }: NetworkGraphTabProps<TEntity>) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [showAll, setShowAll] = useState(false);
@@ -473,7 +475,12 @@ export function NetworkGraphTab<TEntity extends EntityBase = EntityBase>({
     }, [detail, baseNodes]);
 
     return (
-        <div className="bg-card ring-foreground/10 flex h-140 overflow-hidden rounded-2xl shadow-sm ring-1">
+        <div
+            className={cn(
+                'bg-card ring-foreground/10 flex h-140 overflow-hidden rounded-2xl shadow-sm ring-1',
+                className,
+            )}
+        >
             {/* ── Left entity list ─────────────────────────── */}
             <div className="flex w-68 shrink-0 flex-col border-r">
                 <div className="flex flex-1 flex-col overflow-hidden">

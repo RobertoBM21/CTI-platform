@@ -1,30 +1,35 @@
 'use client';
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import {
+    EntityTypeBadge,
+    entityConfig,
+} from '@/shared/components/entity-type-badge';
 import { StatsCard } from '@/shared/components/stats-card';
+import { formatDate as formatStixDate } from '@/shared/lib/stix';
 import type { CatalogEntity } from '@/shared/types/entity';
+import type { PickingInfo } from '@deck.gl/core';
+import { GeoJsonLayer } from '@deck.gl/layers';
+import DeckGL from '@deck.gl/react';
 import {
     Activity,
     AlertTriangle,
     BarChart2,
-    Crosshair,
     Globe,
     MapPin,
+    MapPinned,
+    Radar,
     Shield,
-    ShieldAlert,
-    Target,
     TrendingUp,
-    Users,
     Zap,
 } from 'lucide-react';
-import { useMemo } from 'react';
-import Map, { Marker, NavigationControl } from 'react-map-gl/maplibre';
+import { useCallback, useMemo, useState } from 'react';
+import Map, { Marker, NavigationControl, Popup } from 'react-map-gl/maplibre';
 import {
     Bar,
     BarChart,
     CartesianGrid,
     Cell,
-    Legend,
     Pie,
     PieChart,
     ResponsiveContainer,
@@ -40,12 +45,25 @@ import {
     useTopCampaigns,
     useTopIncidents,
 } from '../hooks/use-dashboard';
-import type { ChartBarItem, CountryChartItem, LocationItem } from '../types';
+import type { ChartBarItem, LocationItem } from '../types';
+
+type ResolvedPoint = {
+    id: string;
+    name: string;
+    city: string | null;
+    country: string | null;
+    confidence: number | null;
+    createdAt: string;
+    latitude: number;
+    longitude: number;
+};
 
 // ── Constants ──────────────────────────────────────────────────────────
 
 const CARTO_LIGHT =
     'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+const COUNTRY_POLYGONS_URL =
+    'https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson';
 
 const TLP_COLORS: Record<string, string> = {
     clear: '#9ca3af',
@@ -189,22 +207,79 @@ function toChartItems(entities: CatalogEntity[]): ChartBarItem[] {
     return entities.map((e) => ({
         id: e.id,
         name: e.name,
-        shortName: truncate(e.name, 28),
+        shortName: truncate(e.name, 24),
         value: e.confidence ?? 0,
     }));
 }
 
-function toCountryItems(locations: LocationItem[]): CountryChartItem[] {
-    const counts: Record<string, number> = {};
+function byConfidenceDesc(a: CatalogEntity, b: CatalogEntity): number {
+    return (b.confidence ?? -1) - (a.confidence ?? -1);
+}
+
+function toResolvedPoints(locations: LocationItem[]): ResolvedPoint[] {
+    const seen = new Set<string>();
+    const points: ResolvedPoint[] = [];
+
     for (const loc of locations) {
-        const key = loc.country ?? loc.city ?? loc.name;
-        if (!key || key.toLowerCase() === 'world') continue;
-        counts[key] = (counts[key] ?? 0) + 1;
+        const coords = resolveCoords(loc);
+        if (!coords) continue;
+
+        const country = (loc.country ?? loc.name ?? '').trim();
+        if (!country || country.toLowerCase() === 'world') continue;
+        if (seen.has(loc.id)) continue;
+        seen.add(loc.id);
+
+        points.push({
+            id: loc.id,
+            name: loc.name,
+            city: loc.city ?? null,
+            country,
+            confidence: loc.confidence ?? null,
+            createdAt: loc.createdAt,
+            latitude: coords[0],
+            longitude: coords[1],
+        });
     }
+
+    return points;
+}
+
+function toCountryCounts(
+    points: ResolvedPoint[],
+): { country: string; count: number }[] {
+    const counts: Record<string, number> = {};
+
+    for (const p of points) {
+        counts[p.country ?? p.name] = (counts[p.country ?? p.name] ?? 0) + 1;
+    }
+
     return Object.entries(counts)
-        .map(([country, count]) => ({ country: truncate(country, 16), count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10);
+        .map(([country, count]) => ({ country, count }))
+        .sort((a, b) => b.count - a.count);
+}
+
+function getCountryFillColor(
+    count: number,
+    maxCount: number,
+): [number, number, number, number] {
+    if (count <= 0) return [0, 0, 0, 0];
+
+    const t = Math.min(1, count / Math.max(maxCount, 1));
+    const red = Math.round(253 + (207 - 253) * t);
+    const green = Math.round(230 + (73 - 230) * t);
+    const blue = Math.round(138 + (49 - 138) * t);
+    const alpha = Math.round(90 + 70 * t);
+
+    return [red, green, blue, alpha];
+}
+
+function normalizeCountryKey(value: string): string {
+    return value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, ' ');
 }
 
 function toTlpDistribution(
@@ -228,9 +303,26 @@ function groupByMonth(
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         counts[key] = (counts[key] ?? 0) + 1;
     }
-    return Object.entries(counts)
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([month, count]) => ({ month, count }));
+
+    const sortedMonths = Object.keys(counts).sort((a, b) => a.localeCompare(b));
+    if (sortedMonths.length === 0) return [];
+
+    const [startYear, startMonth] = sortedMonths[0].split('-').map(Number);
+    const [endYear, endMonth] = sortedMonths[sortedMonths.length - 1]
+        .split('-')
+        .map(Number);
+
+    const cursor = new Date(Date.UTC(startYear, startMonth - 1, 1));
+    const end = new Date(Date.UTC(endYear, endMonth - 1, 1));
+    const series: { month: string; count: number }[] = [];
+
+    while (cursor <= end) {
+        const key = `${cursor.getUTCFullYear()}-${String(cursor.getUTCMonth() + 1).padStart(2, '0')}`;
+        series.push({ month: key, count: counts[key] ?? 0 });
+        cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+    }
+
+    return series;
 }
 
 // ── Spinner ────────────────────────────────────────────────────────────
@@ -258,7 +350,11 @@ function HorizBarChart({
     color?: string;
     loading?: boolean;
 }) {
-    const chartHeight = Math.max(200, data.length * 36);
+    const normalizedData = useMemo(
+        () => [...data].sort((a, b) => b.value - a.value),
+        [data],
+    );
+    const chartHeight = Math.max(220, normalizedData.length * 34);
 
     return (
         <Card className="gap-0 rounded-xl py-0 shadow-sm">
@@ -271,7 +367,7 @@ function HorizBarChart({
             <CardContent className="px-2 pb-4">
                 {loading ? (
                     <Spinner />
-                ) : data.length === 0 ? (
+                ) : normalizedData.length === 0 ? (
                     <div className="text-foreground/40 flex h-28 items-center justify-center text-sm italic">
                         No data available
                     </div>
@@ -279,8 +375,8 @@ function HorizBarChart({
                     <ResponsiveContainer width="100%" height={chartHeight}>
                         <BarChart
                             layout="vertical"
-                            data={data}
-                            margin={{ left: 8, right: 24, top: 4, bottom: 4 }}
+                            data={normalizedData}
+                            margin={{ left: 0, right: 20, top: 2, bottom: 2 }}
                         >
                             <CartesianGrid
                                 strokeDasharray="3 3"
@@ -295,7 +391,8 @@ function HorizBarChart({
                             <YAxis
                                 type="category"
                                 dataKey="shortName"
-                                width={160}
+                                width={126}
+                                interval={0}
                                 tick={{ fontSize: 11 }}
                             />
                             <Tooltip
@@ -312,7 +409,7 @@ function HorizBarChart({
                                 dataKey="value"
                                 fill={color}
                                 radius={[0, 4, 4, 0]}
-                                maxBarSize={20}
+                                maxBarSize={18}
                             />
                         </BarChart>
                     </ResponsiveContainer>
@@ -329,6 +426,15 @@ function TlpPieChart({
     data: { name: string; value: number }[];
     loading?: boolean;
 }) {
+    const total = useMemo(
+        () => data.reduce((acc, entry) => acc + entry.value, 0),
+        [data],
+    );
+    const sortedData = useMemo(
+        () => [...data].sort((a, b) => b.value - a.value),
+        [data],
+    );
+
     return (
         <Card className="gap-0 rounded-xl py-0 shadow-sm">
             <CardHeader className="px-5 pt-4 pb-2">
@@ -342,138 +448,296 @@ function TlpPieChart({
             <CardContent className="px-2 pb-4">
                 {loading ? (
                     <Spinner />
-                ) : data.length === 0 ? (
+                ) : sortedData.length === 0 ? (
                     <div className="text-foreground/40 flex h-28 items-center justify-center text-sm italic">
                         No data
                     </div>
                 ) : (
-                    <ResponsiveContainer width="100%" height={220}>
-                        <PieChart>
-                            <Pie
-                                data={data}
-                                dataKey="value"
-                                nameKey="name"
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={75}
-                                stroke="none"
-                                strokeWidth={0}
-                                paddingAngle={data.length > 1 ? 2 : 0}
-                            >
-                                {data.map((entry, idx) => (
-                                    <Cell
-                                        key={entry.name}
-                                        fill={
-                                            TLP_COLORS[entry.name] ??
-                                            CHART_PALETTE[
-                                                idx % CHART_PALETTE.length
-                                            ]
-                                        }
+                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-2">
+                        <div className="md:w-[56%]">
+                            <ResponsiveContainer width="100%" height={200}>
+                                <PieChart>
+                                    <Pie
+                                        data={sortedData}
+                                        dataKey="value"
+                                        nameKey="name"
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={0}
+                                        outerRadius={74}
                                         stroke="none"
+                                        strokeWidth={0}
+                                        paddingAngle={
+                                            sortedData.length > 1 ? 2 : 0
+                                        }
+                                    >
+                                        {sortedData.map((entry, idx) => (
+                                            <Cell
+                                                key={entry.name}
+                                                fill={
+                                                    TLP_COLORS[entry.name] ??
+                                                    CHART_PALETTE[
+                                                        idx %
+                                                            CHART_PALETTE.length
+                                                    ]
+                                                }
+                                                stroke="none"
+                                            />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip
+                                        formatter={(val, name) => [
+                                            `${val} (${Math.round((Number(val) / Math.max(total, 1)) * 100)}%)`,
+                                            `TLP:${String(name).toUpperCase()}`,
+                                        ]}
+                                        contentStyle={{
+                                            borderRadius: '8px',
+                                            fontSize: 12,
+                                        }}
                                     />
-                                ))}
-                            </Pie>
-                            <Tooltip
-                                formatter={(val, name) => [
-                                    `${val} entities`,
-                                    `TLP:${String(name).toUpperCase()}`,
-                                ]}
-                                contentStyle={{
-                                    borderRadius: '8px',
-                                    fontSize: 12,
-                                }}
-                            />
-                            <Legend
-                                iconType="circle"
-                                iconSize={8}
-                                formatter={(val) => (
-                                    <span className="text-xs capitalize">
-                                        TLP:{String(val).toUpperCase()}
-                                    </span>
-                                )}
-                            />
-                        </PieChart>
-                    </ResponsiveContainer>
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+
+                        <div className="space-y-1 px-2 pb-2 md:max-h-48 md:w-[44%] md:overflow-y-auto md:pr-3">
+                            {sortedData.map((entry, idx) => {
+                                const fill =
+                                    TLP_COLORS[entry.name] ??
+                                    CHART_PALETTE[idx % CHART_PALETTE.length];
+                                const percent = Math.round(
+                                    (entry.value / Math.max(total, 1)) * 100,
+                                );
+
+                                return (
+                                    <div
+                                        key={`legend-${entry.name}`}
+                                        className="border-border/60 flex items-center justify-between gap-2 rounded-md border px-2 py-1"
+                                    >
+                                        <div className="flex min-w-0 items-center gap-1.5">
+                                            <span
+                                                className="size-2.5 shrink-0 rounded-full"
+                                                style={{
+                                                    backgroundColor: fill,
+                                                }}
+                                            />
+                                            <span className="truncate text-xs font-semibold uppercase">
+                                                {entry.name.replace(
+                                                    '+strict',
+                                                    '+',
+                                                )}
+                                            </span>
+                                        </div>
+                                        <span className="text-foreground/65 text-xs tabular-nums">
+                                            {percent}%
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
                 )}
             </CardContent>
         </Card>
     );
 }
 
-function CountryBarChart({
-    data,
+function CountryHeatMap({
+    locations,
     loading = false,
 }: {
-    data: CountryChartItem[];
+    locations: LocationItem[];
     loading?: boolean;
 }) {
+    const points = useMemo(() => toResolvedPoints(locations), [locations]);
+    const countryCounts = useMemo(() => toCountryCounts(points), [points]);
+    const maxCount = useMemo(
+        () => Math.max(1, ...countryCounts.map((item) => item.count)),
+        [countryCounts],
+    );
+
+    const countByCode = useMemo(() => {
+        const map = new globalThis.Map<string, number>();
+        for (const { country, count } of countryCounts) {
+            const key = country.trim().toUpperCase();
+            if (key.length === 2) map.set(key, count);
+        }
+        return map;
+    }, [countryCounts]);
+
+    const countByName = useMemo(() => {
+        const map = new globalThis.Map<string, number>();
+        const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+
+        for (const { country, count } of countryCounts) {
+            const trimmedCountry = country.trim();
+            map.set(normalizeCountryKey(trimmedCountry), count);
+
+            const upperCountry = trimmedCountry.toUpperCase();
+            if (upperCountry.length === 2) {
+                const canonicalCode =
+                    upperCountry === 'UK' ? 'GB' : upperCountry;
+                const displayName = regionNames.of(canonicalCode);
+
+                if (displayName) {
+                    map.set(normalizeCountryKey(displayName), count);
+                }
+            }
+        }
+
+        return map;
+    }, [countryCounts]);
+
+    const getCountryCount = useCallback(
+        (feature: { properties?: Record<string, unknown> } | undefined) => {
+            if (!feature?.properties) return 0;
+
+            const codeRaw = String(
+                feature.properties.ISO_A2 ?? feature.properties.ISO2 ?? '',
+            ).toUpperCase();
+            const codeCandidates = [
+                codeRaw,
+                String(feature.properties.iso_a2 ?? '').toUpperCase(),
+                String(
+                    feature.properties['ISO3166-1-Alpha-2'] ?? '',
+                ).toUpperCase(),
+            ].filter(Boolean);
+
+            for (const code of codeCandidates) {
+                if (countByCode.has(code)) return countByCode.get(code) ?? 0;
+            }
+
+            const nameRaw = String(
+                feature.properties.ADMIN ??
+                    feature.properties.NAME ??
+                    feature.properties.name_en ??
+                    feature.properties.name ??
+                    feature.properties.sovereignt ??
+                    '',
+            );
+            const nameKey = normalizeCountryKey(nameRaw);
+            return countByName.get(nameKey) ?? 0;
+        },
+        [countByCode, countByName],
+    );
+
+    const countryLayer = useMemo(
+        () =>
+            new GeoJsonLayer({
+                id: 'incidents-country-fill-layer',
+                data: COUNTRY_POLYGONS_URL,
+                filled: true,
+                stroked: true,
+                pickable: true,
+                lineWidthMinPixels: 0.7,
+                getLineColor: [216, 211, 204, 120],
+                getFillColor: (feature) =>
+                    getCountryFillColor(
+                        getCountryCount(
+                            feature as {
+                                properties?: Record<string, unknown>;
+                            },
+                        ),
+                        maxCount,
+                    ),
+            }),
+        [getCountryCount, maxCount],
+    );
+
+    const [hoverCard, setHoverCard] = useState<{
+        label: string;
+        count: number;
+    } | null>(null);
+
+    const handleCountryHover = useCallback(
+        (info: PickingInfo<{ properties?: Record<string, unknown> }>) => {
+            if (!info.object) {
+                setHoverCard(null);
+                return;
+            }
+
+            const label = String(
+                info.object.properties?.ADMIN ??
+                    info.object.properties?.NAME ??
+                    info.object.properties?.name ??
+                    'Unknown',
+            );
+            const count = getCountryCount(info.object);
+            setHoverCard({ label, count });
+        },
+        [getCountryCount],
+    );
+
     return (
-        <Card className="gap-0 rounded-xl py-0 shadow-sm">
+        <Card className="gap-0 overflow-hidden rounded-xl py-0 shadow-sm">
             <CardHeader className="px-5 pt-4 pb-2">
-                <div className="flex items-center gap-2">
-                    <Target className="text-foreground/50 size-4" />
-                    <span className="text-sm font-semibold">
-                        Incidents per Country
+                <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                        <Radar className="text-foreground/50 size-4" />
+                        <span className="text-sm font-semibold">
+                            Incidents per Country
+                        </span>
+                    </div>
+                    <span className="text-foreground/50 text-xs">
+                        Heat by location count
                     </span>
                 </div>
             </CardHeader>
-            <CardContent className="px-2 pb-4">
+            <CardContent className="space-y-2 p-0 pb-2">
                 {loading ? (
                     <Spinner />
-                ) : data.length === 0 ? (
-                    <div className="text-foreground/40 flex h-28 items-center justify-center text-sm italic">
+                ) : points.length === 0 ? (
+                    <div className="text-foreground/40 flex h-44 items-center justify-center text-sm italic">
                         No location data
                     </div>
                 ) : (
-                    <ResponsiveContainer
-                        width="100%"
-                        height={Math.max(160, data.length * 34)}
-                    >
-                        <BarChart
-                            data={data}
-                            margin={{ left: 16, right: 16, top: 4, bottom: 32 }}
-                        >
-                            <CartesianGrid
-                                strokeDasharray="3 3"
-                                vertical={false}
-                                className="stroke-foreground/10"
-                            />
-                            <XAxis
-                                dataKey="country"
-                                tick={{ fontSize: 10 }}
-                                angle={-35}
-                                textAnchor="end"
-                                interval={0}
-                            />
-                            <YAxis
-                                tick={{ fontSize: 11 }}
-                                allowDecimals={false}
-                            />
-                            <Tooltip
-                                formatter={(val) => [`${val}`, 'Locations']}
-                                contentStyle={{
-                                    borderRadius: '8px',
-                                    fontSize: 12,
+                    <>
+                        <div className="relative h-72 w-full overflow-hidden">
+                            <DeckGL
+                                initialViewState={{
+                                    longitude: 10,
+                                    latitude: 25,
+                                    zoom: 1.2,
                                 }}
-                            />
-                            <Bar
-                                dataKey="count"
-                                radius={[4, 4, 0, 0]}
-                                maxBarSize={40}
+                                controller={true}
+                                layers={[countryLayer]}
+                                onHover={handleCountryHover}
+                                style={{
+                                    position: 'absolute',
+                                    width: '100%',
+                                    height: '100%',
+                                }}
                             >
-                                {data.map((entry, idx) => (
-                                    <Cell
-                                        key={entry.country}
-                                        fill={
-                                            CHART_PALETTE[
-                                                idx % CHART_PALETTE.length
-                                            ]
-                                        }
-                                    />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
+                                <Map
+                                    style={{ width: '100%', height: '100%' }}
+                                    mapStyle={CARTO_LIGHT}
+                                    attributionControl={false}
+                                >
+                                    <NavigationControl position="top-right" />
+                                </Map>
+                            </DeckGL>
+
+                            {hoverCard ? (
+                                <div className="absolute bottom-3 left-3 z-10 rounded-lg bg-slate-800/92 px-3 py-2 text-xs text-white shadow-lg backdrop-blur-sm">
+                                    <div className="font-semibold">
+                                        {hoverCard.label}
+                                    </div>
+                                    <div className="text-white/85 tabular-nums">
+                                        Incidents: {hoverCard.count}
+                                    </div>
+                                </div>
+                            ) : null}
+                        </div>
+
+                        <div className="flex items-center justify-end gap-2 px-4 pb-2 text-[0.7rem]">
+                            <span className="text-foreground/55">
+                                Low activity
+                            </span>
+                            <div className="h-2 w-28 rounded-full bg-linear-to-r from-[#fde68a] via-[#f59e0b] to-[#cf4931]" />
+                            <span className="text-foreground/55">
+                                High activity
+                            </span>
+                        </div>
+                    </>
                 )}
             </CardContent>
         </Card>
@@ -488,51 +752,67 @@ function AlertVolumeChart({
     loading?: boolean;
 }) {
     return (
-        <Card className="gap-0 rounded-xl py-0 shadow-sm">
+        <Card className="h-full gap-0 rounded-xl py-0 shadow-sm">
             <CardHeader className="px-5 pt-4 pb-2">
                 <div className="flex items-center gap-2">
                     <TrendingUp className="text-foreground/50 size-4" />
                     <span className="text-sm font-semibold">Alert Volume</span>
                 </div>
             </CardHeader>
-            <CardContent className="px-2 pb-4">
+            <CardContent className="flex min-h-55 flex-1 px-3 pt-1 pb-2">
                 {loading ? (
-                    <Spinner />
+                    <div className="flex h-full w-full items-center justify-center">
+                        <Spinner />
+                    </div>
                 ) : data.length === 0 ? (
-                    <div className="text-foreground/40 flex h-28 items-center justify-center text-sm italic">
+                    <div className="text-foreground/40 flex h-full w-full items-center justify-center text-sm italic">
                         No data available
                     </div>
                 ) : (
-                    <ResponsiveContainer width="100%" height={160}>
-                        <BarChart
-                            data={data}
-                            margin={{ left: 8, right: 16, top: 4, bottom: 4 }}
-                        >
-                            <CartesianGrid
-                                strokeDasharray="3 3"
-                                vertical={false}
-                                className="stroke-foreground/10"
-                            />
-                            <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                            <YAxis
-                                tick={{ fontSize: 11 }}
-                                allowDecimals={false}
-                            />
-                            <Tooltip
-                                formatter={(val) => [`${val}`, 'Incidents']}
-                                contentStyle={{
-                                    borderRadius: '8px',
-                                    fontSize: 12,
+                    <div className="h-full w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                                data={data}
+                                margin={{
+                                    left: 10,
+                                    right: 10,
+                                    top: 8,
+                                    bottom: 2,
                                 }}
-                            />
-                            <Bar
-                                dataKey="count"
-                                fill="#CF4931"
-                                radius={[4, 4, 0, 0]}
-                                maxBarSize={36}
-                            />
-                        </BarChart>
-                    </ResponsiveContainer>
+                            >
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    vertical={false}
+                                    className="stroke-foreground/10"
+                                />
+                                <XAxis
+                                    dataKey="month"
+                                    tick={{ fontSize: 11 }}
+                                    tickMargin={8}
+                                    minTickGap={12}
+                                    padding={{ left: 28, right: 28 }}
+                                />
+                                <YAxis
+                                    tick={{ fontSize: 11 }}
+                                    allowDecimals={false}
+                                    width={22}
+                                />
+                                <Tooltip
+                                    formatter={(val) => [`${val}`, 'Incidents']}
+                                    contentStyle={{
+                                        borderRadius: '8px',
+                                        fontSize: 12,
+                                    }}
+                                />
+                                <Bar
+                                    dataKey="count"
+                                    fill="#CF4931"
+                                    radius={[4, 4, 0, 0]}
+                                    maxBarSize={34}
+                                />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
                 )}
             </CardContent>
         </Card>
@@ -546,19 +826,10 @@ function IncidentsMap({
     locations: LocationItem[];
     loading?: boolean;
 }) {
-    const pins = useMemo(() => {
-        const seen = new Set<string>();
-        return locations
-            .map((l) => ({ loc: l, coords: resolveCoords(l) }))
-            .filter(
-                (x): x is { loc: LocationItem; coords: [number, number] } => {
-                    if (x.coords === null) return false;
-                    if (seen.has(x.loc.id)) return false;
-                    seen.add(x.loc.id);
-                    return true;
-                },
-            );
-    }, [locations]);
+    const points = useMemo(() => toResolvedPoints(locations), [locations]);
+    const [hoveredPoint, setHoveredPoint] = useState<ResolvedPoint | null>(
+        null,
+    );
 
     return (
         <Card className="gap-0 overflow-hidden rounded-xl py-0 shadow-sm">
@@ -567,11 +838,11 @@ function IncidentsMap({
                     <div className="flex items-center gap-2">
                         <Globe className="text-foreground/50 size-4" />
                         <span className="text-sm font-semibold">
-                            All Incidents Map
+                            All Incidents
                         </span>
                     </div>
                     <span className="text-foreground/50 text-xs">
-                        {pins.length} location{pins.length !== 1 ? 's' : ''}
+                        {points.length} location{points.length !== 1 ? 's' : ''}
                     </span>
                 </div>
             </CardHeader>
@@ -581,7 +852,7 @@ function IncidentsMap({
                         <Spinner />
                     </div>
                 ) : (
-                    <div className="h-72 w-full">
+                    <div className="h-80 w-full">
                         <Map
                             initialViewState={{
                                 longitude: 10,
@@ -593,23 +864,83 @@ function IncidentsMap({
                             attributionControl={false}
                         >
                             <NavigationControl position="top-right" />
-                            {pins.map(({ loc, coords }) => (
+                            {points.map((point) => (
                                 <Marker
-                                    key={loc.id}
-                                    longitude={coords[1]}
-                                    latitude={coords[0]}
+                                    key={point.id}
+                                    longitude={point.longitude}
+                                    latitude={point.latitude}
                                     anchor="bottom"
                                 >
-                                    <div className="group relative flex flex-col items-center">
+                                    <button
+                                        type="button"
+                                        onMouseEnter={() =>
+                                            setHoveredPoint(point)
+                                        }
+                                        onMouseLeave={() =>
+                                            setHoveredPoint((current) =>
+                                                current?.id === point.id
+                                                    ? null
+                                                    : current,
+                                            )
+                                        }
+                                        onClick={() => setHoveredPoint(point)}
+                                        className="group relative flex flex-col items-center"
+                                        aria-label={`Inspect location ${point.name}`}
+                                    >
                                         <div className="flex size-7 items-center justify-center rounded-full bg-[#CF4931] shadow-lg transition-transform group-hover:scale-110">
                                             <MapPin className="size-3.5 text-white" />
                                         </div>
-                                        <div className="pointer-events-none absolute bottom-8 left-1/2 hidden -translate-x-1/2 rounded bg-gray-800 px-2 py-1 text-center text-[0.6rem] whitespace-nowrap text-white shadow group-hover:block">
-                                            {loc.name}
-                                        </div>
-                                    </div>
+                                    </button>
                                 </Marker>
                             ))}
+
+                            {hoveredPoint ? (
+                                <Popup
+                                    longitude={hoveredPoint.longitude}
+                                    latitude={hoveredPoint.latitude}
+                                    anchor="top"
+                                    closeButton={false}
+                                    closeOnClick={false}
+                                    offset={20}
+                                    className="cti-map-popup"
+                                >
+                                    <div className="cti-map-popup-card border-border/70 bg-card/95 min-w-52 rounded-xl border p-3 text-xs shadow-xl backdrop-blur-sm">
+                                        <div className="mb-2 flex items-center justify-between gap-2">
+                                            <div className="text-base leading-tight font-semibold">
+                                                {hoveredPoint.name}
+                                            </div>
+                                            <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-[0.65rem] font-semibold">
+                                                Location
+                                            </span>
+                                        </div>
+                                        <div className="text-muted-foreground mb-1.5 flex items-center gap-1">
+                                            <MapPinned className="size-3" />
+                                            <span>
+                                                {hoveredPoint.city
+                                                    ? `${hoveredPoint.city}, ${hoveredPoint.country ?? ''}`
+                                                    : hoveredPoint.country}
+                                            </span>
+                                        </div>
+                                        <div className="text-muted-foreground">
+                                            Coordinates:{' '}
+                                            {hoveredPoint.latitude.toFixed(2)},{' '}
+                                            {hoveredPoint.longitude.toFixed(2)}
+                                        </div>
+                                        <div className="text-muted-foreground">
+                                            Confidence:{' '}
+                                            {hoveredPoint.confidence != null
+                                                ? `${hoveredPoint.confidence}%`
+                                                : '—'}
+                                        </div>
+                                        <div className="text-muted-foreground">
+                                            Created:{' '}
+                                            {formatStixDate(
+                                                hoveredPoint.createdAt,
+                                            )}
+                                        </div>
+                                    </div>
+                                </Popup>
+                            ) : null}
                         </Map>
                     </div>
                 )}
@@ -669,9 +1000,7 @@ function SignalFeed({
                                             {e.name}
                                         </p>
                                         <p className="text-foreground/50 text-xs">
-                                            {new Date(
-                                                e.createdAt,
-                                            ).toLocaleDateString()}
+                                            {formatStixDate(e.createdAt)}
                                         </p>
                                     </div>
                                     <span
@@ -703,7 +1032,7 @@ function ActiveCampaignCard({
     const tlp = ((campaign?.tlp as string) ?? 'clear').toLowerCase();
 
     return (
-        <Card className="gap-0 rounded-xl py-0 shadow-sm">
+        <Card className="gap-0 overflow-hidden rounded-xl py-0 shadow-sm">
             <CardHeader className="px-5 pt-4 pb-2">
                 <div className="flex items-center gap-2">
                     <BarChart2 className="text-foreground/50 size-4" />
@@ -716,51 +1045,58 @@ function ActiveCampaignCard({
                 {loading ? (
                     <Spinner />
                 ) : campaign ? (
-                    <div className="space-y-3">
-                        <div className="flex items-start justify-between gap-2">
-                            <h3 className="text-base leading-tight font-semibold">
-                                {campaign.name}
-                            </h3>
+                    <div className="from-primary/5 to-primary/15 border-border/70 space-y-4 rounded-xl border bg-linear-to-br p-4">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="space-y-1">
+                                <p className="text-foreground/50 text-[0.65rem] font-semibold tracking-wider uppercase">
+                                    Highest confidence campaign
+                                </p>
+                                <h3 className="text-base leading-tight font-semibold">
+                                    {campaign.name}
+                                </h3>
+                            </div>
                             <span
                                 className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[0.65rem] font-bold ${TLP_PILL[tlp] ?? 'bg-gray-100 text-gray-600'}`}
                             >
                                 TLP:{tlp.replace('+strict', '').toUpperCase()}
                             </span>
                         </div>
-                        {campaign.confidence != null && (
-                            <div className="flex items-center gap-2">
-                                <span className="text-foreground/50 text-xs">
+
+                        <div className="space-y-1.5">
+                            <div className="flex items-center justify-between gap-2">
+                                <span className="text-foreground/55 text-xs font-medium">
                                     Confidence
                                 </span>
-                                <div className="bg-muted h-1.5 flex-1 rounded-full">
-                                    <div
-                                        className="bg-primary h-full rounded-full"
-                                        style={{
-                                            width: `${campaign.confidence}%`,
-                                        }}
-                                    />
-                                </div>
-                                <span className="text-foreground/70 text-xs tabular-nums">
-                                    {campaign.confidence}%
+                                <span className="text-primary text-sm font-semibold tabular-nums">
+                                    {campaign.confidence != null
+                                        ? `${campaign.confidence}%`
+                                        : '—'}
                                 </span>
                             </div>
-                        )}
+                            <div className="bg-muted h-2 rounded-full">
+                                <div
+                                    className="from-primary to-primary/70 h-full rounded-full bg-linear-to-r"
+                                    style={{
+                                        width: `${campaign.confidence ?? 0}%`,
+                                    }}
+                                />
+                            </div>
+                        </div>
+
                         <dl className="grid grid-cols-2 gap-2 text-xs">
-                            <div>
-                                <dt className="text-foreground/50 font-medium">
+                            <div className="border-border/50 bg-background/70 rounded-lg border p-2">
+                                <dt className="text-foreground/55 font-medium">
                                     Created
                                 </dt>
-                                <dd className="text-foreground/80">
-                                    {new Date(
-                                        campaign.createdAt,
-                                    ).toLocaleDateString()}
+                                <dd className="text-foreground/85 mt-0.5">
+                                    {formatStixDate(campaign.createdAt)}
                                 </dd>
                             </div>
-                            <div>
-                                <dt className="text-foreground/50 font-medium">
+                            <div className="border-border/50 bg-background/70 rounded-lg border p-2">
+                                <dt className="text-foreground/55 font-medium">
                                     Source
                                 </dt>
-                                <dd className="text-foreground/80">
+                                <dd className="text-foreground/85 mt-0.5 truncate">
                                     {(campaign.createdBy as string | null) ??
                                         '—'}
                                 </dd>
@@ -783,18 +1119,13 @@ function RecentEntitiesTable({
     loading?: boolean;
 }) {
     const rows = useMemo(() => {
-        const combined = [
-            ...incidents.map((e) => ({ ...e, category: 'Incident' as const })),
-            ...campaigns.map((e) => ({
-                ...e,
-                category: 'Campaign' as const,
-            })),
-        ].sort(
-            (a, b) =>
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime(),
-        );
-        return combined;
+        return [...incidents, ...campaigns]
+            .sort(
+                (a, b) =>
+                    new Date(b.createdAt).getTime() -
+                    new Date(a.createdAt).getTime(),
+            )
+            .slice(0, 10);
     }, [incidents, campaigns]);
 
     return (
@@ -847,9 +1178,9 @@ function RecentEntitiesTable({
                                             className="hover:bg-muted/30 transition-colors"
                                         >
                                             <td className="px-5 py-3">
-                                                <span className="text-foreground/70 text-xs font-medium">
-                                                    {row.category}
-                                                </span>
+                                                <EntityTypeBadge
+                                                    entityType={row.entityType}
+                                                />
                                             </td>
                                             <td className="max-w-xs truncate px-4 py-3 font-medium">
                                                 {row.name}
@@ -871,9 +1202,7 @@ function RecentEntitiesTable({
                                                 </span>
                                             </td>
                                             <td className="text-foreground/50 px-5 py-3 text-xs tabular-nums">
-                                                {new Date(
-                                                    row.createdAt,
-                                                ).toLocaleDateString()}
+                                                {formatStixDate(row.createdAt)}
                                             </td>
                                         </tr>
                                     );
@@ -899,34 +1228,29 @@ export function OverviewTab() {
     const { data: signalRes, isLoading: signalLoading } = useSignalFeed();
     const { data: volumeRes, isLoading: volumeLoading } = useAlertVolume();
 
-    const locations = locationsRes?.data ?? [];
-    const campaigns = campaignsRes?.data ?? [];
-    const incidents = incidentsRes?.data ?? [];
-    const signalFeed = signalRes?.data ?? [];
+    const locations = useMemo(() => locationsRes?.data ?? [], [locationsRes]);
+    const campaigns = useMemo(() => campaignsRes?.data ?? [], [campaignsRes]);
+    const incidents = useMemo(() => incidentsRes?.data ?? [], [incidentsRes]);
+    const signalFeed = useMemo(() => signalRes?.data ?? [], [signalRes]);
+    const IncidentIcon = entityConfig.incident.icon;
+    const CampaignIcon = entityConfig.campaign.icon;
+    const ThreatActorIcon = entityConfig['threat-actor'].icon;
     const volumeData = useMemo(
         () => groupByMonth(volumeRes?.data ?? []),
         [volumeRes],
     );
 
     const campaignChartData = useMemo(
-        () => toChartItems(campaigns),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [campaignsRes],
+        () => toChartItems([...campaigns].sort(byConfidenceDesc).slice(0, 10)),
+        [campaigns],
     );
     const incidentChartData = useMemo(
-        () => toChartItems(incidents),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [incidentsRes],
-    );
-    const countryData = useMemo(
-        () => toCountryItems(locations),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [locationsRes],
+        () => toChartItems([...incidents].sort(byConfidenceDesc).slice(0, 10)),
+        [incidents],
     );
     const tlpData = useMemo(
         () => toTlpDistribution(incidents, campaigns),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [incidentsRes, campaignsRes],
+        [incidents, campaigns],
     );
 
     const topCampaign = campaigns[0];
@@ -938,21 +1262,21 @@ export function OverviewTab() {
                 <StatsCard
                     label="Total Incidents"
                     value={statsLoading ? '—' : (stats?.totalIncidents ?? 0)}
-                    icon={ShieldAlert}
+                    icon={IncidentIcon}
                     iconClassName="bg-red-50 text-red-600"
                     description="Registered cyber/hybrid incidents"
                 />
                 <StatsCard
                     label="Total Campaigns"
                     value={statsLoading ? '—' : (stats?.totalCampaigns ?? 0)}
-                    icon={Crosshair}
+                    icon={CampaignIcon}
                     iconClassName="bg-blue-50 text-blue-600"
                     description="Active threat campaigns"
                 />
                 <StatsCard
                     label="Total Threat Actors"
                     value={statsLoading ? '—' : (stats?.totalThreatActors ?? 0)}
-                    icon={Users}
+                    icon={ThreatActorIcon}
                     iconClassName="bg-purple-50 text-purple-600"
                     description="Identified threat actor groups"
                 />
@@ -965,14 +1289,14 @@ export function OverviewTab() {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <HorizBarChart
                     title="Top 10 Campaigns"
-                    icon={Crosshair}
+                    icon={CampaignIcon}
                     data={campaignChartData}
                     color="#3b82f6"
                     loading={campaignsLoading}
                 />
                 <HorizBarChart
                     title="Top 10 Incidents"
-                    icon={ShieldAlert}
+                    icon={IncidentIcon}
                     data={incidentChartData}
                     color="#CF4931"
                     loading={incidentsLoading}
@@ -988,27 +1312,24 @@ export function OverviewTab() {
                 />
             </div>
 
-            {/* TLP distribution + Incidents per country */}
+            {/* Incidents per country */}
+            <CountryHeatMap locations={locations} loading={locationsLoading} />
+
+            {/* TLP distribution + Signal feed */}
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <TlpPieChart
                     data={tlpData}
                     loading={campaignsLoading || incidentsLoading}
                 />
-                <CountryBarChart
-                    data={countryData}
-                    loading={locationsLoading}
-                />
+                <SignalFeed incidents={signalFeed} loading={signalLoading} />
             </div>
 
-            {/* Signal feed + Targets info table */}
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <SignalFeed incidents={signalFeed} loading={signalLoading} />
-                <RecentEntitiesTable
-                    incidents={incidents}
-                    campaigns={campaigns}
-                    loading={campaignsLoading || incidentsLoading}
-                />
-            </div>
+            {/* Targets info table */}
+            <RecentEntitiesTable
+                incidents={incidents}
+                campaigns={campaigns}
+                loading={campaignsLoading || incidentsLoading}
+            />
         </div>
     );
 }
