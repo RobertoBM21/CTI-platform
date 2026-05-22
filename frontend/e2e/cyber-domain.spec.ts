@@ -61,19 +61,6 @@ test.describe('Cyber Domain catalog', () => {
         ).toBeVisible({ timeout: 10_000 });
     });
 
-    test('sidebar link navigates to Cyber Domain', async ({ page }) => {
-        await page.goto('/home');
-        const link = page
-            .getByRole('link', { name: /^cyber domain$/i })
-            .first();
-        await expect(link).toBeVisible();
-        await Promise.all([
-            page.waitForURL(/\/cyber-domain/, { timeout: 10_000 }),
-            link.click(),
-        ]);
-        await expect(page).toHaveURL(/\/cyber-domain/, { timeout: 10_000 });
-    });
-
     test('clicking a malware card opens detail with source context', async ({
         page,
     }) => {

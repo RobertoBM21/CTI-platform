@@ -2,8 +2,6 @@
 
 Repositorio del TFM orientado a ciberinteligencia (CTI), preparado como workspace con `pnpm`. Contiene el backend (API REST NestJS) y el frontend (Next.js).
 
----
-
 ## Índice
 
 1. [Objetivo](#objetivo)
@@ -22,8 +20,6 @@ Repositorio del TFM orientado a ciberinteligencia (CTI), preparado como workspac
 14. [Tests](#tests)
 15. [CI](#ci)
 
----
-
 ## Objetivo
 
 Desarrollar una plataforma mantenible y testeable para gestionar inteligencia de amenazas en el MVP, con una base técnica sólida para evolucionar.
@@ -34,8 +30,6 @@ En esta fase:
 - Autenticación completa: registro/login local con JWT y login con Google OAuth2.
 - Se prioriza una arquitectura clara y desacoplada entre dominio y adaptadores.
 - Backend y frontend operan como aplicaciones separadas en un monorepo pnpm.
-
----
 
 ## Stack tecnológico
 
@@ -60,8 +54,6 @@ En esta fase:
 - Vitest + React Testing Library
 - Playwright (E2E)
 
----
-
 ## Arquitectura backend
 
 Se aplica arquitectura hexagonal pragmática por contextos:
@@ -82,8 +74,6 @@ flowchart LR
     Service --> Repo[Infrastructure: Repository Adapters]
     Repo --> DB[(MongoDB)]
 ```
-
----
 
 ## Estado actual
 
@@ -117,8 +107,6 @@ flowchart LR
 - Tests E2E Playwright para todos los features (catálogo + detalle sobre datos reales). Suite de autenticación (login, register, logout).
 - Dockerfile multi-stage (development + production con standalone output).
 
----
-
 ## Modelo de dominio
 
 ### Shared (transversal)
@@ -148,8 +136,6 @@ flowchart LR
 - **Value Objects**: `ReportType`.
 - **Puertos**: `ReportRepository`.
 - **Persistencia**: `ReportDocument`.
-
----
 
 ## Estructura de carpetas
 
@@ -246,8 +232,6 @@ frontend/src/
     proxy.ts                                     # Protección de rutas autenticadas
 ```
 
----
-
 ## Configuración de entorno
 
 Usa `.env` en la raíz del repositorio como fuente única de configuración. Toma como base `.env.example`.
@@ -268,8 +252,6 @@ Las variables se consumen mediante configuración tipada con espacios de nombres
 | `GOOGLE_CLIENT_ID`     | Client ID de OAuth2 Google                         | —       |
 | `GOOGLE_CLIENT_SECRET` | Client Secret de OAuth2 Google                     | —       |
 | `GOOGLE_CALLBACK_URL`  | Callback OAuth2 Google en backend                  | —       |
-
----
 
 ## Ejecución local
 
@@ -300,8 +282,6 @@ cd backend && pnpm start:dev
 # Frontend
 cd frontend && pnpm dev
 ```
-
----
 
 ## Ejecución con Docker
 
@@ -338,8 +318,6 @@ Servicios una vez activos:
 | Backend  | `http://localhost:3000`     |
 | Swagger  | `http://localhost:3000/api` |
 | MongoDB  | `localhost:27017`           |
-
----
 
 ## Primeros pasos: ingestar datos y probar la aplicación
 
@@ -381,8 +359,6 @@ La respuesta incluye un resumen `{ total, processed, skipped, failed }`. Solo `m
 
 La ingesta es **idempotente**: ejecutarla varias veces no crea duplicados.
 
----
-
 ## API — Swagger
 
 La documentación interactiva completa de todos los endpoints está disponible en:
@@ -407,8 +383,6 @@ Incluye esquemas de request/response, parámetros de paginación, filtros y ejem
 }
 ```
 
----
-
 ## Ingesta de bundles STIX 2.1
 
 **Endpoint:** `POST /ingestion/bundles`
@@ -429,8 +403,6 @@ Carga manualmente un bundle STIX 2.1 completo.
 - Cada objeto se persiste con semántica de **upsert idempotente** por `domainId`: si ya existe, se actualizan los campos mutables y se preserva el `createdAt` original del bundle STIX.
 - La respuesta devuelve `{ total, processed, skipped, failed }`.
 - El endpoint está protegido con `JwtAuthGuard`. Es necesario incluir el header `Authorization: Bearer <token>`.
-
----
 
 ## Tests
 
@@ -457,3 +429,20 @@ Los tests E2E requieren que backend y frontend estén activos. El `globalSetup` 
 3. Guarda el estado de autenticación en `e2e/.auth/state.json` para que todos los tests arranquen con sesión iniciada.
 
 Specs E2E disponibles: `home`, `incidents`, `campaigns`, `threat-actors`, `reports`, `threat-domain`, `cyber-domain`, `auth`.
+
+## CI
+
+El pipeline de CI ejecuta esta secuencia:
+
+1. `pnpm lint`
+2. `pnpm test`
+3. `pnpm backend:test:e2e`
+4. `pnpm build`
+
+Decisión actual del proyecto:
+
+- **Sí se ejecutan en CI** los tests E2E de backend (Jest + Supertest + `mongodb-memory-server`).
+- **No se ejecutan en CI** los tests E2E de frontend (Playwright), porque son pesados, lentos e inestables en pipeline.
+- Los E2E de frontend se mantienen para ejecución local (`pnpm frontend:test:e2e`) antes de merge cuando aplique.
+
+Para los E2E de backend en CI **no hace falta levantar Docker**: usan `mongodb-memory-server` y no dependen de servicios externos del stack.

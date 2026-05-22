@@ -46,38 +46,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browser (Chromium)
-        run: pnpm --filter @cti-platform/frontend exec playwright install --with-deps chromium
-
       - name: Linting (workspace)
         run: pnpm lint
 
       - name: Run unit tests (workspace)
         run: pnpm test
 
-      - name: Build and start production stack (Docker Compose)
-        run: docker compose -f docker-compose.yml up -d --build
-
-      - name: Wait for backend and frontend readiness
-        run: pnpm dlx wait-on http://localhost:3000/health http://localhost:3001 -t 120000
-
-      - name: Run E2E tests (workspace)
-        run: pnpm test:e2e
-
-      - name: Upload Playwright report on failure
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: playwright-report
-          path: |
-            frontend/playwright-report
-            frontend/test-results
-          if-no-files-found: ignore
-          retention-days: 7
+      - name: Run backend E2E tests
+        run: pnpm backend:test:e2e
 
       - name: Build applications (workspace)
         run: pnpm build
-
-      - name: Show Docker Compose logs on failure
-        if: failure()
-        run: docker compose -f docker-compose.yml logs --no-color || true
