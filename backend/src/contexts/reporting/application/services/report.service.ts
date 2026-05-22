@@ -32,6 +32,10 @@ export class ReportService {
         return this.reportRepository.findById(id);
     }
 
+    findByObjectRef(objectRef: string): Promise<Report[]> {
+        return this.reportRepository.findByObjectRef(objectRef);
+    }
+
     save(entity: Report): Promise<Report> {
         return this.reportRepository.save(entity);
     }

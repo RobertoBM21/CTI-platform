@@ -111,7 +111,7 @@ interface IntrusionSetPdfDocumentProps {
 export function IntrusionSetPdfDocument({
     detail,
 }: IntrusionSetPdfDocumentProps) {
-    const { entity, relatedObjects, sightings } = detail;
+    const { entity, relatedObjects, sightings, relatedReports = [] } = detail;
     const now = new Date().toISOString();
 
     return (
@@ -173,6 +173,14 @@ export function IntrusionSetPdfDocument({
                             <Text style={styles.value}>{entity.goals}</Text>
                         </View>
                     )}
+                    {entity.aliases.length > 0 && (
+                        <View style={styles.row}>
+                            <Text style={styles.label}>Aliases:</Text>
+                            <Text style={styles.value}>
+                                {entity.aliases.join(', ')}
+                            </Text>
+                        </View>
+                    )}
                     {entity.firstSeen && (
                         <View style={styles.row}>
                             <Text style={styles.label}>First Seen:</Text>
@@ -226,6 +234,26 @@ export function IntrusionSetPdfDocument({
                     </View>
                 )}
 
+                {/* ── Related Reports ── */}
+                {relatedReports.length > 0 && (
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>
+                            Related Reports ({relatedReports.length})
+                        </Text>
+                        {relatedReports.map((report) => (
+                            <View key={report.id} style={styles.objRow}>
+                                <Text style={styles.objType}>report</Text>
+                                <Text style={styles.objName}>
+                                    {report.name}
+                                </Text>
+                                <Text style={styles.objRel}>
+                                    {formatDate(report.published)}
+                                </Text>
+                            </View>
+                        ))}
+                    </View>
+                )}
+
                 {/* ── Sightings ── */}
                 {sightings.length > 0 && (
                     <View style={styles.section}>
@@ -236,6 +264,28 @@ export function IntrusionSetPdfDocument({
                             <View key={i} style={styles.row}>
                                 <Text style={styles.label}>Count:</Text>
                                 <Text style={styles.value}>{s.count}</Text>
+                            </View>
+                        ))}
+                    </View>
+                )}
+
+                {/* ── External References ── */}
+                {entity.externalReferences.length > 0 && (
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>
+                            External References
+                        </Text>
+                        {entity.externalReferences.map((ref, i) => (
+                            <View key={i} style={styles.row}>
+                                <Text style={styles.label}>
+                                    {ref.sourceName}
+                                    {ref.externalId
+                                        ? ` · ${ref.externalId}`
+                                        : ''}
+                                </Text>
+                                <Text style={styles.value}>
+                                    {ref.url ?? ref.description ?? '—'}
+                                </Text>
                             </View>
                         ))}
                     </View>

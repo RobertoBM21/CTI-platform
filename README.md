@@ -30,7 +30,7 @@ Desarrollar una plataforma mantenible y testeable para gestionar inteligencia de
 
 En esta fase:
 
-- El foco funcional está en los contextos `Threat` y `Cyber` (SDOs técnicos STIX 2.1).
+- El foco funcional está en los contextos `Threat`, `Cyber` y `Reporting` (STIX 2.1).
 - Autenticación completa: registro/login local con JWT y login con Google OAuth2.
 - Se prioriza una arquitectura clara y desacoplada entre dominio y adaptadores.
 - Backend y frontend operan como aplicaciones separadas en un monorepo pnpm.
@@ -94,8 +94,9 @@ flowchart LR
 - Capa de dominio `shared` con SROs (`Relationship`, `Sighting`) y VOs transversales STIX.
 - Contexto `Threat` completo: 5 entidades (`ThreatActor`, `Campaign`, `Incident`, `AttackPattern`, `Indicator`), servicios de lectura, repositorios Mongoose, controladores REST con paginación, filtrado y ordenación.
 - Contexto `Cyber` completo: 12 SDOs técnicos STIX 2.1 (`Malware`, `Tool`, `Vulnerability`, `InfrastructureEntity`, `IntrusionSet`, `Identity`, `Location`, `CourseOfAction`, `Note`, `Opinion`, `MalwareAnalysis`, `ObservedData`), persistencia completa, servicios read-only, registrados en `StixRefResolver` y `BundleIngestionService`.
+- Contexto `Reporting` completo: entidad `Report` STIX 2.1, servicios de lectura, repositorio Mongoose y endpoints REST (`GET /reports`, `GET /reports/:id`) integrados en el detalle enriquecido cross-context.
 - Detalle enriquecido (`EnrichedDetail<T>`): objetos relacionados resueltos cross-context + sightings. `DetailEnricher` incluye una segunda pasada para devolver también las relaciones entre nodos periféricos (no solo las del centro).
-- `POST /ingestion/bundles`: ingesta manual de bundles STIX 2.1 con soporte de 21 tipos, idempotente por `domainId`.
+- `POST /ingestion/bundles`: ingesta manual de bundles STIX 2.1 con soporte de 20 tipos, idempotente por `domainId`.
 - Contexto `Auth` completo: `POST /auth/register`, `POST /auth/login` (Passport local + JWT), `GET /auth/google` + `GET /auth/google/callback` (OAuth2), `GET /auth/me`, `POST /auth/logout`. Bcryptjs 12 rounds. `JwtAuthGuard` protege `POST /ingestion/bundles`.
 - Suite de tests unitarios de dominio + application + repositorios + e2e en verde.
 
@@ -103,14 +104,16 @@ flowchart LR
 
 - Identidad visual: IBM Plex Sans/Mono + paleta corporativa (`#CF4931` primary, `#EDE9E3` bg, `#092028` sidebar) mapeada a tokens shadcn/ui. Tema claro/oscuro.
 - TanStack Query + API client base con tipado de respuestas paginadas.
+- Feature `home/`: dashboard principal (`/` redirige a `/home`) con tabs `Overview` y `Threat Domain`, KPIs globales y visualización geoespacial.
 - Feature `incidents/`: catálogo paginado + vista detalle con 5 tabs (Executive Summary, Network Analysis, Artifacts & IOCs, Map, Audit & Timeline). Exportación JSON y PDF. Conectado al backend real.
 - Feature `campaigns/`: catálogo paginado + vista detalle con 5 tabs. Exportación JSON y PDF. Conectado al backend real.
 - Feature `threat-actors/`: catálogo paginado + vista detalle con 4 tabs (Actor Overview, Cyber, Info-Ops, Hybrid Graph). Exportación JSON y PDF. Grafo híbrido con 3 clusters d3-force. Conectado al backend real.
 - Feature `reports/`: catálogo paginado + vista detalle con 7 tabs (Datos, Resumen, Actores, Mapa, Targets, Artefactos, Grafo). Exportación JSON y PDF.
 - Feature `threat-domain/`: vista unificada con pestañas All / Incidents / Campaigns / Threat Actors / Attack Patterns. Filtro cruzado por ATT&CK e Intrusion Set.
+- Feature `cyber-domain/`: vista unificada con pestañas All / Malware / Tools / Vulnerabilities / Intrusion Sets y detalles enriquecidos por entidad (`/malware/[id]`, `/tools/[id]`, `/vulnerabilities/[id]`, `/intrusion-sets/[id]`) con exportación JSON STIX + PDF.
 - Feature `ingestion/`: panel lateral (Sheet) para ingestar bundles STIX 2.1 desde la UI. Requiere sesión activa.
-- Autenticación completa: páginas `/login` y `/register` en route group `(public)/`, middleware de protección de rutas, Route Handlers BFF en `/api/auth/` (login, register, logout, me, google, callback), cookie httpOnly `auth_token`. Dropdown de usuario en `AppHeader`.
-- Capa `shared/` con componentes, tabs, utilidades y tipos reutilizables: `EntityCatalog`, `EntityCard`, `EntityListRow`, `DetailPageHeader`, `EntityInfoCard`, `NetworkGraphTab` (d3-force + ReactFlow), `ExecutiveSummaryTab`, `ArtifactsTab`, `MapTab` (MapLibre + react-map-gl), `TimelineTab`, `DetailSidePanel`, `SectionTitle`, `SectionCard`, `ObservationWindow`, `SightingCount`, `EmptyState`, `TlpBadge`, `ConfidenceBadge`, `CatalogFiltersPanel`, estados de carga/error, etc.
+- Autenticación completa: páginas `/login` y `/register` en route group `(public)/`, `proxy.ts` de protección de rutas, Route Handlers BFF en `/api/auth/` (login, register, logout, me, google, callback), cookie httpOnly `auth_token`. Dropdown de usuario en `AppHeader`.
+- Capa `shared/` con componentes, tabs, utilidades y tipos reutilizables: `EntityCatalog`, `EntityCard`, `EntityListRow`, `DetailPageHeader`, `EntityInfoCard`, `NetworkGraphTab` (d3-force + ReactFlow), `ExecutiveSummaryTab`, `ArtifactsTab`, `AnalysisTab`, `MapTab` (MapLibre + react-map-gl), `TimelineTab`, `DetailSidePanel`, `SectionTitle`, `SectionCard`, `ObservationWindow`, `SightingCount`, `EmptyState`, `TlpBadge`, `ConfidenceBadge`, `CatalogFiltersPanel`, `CvssScoreWidget`, `ExternalReferencesSection`, `KillChainPhaseChips`, estados de carga/error, etc.
 - Tests E2E Playwright para todos los features (catálogo + detalle sobre datos reales). Suite de autenticación (login, register, logout).
 - Dockerfile multi-stage (development + production con standalone output).
 
@@ -138,6 +141,13 @@ flowchart LR
 - **Value Objects**: `MalwareType`, `ToolType`, `InfrastructureType`, `IdentityClass`, `OpinionValue`, `Region`, `MalwareAnalysisResult`.
 - **Puertos**: repositorio por entidad.
 - **Persistencia**: documento Mongoose por entidad.
+
+### Reporting
+
+- **Entidades**: `Report`.
+- **Value Objects**: `ReportType`.
+- **Puertos**: `ReportRepository`.
+- **Persistencia**: `ReportDocument`.
 
 ---
 
@@ -171,6 +181,11 @@ backend/src/
             application/services/                # Servicios read-only (findById por entidad)
             infrastructure/persistence/          # Schemas Mongoose + repositorios
 
+        reporting/
+            domain/                              # Entidad Report, VOs y puertos
+            application/services/                # Servicio read-only de reportes
+            infrastructure/                      # Controladores REST + persistencia Mongoose
+
         auth/
             domain/entities/                     # User entity
             application/dtos/                    # LoginDto, RegisterDto
@@ -191,12 +206,13 @@ frontend/src/
         globals.css                              # Tema + tokens shadcn/ui (OKLCH)
         (authenticated)/                         # Route group con layout completo (sidebar + header)
             layout.tsx
-            page.tsx                             # Home / Dashboard
+            home/                                # Dashboard principal
             incidents/                           # Catálogo y detalle de incidentes
             campaigns/                           # Catálogo y detalle de campañas
             threat-actors/                       # Catálogo y detalle de actores de amenaza
             reports/                             # Catálogo y detalle de informes
             threat-domain/                       # Vista unificada con pestañas por tipo
+            cyber-domain/                        # Vista unificada del dominio cyber
         (public)/                                # Route group sin sidebar (login, registro)
             login/
             register/
@@ -204,8 +220,14 @@ frontend/src/
         api/ingestion/                           # Route Handler proxy para ingesta protegida
     components/ui/                               # Componentes shadcn/ui (autogenerados)
     features/
+        dashboard/                               # Dashboard Home (Overview + Threat Domain tab)
         incidents/                               # API hooks, tipos y componentes de incidentes
         campaigns/                               # API hooks, tipos y componentes de campañas
+        cyber-domain/                            # Vista unificada de catálogos cyber
+        malware/                                 # Detalle de malware
+        tools/                                   # Detalle de tools
+        vulnerabilities/                         # Detalle de vulnerabilities
+        intrusion-sets/                          # Detalle de intrusion sets
         threat-actors/                           # API hooks, tipos y componentes de actores
         reports/                                 # API hooks, tipos y componentes de informes
         ingestion/                               # Sheet de ingesta de bundles STIX
@@ -213,7 +235,7 @@ frontend/src/
         threat-domain/                           # Vista unificada con pestañas por tipo de entidad
     shared/
         components/                              # Componentes reutilizables (EntityCatalog, tabs, DetailPageHeader, badges, estados, AppSidebar, AppHeader…)
-        components/tabs/                         # Tabs compartidas (ExecutiveSummary, NetworkGraph, Artifacts, Map, Timeline)
+        components/tabs/                         # Tabs compartidas (ExecutiveSummary, NetworkGraph, Artifacts, Analysis, Map, Timeline)
         hooks/                                   # Hooks transversales (useTheme, useDetailTab, useEntityPageTitle)
         lib/                                     # stix.ts, export-utils.ts (exportToJson, exportToPdf)
         types/                                   # entity.ts (EntityBase, EntityDetail<T>, SightingItem…)
@@ -221,7 +243,7 @@ frontend/src/
         query-provider.tsx                       # TanStack Query provider
         page-title-context.tsx                   # Contexto de título de página
         auth-context.tsx                         # AuthProvider, useAuth()
-    middleware.ts                                # Protección de rutas autenticadas
+    proxy.ts                                     # Protección de rutas autenticadas
 ```
 
 ---
@@ -245,6 +267,7 @@ Las variables se consumen mediante configuración tipada con espacios de nombres
 | `JWT_EXPIRES_IN`       | Duración del token JWT                             | `7d`    |
 | `GOOGLE_CLIENT_ID`     | Client ID de OAuth2 Google                         | —       |
 | `GOOGLE_CLIENT_SECRET` | Client Secret de OAuth2 Google                     | —       |
+| `GOOGLE_CALLBACK_URL`  | Callback OAuth2 Google en backend                  | —       |
 
 ---
 
@@ -393,13 +416,14 @@ Incluye esquemas de request/response, parámetros de paginación, filtros y ejem
 Carga manualmente un bundle STIX 2.1 completo.
 
 - Acepta un body con `type = "bundle"`, `id` y un array `objects` no vacío.
-- Soporta **21 tipos** de los dominios implementados:
+- Soporta **20 tipos** de los dominios implementados:
 
-  | Dominio | Tipos soportados                                                                                                                                                          |
-  | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | Threat  | `threat-actor`, `campaign`, `incident`, `attack-pattern`, `indicator`                                                                                                     |
-  | Cyber   | `malware`, `tool`, `vulnerability`, `infrastructure`, `intrusion-set`, `identity`, `location`, `course-of-action`, `note`, `opinion`, `malware-analysis`, `observed-data` |
-  | Shared  | `relationship`, `sighting`                                                                                                                                                |
+  | Dominio   | Tipos soportados                                                                                                                                                          |
+  | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | Threat    | `threat-actor`, `campaign`, `incident`, `attack-pattern`, `indicator`                                                                                                     |
+  | Cyber     | `malware`, `tool`, `vulnerability`, `infrastructure`, `intrusion-set`, `identity`, `location`, `course-of-action`, `note`, `opinion`, `malware-analysis`, `observed-data` |
+  | Reporting | `report`                                                                                                                                                                  |
+  | Shared    | `relationship`, `sighting`                                                                                                                                                |
 
 - Los tipos no soportados (`marking-definition`, …) se ignoran sin abortar la ingesta (`skipped`).
 - Cada objeto se persiste con semántica de **upsert idempotente** por `domainId`: si ya existe, se actualizan los campos mutables y se preserva el `createdAt` original del bundle STIX.
@@ -432,4 +456,4 @@ Los tests E2E requieren que backend y frontend estén activos. El `globalSetup` 
 2. Ingesta el bundle de `docs/data-sample.json` (autenticado con JWT).
 3. Guarda el estado de autenticación en `e2e/.auth/state.json` para que todos los tests arranquen con sesión iniciada.
 
-Specs E2E disponibles: `home`, `incidents`, `campaigns`, `threat-actors`, `reports`, `threat-domain`, `auth`.
+Specs E2E disponibles: `home`, `incidents`, `campaigns`, `threat-actors`, `reports`, `threat-domain`, `cyber-domain`, `auth`.

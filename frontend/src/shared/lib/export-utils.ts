@@ -1,4 +1,8 @@
-import type { RelatedObjectItem, SightingItem } from '@/shared/types/entity';
+import type {
+    RelatedObjectItem,
+    SightingItem,
+    StixExternalRef,
+} from '@/shared/types/entity';
 import type { DocumentProps } from '@react-pdf/renderer';
 import { pdf } from '@react-pdf/renderer';
 import type { ReactElement } from 'react';
@@ -83,6 +87,26 @@ export function buildRelatedSdos(
     return relatedObjects
         .filter((r) => r.object !== null)
         .map((r) => r.object as object);
+}
+
+/** Maps frontend external reference shape to STIX 2.1 external_references. */
+export function toStixExternalReferences(refs: StixExternalRef[]): object[] {
+    return refs.map((ref) => ({
+        source_name: ref.sourceName,
+        description: ref.description ?? undefined,
+        external_id: ref.externalId ?? undefined,
+        url: ref.url ?? undefined,
+    }));
+}
+
+/** Maps camelCase kill-chain phases to STIX 2.1 kill_chain_phases. */
+export function toStixKillChainPhases(
+    phases: { killChainName: string; phaseName: string }[],
+): object[] {
+    return phases.map((phase) => ({
+        kill_chain_name: phase.killChainName,
+        phase_name: phase.phaseName,
+    }));
 }
 
 /** Sanitised filename: replaces whitespace with underscores. */

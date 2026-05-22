@@ -1,5 +1,7 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { formatDate, getStixType } from '@/shared/lib/stix';
 import type {
@@ -7,7 +9,7 @@ import type {
     EntityDetail,
     StixObject,
 } from '@/shared/types/entity';
-import { Download, FileText, Link2, Shield } from 'lucide-react';
+import { CalendarClock, Download, FileText, Link2, Shield } from 'lucide-react';
 import { useState } from 'react';
 
 interface ArtifactsTabProps<TEntity extends EntityBase = EntityBase> {
@@ -51,6 +53,50 @@ function inferIocType(obj: StixObject): string {
     return 'indicator';
 }
 
+function getPatternType(obj: StixObject): string {
+    const camel = obj.patternType;
+    if (typeof camel === 'string' && camel.length > 0) {
+        return camel.toUpperCase();
+    }
+
+    const snake = obj.pattern_type;
+    if (typeof snake === 'string' && snake.length > 0) {
+        return snake.toUpperCase();
+    }
+
+    return 'STIX';
+}
+
+function getIsoDate(obj: StixObject, camelKey: string, snakeKey: string) {
+    const camel = obj[camelKey];
+    if (typeof camel === 'string' && camel.length > 0) {
+        return camel;
+    }
+
+    const snake = obj[snakeKey];
+    if (typeof snake === 'string' && snake.length > 0) {
+        return snake;
+    }
+
+    return undefined;
+}
+
+function isExpired(validUntil?: string): boolean {
+    if (!validUntil) return false;
+    const expiresAt = Date.parse(validUntil);
+    if (Number.isNaN(expiresAt)) return false;
+    return expiresAt < Date.now();
+}
+
+function getPatternLines(obj: StixObject): string[] {
+    const pattern = obj.pattern;
+    if (typeof pattern !== 'string' || pattern.length === 0) {
+        return [];
+    }
+
+    return pattern.split('\n');
+}
+
 function downloadIndicator(obj: StixObject): void {
     const blob = new Blob([JSON.stringify(obj, null, 2)], {
         type: 'application/json',
@@ -68,7 +114,17 @@ export function ArtifactsTab<TEntity extends EntityBase = EntityBase>({
     detail,
 }: ArtifactsTabProps<TEntity>) {
     const [selected, setSelected] = useState<StixObject | null>(null);
+    const [expandedPatterns, setExpandedPatterns] = useState<
+        Record<string, boolean>
+    >({});
     const indicators = getIndicators(detail);
+
+    function togglePattern(indicatorId: string) {
+        setExpandedPatterns((prev) => ({
+            ...prev,
+            [indicatorId]: !prev[indicatorId],
+        }));
+    }
 
     return (
         <div className="flex gap-6">
@@ -91,6 +147,27 @@ export function ArtifactsTab<TEntity extends EntityBase = EntityBase>({
                             <ul className="divide-y">
                                 {indicators.map(({ obj, relType }) => {
                                     const iocType = inferIocType(obj);
+                                    const patternType = getPatternType(obj);
+                                    const validFrom = getIsoDate(
+                                        obj,
+                                        'validFrom',
+                                        'valid_from',
+                                    );
+                                    const validUntil = getIsoDate(
+                                        obj,
+                                        'validUntil',
+                                        'valid_until',
+                                    );
+                                    const patternLines = getPatternLines(obj);
+                                    const hasLongPattern =
+                                        patternLines.length > 3;
+                                    const isPatternExpanded =
+                                        expandedPatterns[obj.id] ?? false;
+                                    const visiblePattern = hasLongPattern
+                                        ? isPatternExpanded
+                                            ? patternLines
+                                            : patternLines.slice(0, 3)
+                                        : patternLines;
                                     const Icon =
                                         IOC_TYPE_ICONS[iocType] ?? FileText;
                                     const isSelected = selected?.id === obj.id;
@@ -133,6 +210,12 @@ export function ArtifactsTab<TEntity extends EntityBase = EntityBase>({
                                                                     | undefined) ??
                                                                 obj.id}
                                                         </p>
+                                                        <Badge
+                                                            variant="outline"
+                                                            className="text-[0.62rem]"
+                                                        >
+                                                            {patternType}
+                                                        </Badge>
                                                     </div>
                                                     <p className="text-foreground/50 mt-1 text-sm">
                                                         {iocType.toUpperCase()}{' '}
@@ -140,6 +223,73 @@ export function ArtifactsTab<TEntity extends EntityBase = EntityBase>({
                                                         {obj.createdAt &&
                                                             ` · ${formatDate(obj.createdAt)}`}
                                                     </p>
+
+                                                    {(validFrom ||
+                                                        validUntil) && (
+                                                        <div className="text-foreground/55 mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                                                            {validFrom && (
+                                                                <span className="inline-flex items-center gap-1">
+                                                                    <CalendarClock className="size-3.5" />
+                                                                    Valid from{' '}
+                                                                    {formatDate(
+                                                                        validFrom,
+                                                                    )}
+                                                                </span>
+                                                            )}
+                                                            {validUntil && (
+                                                                <span
+                                                                    className={`inline-flex items-center gap-1 ${
+                                                                        isExpired(
+                                                                            validUntil,
+                                                                        )
+                                                                            ? 'text-red-600'
+                                                                            : ''
+                                                                    }`}
+                                                                >
+                                                                    <CalendarClock className="size-3.5" />
+                                                                    Valid until{' '}
+                                                                    {formatDate(
+                                                                        validUntil,
+                                                                    )}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    )}
+
+                                                    {visiblePattern.length >
+                                                        0 && (
+                                                        <div className="mt-2">
+                                                            <pre className="bg-muted/40 overflow-x-auto rounded-lg p-2 text-xs">
+                                                                {visiblePattern.join(
+                                                                    '\n',
+                                                                )}
+                                                                {!isPatternExpanded &&
+                                                                    hasLongPattern &&
+                                                                    '\n…'}
+                                                            </pre>
+                                                            {hasLongPattern && (
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="mt-1 h-auto px-1 py-0 text-xs"
+                                                                    onClick={(
+                                                                        e,
+                                                                    ) => {
+                                                                        e.stopPropagation();
+                                                                        togglePattern(
+                                                                            obj.id,
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    {isPatternExpanded
+                                                                        ? 'Show less pattern'
+                                                                        : 'Show full pattern'}
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                    )}
+
                                                     {obj.description && (
                                                         <p className="text-foreground/40 mt-1.5 line-clamp-2 text-xs leading-relaxed">
                                                             {obj.description}
@@ -198,9 +348,14 @@ export function ArtifactsTab<TEntity extends EntityBase = EntityBase>({
                                     <p className="text-foreground/50 text-[0.65rem] font-bold tracking-widest uppercase">
                                         Type
                                     </p>
-                                    <p className="mt-1 font-semibold uppercase">
-                                        {inferIocType(selected)}
-                                    </p>
+                                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                                        <p className="font-semibold uppercase">
+                                            {inferIocType(selected)}
+                                        </p>
+                                        <Badge variant="outline">
+                                            {getPatternType(selected)}
+                                        </Badge>
+                                    </div>
                                 </div>
 
                                 {selected.description && (
@@ -222,6 +377,69 @@ export function ArtifactsTab<TEntity extends EntityBase = EntityBase>({
                                         <p className="mt-1 font-semibold">
                                             {formatDate(selected.createdAt)}
                                         </p>
+                                    </div>
+                                )}
+
+                                {(getIsoDate(
+                                    selected,
+                                    'validFrom',
+                                    'valid_from',
+                                ) ||
+                                    getIsoDate(
+                                        selected,
+                                        'validUntil',
+                                        'valid_until',
+                                    )) && (
+                                    <div>
+                                        <p className="text-foreground/50 text-[0.65rem] font-bold tracking-widest uppercase">
+                                            Validity Window
+                                        </p>
+                                        <div className="text-foreground/70 mt-1 space-y-1 text-sm">
+                                            {getIsoDate(
+                                                selected,
+                                                'validFrom',
+                                                'valid_from',
+                                            ) && (
+                                                <p>
+                                                    Valid from{' '}
+                                                    {formatDate(
+                                                        getIsoDate(
+                                                            selected,
+                                                            'validFrom',
+                                                            'valid_from',
+                                                        ) as string,
+                                                    )}
+                                                </p>
+                                            )}
+                                            {getIsoDate(
+                                                selected,
+                                                'validUntil',
+                                                'valid_until',
+                                            ) && (
+                                                <p
+                                                    className={
+                                                        isExpired(
+                                                            getIsoDate(
+                                                                selected,
+                                                                'validUntil',
+                                                                'valid_until',
+                                                            ),
+                                                        )
+                                                            ? 'text-red-600'
+                                                            : ''
+                                                    }
+                                                >
+                                                    Valid until{' '}
+                                                    {formatDate(
+                                                        getIsoDate(
+                                                            selected,
+                                                            'validUntil',
+                                                            'valid_until',
+                                                        ) as string,
+                                                    )}
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
 
@@ -249,14 +467,39 @@ export function ArtifactsTab<TEntity extends EntityBase = EntityBase>({
                                     ),
                                 )}
 
-                                {(selected.pattern as string | undefined) && (
+                                {getPatternLines(selected).length > 0 && (
                                     <div>
                                         <p className="text-foreground/50 text-[0.65rem] font-bold tracking-widest uppercase">
                                             Pattern
                                         </p>
                                         <pre className="bg-muted/40 mt-1 overflow-x-auto rounded-lg p-2 text-xs">
-                                            {selected.pattern as string}
+                                            {(expandedPatterns[selected.id]
+                                                ? getPatternLines(selected)
+                                                : getPatternLines(
+                                                      selected,
+                                                  ).slice(0, 3)
+                                            ).join('\n')}
+                                            {!expandedPatterns[selected.id] &&
+                                                getPatternLines(selected)
+                                                    .length > 3 &&
+                                                '\n…'}
                                         </pre>
+                                        {getPatternLines(selected).length >
+                                            3 && (
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                className="mt-1 h-auto px-1 py-0 text-xs"
+                                                onClick={() =>
+                                                    togglePattern(selected.id)
+                                                }
+                                            >
+                                                {expandedPatterns[selected.id]
+                                                    ? 'Show less pattern'
+                                                    : 'Show full pattern'}
+                                            </Button>
+                                        )}
                                     </div>
                                 )}
                             </div>

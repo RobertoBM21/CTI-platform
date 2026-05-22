@@ -3,6 +3,7 @@ import type {
     CatalogEntity,
     EntityDetail,
     RelatedObjectItem,
+    RelatedReportItem,
     SightingItem,
     StixExternalRef,
     StixObject,
@@ -11,6 +12,7 @@ import type {
 
 export type {
     RelatedObjectItem,
+    RelatedReportItem,
     SightingItem,
     StixExternalRef,
     StixObject,

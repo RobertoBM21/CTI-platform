@@ -7,6 +7,21 @@ const nextConfig: NextConfig = {
     turbopack: {
         root: resolve(__dirname, '..'),
     },
+    async redirects() {
+        return [
+            {
+                source: '/',
+                has: [
+                    {
+                        type: 'cookie',
+                        key: 'auth_token',
+                    },
+                ],
+                destination: '/home',
+                permanent: false,
+            },
+        ];
+    },
     async rewrites() {
         return [
             {

@@ -7,6 +7,7 @@ import {
     DetailErrorState,
     DetailLoadingState,
 } from '@/shared/components/error-state';
+import { AnalysisTab } from '@/shared/components/tabs/analysis-tab';
 import { ArtifactsTab } from '@/shared/components/tabs/artifacts-tab';
 import { ExecutiveSummaryTab } from '@/shared/components/tabs/executive-summary-tab';
 import { MapTab } from '@/shared/components/tabs/map-tab';
@@ -23,10 +24,18 @@ import {
     downloadJson,
     downloadPdf,
     toFilename,
+    toStixExternalReferences,
 } from '@/shared/lib/export-utils';
 import { getStixType } from '@/shared/lib/stix';
 import { TLP } from '@/shared/types/enums';
-import { Activity, Clock, FileText, Link2, MapPin } from 'lucide-react';
+import {
+    Activity,
+    Clock,
+    FileSearch,
+    FileText,
+    Link2,
+    MapPin,
+} from 'lucide-react';
 import { useIntrusionSetDetail } from '../hooks/use-intrusion-set-detail';
 import { IntrusionSetPdfDocument } from './intrusion-set-pdf-document';
 
@@ -35,6 +44,7 @@ const TABS = [
     { id: 'network', label: 'Network Analysis', icon: Activity },
     { id: 'artifacts', label: 'Artifacts & IOCs', icon: Link2 },
     { id: 'map', label: 'Map', icon: MapPin },
+    { id: 'analysis', label: 'Analysis', icon: FileSearch },
     { id: 'timeline', label: 'Audit & Timeline', icon: Clock },
 ] as const;
 
@@ -82,10 +92,11 @@ export function IntrusionSetDetailPage({ id }: IntrusionSetDetailPageProps) {
                 revoked: entity.revoked,
                 external_references:
                     entity.externalReferences.length > 0
-                        ? entity.externalReferences
+                        ? toStixExternalReferences(entity.externalReferences)
                         : undefined,
                 created: entity.createdAt,
                 modified: entity.updatedAt,
+                created_by_ref: entity.createdBy ?? undefined,
             },
             ...buildSroObjects(relatedObjects),
             ...buildRelatedSdos(relatedObjects),
@@ -177,6 +188,7 @@ export function IntrusionSetDetailPage({ id }: IntrusionSetDetailPageProps) {
                         <ArtifactsTab detail={data} />
                     )}
                     {activeTab === 'map' && <MapTab detail={data} />}
+                    {activeTab === 'analysis' && <AnalysisTab detail={data} />}
                     {activeTab === 'timeline' && <TimelineTab detail={data} />}
                 </div>
             </div>

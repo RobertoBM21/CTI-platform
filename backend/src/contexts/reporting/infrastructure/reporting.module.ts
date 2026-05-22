@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ThreatModule } from '../../threat/infrastructure/threat.module';
 import { ReportService } from '../application/services/report.service';
@@ -12,7 +12,7 @@ import {
 
 @Module({
     imports: [
-        ThreatModule,
+        forwardRef(() => ThreatModule),
         MongooseModule.forFeature([
             { name: ReportDocument.name, schema: ReportSchema },
         ]),

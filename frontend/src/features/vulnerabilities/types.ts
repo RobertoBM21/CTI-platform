@@ -3,6 +3,7 @@ import type {
     CatalogEntity,
     EntityDetail,
     RelatedObjectItem,
+    RelatedReportItem,
     SightingItem,
     StixExternalRef,
     StixObject,
@@ -11,6 +12,7 @@ import type {
 
 export type {
     RelatedObjectItem,
+    RelatedReportItem,
     SightingItem,
     StixExternalRef,
     StixObject,
@@ -25,6 +27,9 @@ export type VulnerabilityFilters = BaseCatalogFilters;
 
 export interface VulnerabilityDetailEntity extends Vulnerability {
     revoked: boolean;
+    xCvss3BaseScore?: number;
+    xCvss3Vector?: string;
+    xEpssScore?: number;
     externalReferences: StixExternalRef[];
 }
 

@@ -337,6 +337,9 @@ export class StixMapper {
         return new Vulnerability({
             ...this.commonProps(o),
             name: o.name as string,
+            xCvss3BaseScore: o.x_cvss3_base_score as number | undefined,
+            xCvss3Vector: o.x_cvss3_vector as string | undefined,
+            xEpssScore: o.x_epss_score as number | undefined,
         });
     }
 

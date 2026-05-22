@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ReportService } from '../../../reporting/application/services/report.service';
 import {
     RelationshipService,
     SightingService,
@@ -15,6 +16,7 @@ export class DetailEnricher {
         private readonly relationshipService: RelationshipService,
         private readonly sightingService: SightingService,
         private readonly stixRefResolver: StixRefResolver,
+        private readonly reportService: ReportService,
     ) {}
 
     async enrich<T extends { id: string }>(
@@ -79,6 +81,7 @@ export class DetailEnricher {
                 ...interPeripheralRelatedObjects,
             ],
             sightings,
+            relatedReports: await this.reportService.findByObjectRef(entity.id),
         };
     }
 }

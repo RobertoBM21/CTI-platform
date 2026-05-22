@@ -1,3 +1,4 @@
+import { ReportService } from '../../../../../../src/contexts/reporting/application/services/report.service';
 import { RelationshipService } from '../../../../../../src/contexts/shared/application/services/relationship.service';
 import { SightingService } from '../../../../../../src/contexts/shared/application/services/sighting.service';
 import { Relationship } from '../../../../../../src/contexts/shared/domain/entities/relationship.entity';
@@ -12,6 +13,7 @@ describe('DetailEnricher', () => {
         targetRels: Relationship[] = [],
         sightings: Sighting[] = [],
         resolvedObject: unknown = null,
+        relatedReports: unknown[] = [],
     ) {
         const relationshipService: Pick<
             RelationshipService,
@@ -26,14 +28,23 @@ describe('DetailEnricher', () => {
         const stixRefResolver: Pick<StixRefResolver, 'resolve'> = {
             resolve: jest.fn().mockResolvedValue(resolvedObject),
         };
+        const reportService: Pick<ReportService, 'findByObjectRef'> = {
+            findByObjectRef: jest.fn().mockResolvedValue(relatedReports),
+        };
 
         return {
             enricher: new DetailEnricher(
                 relationshipService as RelationshipService,
                 sightingService as SightingService,
                 stixRefResolver as StixRefResolver,
+                reportService as ReportService,
             ),
-            mocks: { relationshipService, sightingService, stixRefResolver },
+            mocks: {
+                relationshipService,
+                sightingService,
+                stixRefResolver,
+                reportService,
+            },
         };
     }
 
@@ -46,6 +57,7 @@ describe('DetailEnricher', () => {
         expect(result.entity).toBe(entity);
         expect(result.relatedObjects).toEqual([]);
         expect(result.sightings).toEqual([]);
+        expect(result.relatedReports).toEqual([]);
     });
 
     it('should resolve related objects from source relationships', async () => {
@@ -165,11 +177,15 @@ describe('DetailEnricher', () => {
                 return Promise.resolve(null);
             }),
         };
+        const reportService: Pick<ReportService, 'findByObjectRef'> = {
+            findByObjectRef: jest.fn().mockResolvedValue([]),
+        };
 
         const enricher = new DetailEnricher(
             relationshipService as RelationshipService,
             sightingService as SightingService,
             stixRefResolver as StixRefResolver,
+            reportService as ReportService,
         );
         const entity = { id: 'campaign--c1', name: 'Neptuno' };
 

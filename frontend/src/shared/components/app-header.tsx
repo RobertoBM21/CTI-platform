@@ -24,7 +24,6 @@ export function AppHeader() {
     const { pageTitle } = usePageTitle();
     const { user } = useAuth();
     const { mutate: logout, isPending: isLoggingOut } = useLogout();
-
     const searchParams = new URLSearchParams(search);
 
     const segments = pathname.split('/').filter(Boolean);

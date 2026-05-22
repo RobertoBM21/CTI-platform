@@ -2,6 +2,7 @@ import { apiFetch, type PaginatedResponse } from '@/lib/api-client';
 import type { TLP } from '@/shared/types/enums';
 import type {
     RelatedObjectItem,
+    RelatedReportItem,
     SightingItem,
     StixExternalRef,
     StixObject,
@@ -16,6 +17,9 @@ interface BackendVulnerability {
     name: string;
     description?: string;
     confidence?: number;
+    xCvss3BaseScore?: number;
+    xCvss3Vector?: string;
+    xEpssScore?: number;
     revoked: boolean;
     externalReferences: StixExternalRef[];
     tlp: TLP;
@@ -50,6 +54,9 @@ function adaptVulnerabilityDetail(
     return {
         ...adaptVulnerability(b),
         revoked: b.revoked,
+        xCvss3BaseScore: b.xCvss3BaseScore,
+        xCvss3Vector: b.xCvss3Vector,
+        xEpssScore: b.xEpssScore,
         externalReferences: b.externalReferences,
     };
 }
@@ -85,11 +92,13 @@ export async function fetchVulnerabilityDetail(
             object: StixObject | null;
         }>;
         sightings: SightingItem[];
+        relatedReports?: RelatedReportItem[];
     }>(`/vulnerabilities/${encodeURIComponent(id)}`);
 
     return {
         entity: adaptVulnerabilityDetail(raw.entity),
         relatedObjects: raw.relatedObjects,
         sightings: raw.sightings,
+        relatedReports: raw.relatedReports ?? [],
     };
 }

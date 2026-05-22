@@ -52,6 +52,15 @@ export interface SightingItem {
     updatedAt: string;
 }
 
+export interface RelatedReportItem {
+    id: string;
+    name: string;
+    published: string;
+    confidence?: number;
+    tlp: TLP;
+    reportTypes?: string[];
+}
+
 // ── Base entity interfaces ─────────────────────────────────────────────
 
 /** Common fields shared by all catalog entities (list cards, list rows) */
@@ -88,6 +97,7 @@ export interface EntityDetail<TEntity extends EntityBase = EntityBase> {
     entity: TEntity;
     relatedObjects: RelatedObjectItem[];
     sightings: SightingItem[];
+    relatedReports?: RelatedReportItem[];
 }
 
 export type ViewMode = 'list' | 'grid';

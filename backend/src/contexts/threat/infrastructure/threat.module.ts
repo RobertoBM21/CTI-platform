@@ -1,6 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CyberModule } from '../../cyber/infrastructure/cyber.module';
+import { ReportingModule } from '../../reporting/infrastructure/reporting.module';
 import { SharedModule } from '../../shared/infrastructure/shared.module';
 import {
     AttackPatternService,
@@ -47,6 +48,7 @@ import {
     imports: [
         SharedModule,
         forwardRef(() => CyberModule),
+        forwardRef(() => ReportingModule),
         MongooseModule.forFeature([
             { name: ThreatActorDocument.name, schema: ThreatActorSchema },
             { name: CampaignDocument.name, schema: CampaignSchema },

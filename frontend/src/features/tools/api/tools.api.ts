@@ -3,6 +3,7 @@ import type { TLP } from '@/shared/types/enums';
 import type {
     KillChainPhase,
     RelatedObjectItem,
+    RelatedReportItem,
     SightingItem,
     StixExternalRef,
     StixObject,
@@ -85,11 +86,13 @@ export async function fetchToolDetail(id: string): Promise<ToolDetail> {
             object: StixObject | null;
         }>;
         sightings: SightingItem[];
+        relatedReports?: RelatedReportItem[];
     }>(`/tools/${encodeURIComponent(id)}`);
 
     return {
         entity: adaptToolDetail(raw.entity),
         relatedObjects: raw.relatedObjects,
         sightings: raw.sightings,
+        relatedReports: raw.relatedReports ?? [],
     };
 }

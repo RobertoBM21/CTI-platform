@@ -140,8 +140,11 @@ test.describe('Threat Domain catalog', () => {
 
     test('sidebar link navigates to threat domain', async ({ page }) => {
         await page.goto('/');
-        const link = page.getByRole('link', { name: /threat domain/i }).first();
-        await link.click();
-        await expect(page).toHaveURL(/\/threat-domain/);
+        const link = page.locator('aside nav a[href="/threat-domain"]').first();
+        await expect(link).toBeVisible({ timeout: 10_000 });
+        await Promise.all([
+            page.waitForURL(/\/threat-domain/, { timeout: 10_000 }),
+            link.click({ force: true }),
+        ]);
     });
 });

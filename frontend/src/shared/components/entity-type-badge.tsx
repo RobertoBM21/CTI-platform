@@ -25,13 +25,14 @@ import {
     Users,
     Waypoints,
     Wrench,
+    type LucideIcon,
 } from 'lucide-react';
 
 export const entityConfig: Record<
     EntityType,
     {
         label: string;
-        icon: React.ComponentType<{ className?: string }>;
+        icon: LucideIcon;
         className: string;
     }
 > = {
@@ -146,10 +147,7 @@ export const entityConfig: Record<
 };
 
 /** Icon map for all STIX 2.1 SDO types — use in graph nodes and entity lists */
-export const stixTypeIconMap: Record<
-    string,
-    React.ComponentType<{ className?: string }>
-> = {
+export const stixTypeIconMap: Record<string, LucideIcon> = {
     // Shared EntityType icons — derived from entityConfig as single source of truth
     incident: entityConfig['incident'].icon,
     'threat-actor': entityConfig['threat-actor'].icon,
@@ -177,7 +175,7 @@ export const domainConfig: Record<
     DomainRoute,
     {
         label: string;
-        icon: React.ComponentType<{ className?: string }>;
+        icon: LucideIcon;
     }
 > = {
     'threat-domain': {

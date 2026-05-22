@@ -4,10 +4,14 @@ import { Badge } from '@/components/ui/badge';
 import { DetailPageHeader } from '@/shared/components/detail-page-header';
 import { DetailTabNav } from '@/shared/components/detail-tab-nav';
 import { EntityInfoCard } from '@/shared/components/entity-info-card';
+import { entityConfig } from '@/shared/components/entity-type-badge';
 import {
     DetailErrorState,
     DetailLoadingState,
 } from '@/shared/components/error-state';
+import { ExternalReferencesSection } from '@/shared/components/external-references-section';
+import { KillChainPhaseChips } from '@/shared/components/kill-chain-phase-chips';
+import { AnalysisTab } from '@/shared/components/tabs/analysis-tab';
 import { ArtifactsTab } from '@/shared/components/tabs/artifacts-tab';
 import { NetworkGraphTab } from '@/shared/components/tabs/network-graph-tab';
 import { TimelineTab } from '@/shared/components/tabs/timeline-tab';
@@ -22,17 +26,20 @@ import {
     downloadJson,
     downloadPdf,
     toFilename,
+    toStixExternalReferences,
+    toStixKillChainPhases,
 } from '@/shared/lib/export-utils';
 import { getStixType } from '@/shared/lib/stix';
 import { TLP } from '@/shared/types/enums';
-import { Activity, Clock, Link2, Wrench } from 'lucide-react';
+import { Activity, Clock, FileSearch, Link2 } from 'lucide-react';
 import { useToolDetail } from '../hooks/use-tool-detail';
 import { ToolPdfDocument } from './tool-pdf-document';
 
 const TABS = [
-    { id: 'overview', label: 'Overview', icon: Wrench },
-    { id: 'network', label: 'Knowledge', icon: Activity },
-    { id: 'indicators', label: 'Indicators', icon: Link2 },
+    { id: 'overview', label: 'Overview', icon: entityConfig.tool.icon },
+    { id: 'network', label: 'Network Analysis', icon: Activity },
+    { id: 'indicators', label: 'Artifacts & IOCs', icon: Link2 },
+    { id: 'analysis', label: 'Analysis', icon: FileSearch },
     { id: 'timeline', label: 'Audit & Timeline', icon: Clock },
 ] as const;
 
@@ -68,7 +75,7 @@ export function ToolDetailPage({ id }: ToolDetailPageProps) {
                     entity.toolTypes.length > 0 ? entity.toolTypes : undefined,
                 kill_chain_phases:
                     entity.killChainPhases.length > 0
-                        ? entity.killChainPhases
+                        ? toStixKillChainPhases(entity.killChainPhases)
                         : undefined,
                 tool_version: entity.toolVersion ?? undefined,
                 aliases: entity.aliases.length > 0 ? entity.aliases : undefined,
@@ -76,10 +83,11 @@ export function ToolDetailPage({ id }: ToolDetailPageProps) {
                 revoked: entity.revoked,
                 external_references:
                     entity.externalReferences.length > 0
-                        ? entity.externalReferences
+                        ? toStixExternalReferences(entity.externalReferences)
                         : undefined,
                 created: entity.createdAt,
                 modified: entity.updatedAt,
+                created_by_ref: entity.createdBy ?? undefined,
             },
             ...buildSroObjects(relatedObjects),
             ...buildRelatedSdos(relatedObjects),
@@ -185,26 +193,30 @@ export function ToolDetailPage({ id }: ToolDetailPageProps) {
                                     </div>
                                 )}
 
-                                {entity.killChainPhases.length > 0 && (
-                                    <div className="bg-card rounded-xl border p-5">
-                                        <p className="text-foreground/50 mb-3 text-xs font-bold tracking-widest uppercase">
-                                            Kill-chain Phases
+                                <div className="bg-card rounded-xl border p-5">
+                                    <p className="text-foreground/50 mb-3 text-xs font-bold tracking-widest uppercase">
+                                        Kill-chain Phases
+                                    </p>
+                                    {entity.killChainPhases.length > 0 ? (
+                                        <KillChainPhaseChips
+                                            phases={entity.killChainPhases}
+                                        />
+                                    ) : (
+                                        <p className="text-foreground/45 text-sm">
+                                            No kill-chain phases available for
+                                            this tool.
                                         </p>
-                                        <div className="flex flex-wrap gap-2">
-                                            {entity.killChainPhases.map(
-                                                (p, i) => (
-                                                    <Badge
-                                                        key={i}
-                                                        variant="outline"
-                                                    >
-                                                        {p.phaseName}
-                                                    </Badge>
-                                                ),
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </div>
+
+                            <ExternalReferencesSection
+                                refs={entity.externalReferences}
+                                showWhenEmpty
+                                emptyMessage={
+                                    'No external references available for this tool.'
+                                }
+                            />
                         </div>
                     )}
                     {activeTab === 'network' && (
@@ -213,6 +225,7 @@ export function ToolDetailPage({ id }: ToolDetailPageProps) {
                     {activeTab === 'indicators' && (
                         <ArtifactsTab detail={data} />
                     )}
+                    {activeTab === 'analysis' && <AnalysisTab detail={data} />}
                     {activeTab === 'timeline' && <TimelineTab detail={data} />}
                 </div>
             </div>

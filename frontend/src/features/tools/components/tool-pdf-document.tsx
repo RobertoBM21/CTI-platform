@@ -1,4 +1,4 @@
-import { formatDate, getStixType } from '@/shared/lib/stix';
+import { formatDate, formatVocabLabel, getStixType } from '@/shared/lib/stix';
 import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import type { ToolDetail } from '../types';
 
@@ -109,7 +109,7 @@ interface ToolPdfDocumentProps {
 }
 
 export function ToolPdfDocument({ detail }: ToolPdfDocumentProps) {
-    const { entity, relatedObjects } = detail;
+    const { entity, relatedObjects, sightings, relatedReports = [] } = detail;
     const now = new Date().toISOString();
 
     return (
@@ -139,7 +139,9 @@ export function ToolPdfDocument({ detail }: ToolPdfDocumentProps) {
                         <View style={styles.row}>
                             <Text style={styles.label}>Tool Types:</Text>
                             <Text style={styles.value}>
-                                {entity.toolTypes.join(', ')}
+                                {entity.toolTypes
+                                    .map(formatVocabLabel)
+                                    .join(', ')}
                             </Text>
                         </View>
                     )}
@@ -156,8 +158,19 @@ export function ToolPdfDocument({ detail }: ToolPdfDocumentProps) {
                             <Text style={styles.label}>Kill-chain:</Text>
                             <Text style={styles.value}>
                                 {entity.killChainPhases
-                                    .map((p) => p.phaseName)
+                                    .map(
+                                        (p) =>
+                                            `${formatVocabLabel(p.killChainName)} / ${formatVocabLabel(p.phaseName)}`,
+                                    )
                                     .join(', ')}
+                            </Text>
+                        </View>
+                    )}
+                    {entity.aliases.length > 0 && (
+                        <View style={styles.row}>
+                            <Text style={styles.label}>Aliases:</Text>
+                            <Text style={styles.value}>
+                                {entity.aliases.join(', ')}
                             </Text>
                         </View>
                     )}
@@ -195,6 +208,63 @@ export function ToolPdfDocument({ detail }: ToolPdfDocumentProps) {
                                     </View>
                                 ),
                         )}
+                    </View>
+                )}
+
+                {/* ── Related Reports ── */}
+                {relatedReports.length > 0 && (
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>
+                            Related Reports ({relatedReports.length})
+                        </Text>
+                        {relatedReports.map((report) => (
+                            <View key={report.id} style={styles.objRow}>
+                                <Text style={styles.objType}>report</Text>
+                                <Text style={styles.objName}>
+                                    {report.name}
+                                </Text>
+                                <Text style={styles.objRel}>
+                                    {formatDate(report.published)}
+                                </Text>
+                            </View>
+                        ))}
+                    </View>
+                )}
+
+                {/* ── Sightings ── */}
+                {sightings.length > 0 && (
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>
+                            Sightings ({sightings.length})
+                        </Text>
+                        {sightings.slice(0, 10).map((s, i) => (
+                            <View key={i} style={styles.row}>
+                                <Text style={styles.label}>Count:</Text>
+                                <Text style={styles.value}>{s.count}</Text>
+                            </View>
+                        ))}
+                    </View>
+                )}
+
+                {/* ── External References ── */}
+                {entity.externalReferences.length > 0 && (
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>
+                            External References
+                        </Text>
+                        {entity.externalReferences.map((ref, i) => (
+                            <View key={i} style={styles.row}>
+                                <Text style={styles.label}>
+                                    {ref.sourceName}
+                                    {ref.externalId
+                                        ? ` · ${ref.externalId}`
+                                        : ''}
+                                </Text>
+                                <Text style={styles.value}>
+                                    {ref.url ?? ref.description ?? '—'}
+                                </Text>
+                            </View>
+                        ))}
                     </View>
                 )}
 

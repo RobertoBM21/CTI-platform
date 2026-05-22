@@ -6,6 +6,7 @@ import type {
     IntrusionSetDetailEntity,
     IntrusionSetFilters,
     RelatedObjectItem,
+    RelatedReportItem,
     SightingItem,
     StixExternalRef,
     StixObject,
@@ -94,11 +95,13 @@ export async function fetchIntrusionSetDetail(
             object: StixObject | null;
         }>;
         sightings: SightingItem[];
+        relatedReports?: RelatedReportItem[];
     }>(`/intrusion-sets/${encodeURIComponent(id)}`);
 
     return {
         entity: adaptIntrusionSetDetail(raw.entity),
         relatedObjects: raw.relatedObjects,
         sightings: raw.sightings,
+        relatedReports: raw.relatedReports ?? [],
     };
 }

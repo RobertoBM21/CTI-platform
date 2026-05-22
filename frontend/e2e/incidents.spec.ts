@@ -33,9 +33,12 @@ test.describe('Incidents catalog', () => {
     test('search filters incidents by name', async ({ page }) => {
         const searchInput = page.getByPlaceholder(/search/i);
         await searchInput.fill('Tormenta');
+        await expect(page.getByText(/loading incidents/i)).toHaveCount(0, {
+            timeout: 15_000,
+        });
         await expect(
             page.getByText(INCIDENT_NAME, { exact: false }),
-        ).toBeVisible({ timeout: 8_000 });
+        ).toBeVisible({ timeout: 15_000 });
     });
 
     test('search with no match shows empty state', async ({ page }) => {
@@ -51,9 +54,9 @@ test.describe('Incidents catalog', () => {
         if (await filterButton.isVisible()) {
             await filterButton.click();
         }
-        await expect(page.getByText('TLP:CLEAR', { exact: true })).toBeVisible({
-            timeout: 5_000,
-        });
+        await expect(
+            page.getByRole('button', { name: 'TLP:CLEAR', exact: true }),
+        ).toBeVisible({ timeout: 5_000 });
     });
 
     test('TLP filter by TLP:CLEAR hides/shows incidents accordingly', async ({

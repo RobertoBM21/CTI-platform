@@ -16,6 +16,14 @@ export class ReportMongooseRepository
         super(model);
     }
 
+    async findByObjectRef(objectRef: string): Promise<Report[]> {
+        const docs = await this.model
+            .find({ objectRefs: objectRef })
+            .sort({ published: -1 })
+            .exec();
+        return docs.map((doc) => this.toDomain(doc));
+    }
+
     protected toDomain(doc: ReportDoc): Report {
         return new Report({
             id: doc.domainId,

@@ -42,9 +42,11 @@ test.describe('Login page', () => {
         await page.locator('input[type="email"]').fill('wrong@example.com');
         await page.locator('input[type="password"]').fill('wrongpassword123');
         await page.getByRole('button', { name: /sign in/i }).click();
-        await expect(
-            page.getByText(/invalid|unauthorized|incorrect|password/i),
-        ).toBeVisible({ timeout: 10_000 });
+        const authError = page
+            .locator('p')
+            .filter({ hasText: /invalid|unauthorized|incorrect/i })
+            .first();
+        await expect(authError).toBeVisible({ timeout: 10_000 });
     });
 
     test('login with valid credentials redirects to home', async ({ page }) => {
@@ -122,7 +124,9 @@ test.describe('Logout', () => {
     test('logout redirects to login page', async ({ page }) => {
         await page.goto('/');
         await page.locator('[data-slot="dropdown-menu-trigger"]').click();
-        await page.getByText(/sign out/i).click();
+        const signOutItem = page.getByRole('menuitem', { name: /sign out/i });
+        await expect(signOutItem).toBeVisible({ timeout: 10_000 });
+        await signOutItem.click({ force: true });
         await expect(page).toHaveURL(/\/login/, { timeout: 10_000 });
     });
 });

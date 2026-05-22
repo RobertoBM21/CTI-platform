@@ -5,6 +5,8 @@ import { Report } from '../entities/report.entity';
 export abstract class ReportRepository {
     abstract findById(id: string): Promise<Report | null>;
 
+    abstract findByObjectRef(objectRef: string): Promise<Report[]>;
+
     abstract findAll(
         filter: Partial<{ name: string; tlp: string }>,
         page: number,

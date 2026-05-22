@@ -63,10 +63,15 @@ test.describe('Cyber Domain catalog', () => {
 
     test('sidebar link navigates to Cyber Domain', async ({ page }) => {
         await page.goto('/home');
-        const link = page.locator('aside nav a[href="/cyber-domain"]').first();
+        const link = page
+            .getByRole('link', { name: /^cyber domain$/i })
+            .first();
         await expect(link).toBeVisible();
-        await link.click();
-        await expect(page).toHaveURL(/\/cyber-domain/);
+        await Promise.all([
+            page.waitForURL(/\/cyber-domain/, { timeout: 10_000 }),
+            link.click(),
+        ]);
+        await expect(page).toHaveURL(/\/cyber-domain/, { timeout: 10_000 });
     });
 
     test('clicking a malware card opens detail with source context', async ({
@@ -77,9 +82,13 @@ test.describe('Cyber Domain catalog', () => {
 
         const malwareCard = page.locator('a[href^="/malware/"]').first();
         await expect(malwareCard).toBeVisible({ timeout: 10_000 });
-        await malwareCard.click();
+        await Promise.all([
+            page.waitForURL(/\/malware\/.+fromDomain=cyber-domain/, {
+                timeout: 10_000,
+            }),
+            malwareCard.click({ force: true }),
+        ]);
 
-        await expect(page).toHaveURL(/\/malware\/.+fromDomain=cyber-domain/);
         await expect(page).toHaveURL(/fromTab=malware/);
         await expect(
             page.getByRole('link', { name: /back to malwares/i }),
