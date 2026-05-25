@@ -33,6 +33,8 @@ The platform is fully containerized for easy evaluation and deployment. You can 
 # Copy the example environment variables
 cp .env.example .env
 
+# Update required secrets (Google)
+
 # Build and start the services
 docker-compose up -d --build
 ```
