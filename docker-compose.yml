@@ -33,6 +33,7 @@ services:
     environment:
       - NODE_ENV=production
       - API_URL=${API_URL_DOCKER:-http://backend:3000}
+      - BACKEND_PUBLIC_URL=${BACKEND_PUBLIC_URL:-http://localhost:3000}
     depends_on:
       - backend
     restart: unless-stopped

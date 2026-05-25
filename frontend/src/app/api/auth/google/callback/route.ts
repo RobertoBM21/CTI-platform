@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 const COOKIE_NAME = 'auth_token';
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60;
@@ -9,13 +9,18 @@ const COOKIE_MAX_AGE = 7 * 24 * 60 * 60;
  * The backend redirects here with ?token=<JWT> after successful authentication.
  * This route sets the httpOnly cookie and redirects to the main app.
  */
-export async function GET(request: Request) {
-    const url = new URL(request.url);
-    const token = url.searchParams.get('token');
+export async function GET(request: NextRequest) {
+    const token = request.nextUrl.searchParams.get('token');
+    const host =
+        request.headers.get('x-forwarded-host') ??
+        request.headers.get('host') ??
+        'localhost:3001';
+    const proto = request.headers.get('x-forwarded-proto') ?? 'http';
+    const base = `${proto}://${host}`;
 
     if (!token) {
         return NextResponse.redirect(
-            new URL('/login?error=google_failed', url),
+            new URL('/login?error=google_failed', base),
         );
     }
 
@@ -28,5 +33,5 @@ export async function GET(request: Request) {
         path: '/',
     });
 
-    return NextResponse.redirect(new URL('/', url));
+    return NextResponse.redirect(new URL('/', base));
 }
