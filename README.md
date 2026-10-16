@@ -25,6 +25,88 @@ As the sole architect and developer of this platform, I focused on building a ma
 - **Full-Stack End-to-End Delivery:** Developed a responsive, type-safe frontend using Next.js to visualize the threat landscape, bridging the gap between raw backend intelligence and actionable user interfaces.
 - **Comprehensive Testing Strategy:** Enforced software quality from day one by implementing unit and integration tests (Jest/Vitest) for backend domain logic, and robust End-to-End (E2E) testing for critical user flows using **Playwright**.
 
+### 🏗️ System & Domain Architecture
+
+The platform's architecture is documented at two levels: the **System & Bounded Contexts Overview** (macro level) and the **Hexagonal Architecture implementation** (micro level inside each module).
+
+#### 1. System & Bounded Contexts Overview
+
+```mermaid
+flowchart LR
+    User(["👤 CTI Analyst"])
+    Google["🔐 Google OAuth"]
+
+    subgraph FE ["🖥️ Frontend (Next.js App Router)"]
+        UI["📊 Interactive UI & Graphs"]
+        BFF["⚡ Next.js API Routes (BFF)"]
+        UI --> BFF
+    end
+
+    subgraph BE ["⚙️ Backend API (NestJS Modular Monolith - DDD)"]
+        API["🔌 REST Controllers & Guards"]
+
+        subgraph Contexts ["📦 Domain Bounded Contexts"]
+            Auth["🔐 Auth<br/>(Users & Sessions)"]
+            Shared["🔄 Shared<br/>(Bundle Ingestion & SROs)"]
+            Threat["🎯 Threat SDOs<br/>(Actors, Campaigns, Incidents)"]
+            Cyber["🛡️ Cyber SDOs<br/>(Malware, Tools, Vulns)"]
+            Reporting["📑 Reporting<br/>(STIX Reports)"]
+        end
+
+        API --> Auth & Shared & Threat & Cyber & Reporting
+        Shared -. "Ingests & maps" .-> Threat & Cyber & Reporting
+        Threat -. "Resolves refs" .-> Cyber
+    end
+
+    DB[("🍃 MongoDB<br/>(STIX 2.1 Store)")]
+
+    User -->|HTTPS| UI
+    UI & BFF -->|REST / JWT| API
+    API <-->|OAuth 2.0| Google
+    Auth & Shared & Threat & Cyber & Reporting -->|Mongoose ODM| DB
+
+    classDef context fill:#1e293b,stroke:#38bdf8,stroke-width:1.5px,color:#f8fafc;
+    classDef infra fill:#0f172a,stroke:#94a3b8,stroke-width:1px,color:#f8fafc;
+    class Auth,Shared,Threat,Cyber,Reporting context;
+    class UI,BFF,API,DB,Google infra;
+```
+
+#### 2. Hexagonal Architecture (Ports & Adapters) per Bounded Context
+
+Inside `backend/src/contexts/*`, every module strictly enforces **Dependency Inversion** so the core STIX 2.1 domain logic remains 100% decoupled from NestJS and MongoDB:
+
+```mermaid
+flowchart LR
+    subgraph InfraIn ["🔌 Driving Side (Infrastructure)"]
+        Controller["REST Controller<br/>(e.g., ThreatActorsController)"]
+    end
+
+    subgraph Core ["🧠 Application & Domain Core (Pure TypeScript)"]
+        Service["Application Service<br/>(Use Cases & Orchestration)"]
+        Entity["Domain Entities & Value Objects<br/>(STIX 2.1 Business Rules)"]
+        Port[["Repository Port (Interface)<br/>(e.g., ThreatActorRepository)"]]
+
+        Service --> Entity
+        Service --> Port
+    end
+
+    subgraph InfraOut ["🗄️ Driven Side (Persistence Infrastructure)"]
+        Repo["Mongoose Repository<br/>(Extends BaseMongooseRepository)"]
+        Schema["Mongoose Schema<br/>(MongoDB Document)"]
+        Repo --> Schema
+    end
+
+    Controller -->|DTOs| Service
+    Repo -. "Implements (Dependency Inversion)" .-> Port
+
+    classDef coreStyle fill:#1e3a8a,stroke:#60a5fa,stroke-width:1.5px,color:#ffffff;
+    classDef portStyle fill:#065f46,stroke:#34d399,stroke-width:2px,color:#ffffff;
+    classDef infraStyle fill:#1e293b,stroke:#94a3b8,stroke-width:1px,color:#f8fafc;
+    class Service,Entity coreStyle;
+    class Port portStyle;
+    class Controller,Repo,Schema infraStyle;
+```
+
 ## 🚀 Quick Start (Docker)
 
 The platform is fully containerized for easy evaluation and deployment. You can spin up the entire stack using Docker Compose:
